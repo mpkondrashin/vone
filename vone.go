@@ -1,28 +1,46 @@
 package vone
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
-	"strconv"
 )
 
 const (
 	GET = "GET"
+
+	application_json = "application/json"
+
+	timeFormat = "2006-1-02T15:04:05Z"
 )
 
 type VOneError struct {
-	HttpError int
+	ErrorData struct {
+		Message    string `json:"message"`
+		Code       string `json:"code"`
+		Innererror struct {
+			Service string `json:"service"`
+			Code    string `json:"code"`
+		} `json:"innererror"`
+	} `json:"error"`
 }
 
-func VOneErr(httpError int) VOneError {
+/*
+{"error":{"message":"Invalid token, Authorization token invaild for payload",
+"code":"InvalidCredentials","innererror":{"service":"svp","code":"InvalidToken"}}}
+*/
+/*func VOneErr(httpError int) VOneError {
 	return VOneError{
 		HttpError: httpError,
 	}
 }
+*/
 
-func (e VOneError) Error() string {
-	return strconv.Itoa(e.HttpError)
+func (e *VOneError) Error() string {
+	return e.ErrorData.Message
 }
 
 type VOne struct {
@@ -37,20 +55,97 @@ func NewVOne(url string, bearer string) *VOne {
 	}
 }
 
-func (v *VOne) Request(method, url string, body io.Reader) (io.ReadCloser, error) {
+func (v *VOne) RequestJSON(method, url string, bodyData any) (io.ReadCloser, error) {
+	var body io.Reader
+	if bodyData != nil {
+		buffer, err := json.Marshal(bodyData)
+		if err != nil {
+			return nil, err
+		}
+		body = bytes.NewReader(buffer)
+	}
+	return v.Request(method, url, body, application_json)
+}
+
+func (v *VOne) Request(method, url string, body io.Reader, contentType string) (io.ReadCloser, error) {
 	req, err := http.NewRequest(method, v.urlBase+url, body)
 	if err != nil {
 		return nil, fmt.Errorf("VOne: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+v.bearer)
+	if body != nil {
+		req.Header.Set("Content-Type", contentType)
+	}
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	if resp.StatusCode != 200 {
-		return nil, VOneErr(resp.StatusCode)
+	if err != nil {
+		return nil, fmt.Errorf("VOne: %v", err)
+	}
+	if resp.StatusCode > 299 {
+		var data bytes.Buffer
+		if _, err := io.Copy(&data, resp.Body); err != nil {
+			return nil, err
+		}
+		vOneErr := new(VOneError)
+		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
+			return nil, err
+		}
+		return nil, vOneErr
 	}
 	return resp.Body, nil
 }
 
-func (v *VOne) Get(url string, body io.Reader) (io.ReadCloser, error) {
-	return v.Request("GET", url, body)
+func (v *VOne) Call(f Func) error {
+	uri := f.URI()
+	if uri == "" {
+		uri = v.urlBase + f.URL()
+	}
+	return v.CallURL(f, uri)
 }
+
+func (v *VOne) CallURL(f Func, uri string) error {
+	req, err := http.NewRequest(f.Method(), uri, f.RequestBody())
+	if err != nil {
+		return fmt.Errorf("http.NewRequest: %w", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+v.bearer)
+	if f.RequestBody() != nil {
+		req.Header.Set("Content-Type", f.ContentType())
+	}
+	log.Print(req.Header)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("http.Client.Do: %v", err)
+	}
+	//log.Println(resp)
+	if resp.StatusCode > 299 {
+		var data bytes.Buffer
+		if _, err := io.Copy(&data, resp.Body); err != nil {
+			return fmt.Errorf("io.Copy: %v", err)
+		}
+		log.Printf("respond: %v\n", data.String())
+		vOneErr := new(VOneError)
+		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
+			return fmt.Errorf("json.Unmarshal: %v", err)
+		}
+		return fmt.Errorf("vOneErr: %w", vOneErr)
+	}
+	err = json.NewDecoder(resp.Body).Decode(f.ResponseStruct())
+	resp.Body.Close()
+	if err != nil && err != io.EOF {
+		return fmt.Errorf("response error: %w", err)
+	}
+
+	return nil
+}
+
+/*
+func (v *VOne) Get(url string, body any, contentType string) (io.ReadCloser, error) {
+	return v.Request("GET", url, body, contentType)
+}
+
+func (v *VOne) Post(url string, body any, contentType string) (io.ReadCloser, error) {
+	return v.Request("POST", url, body, contentType)
+}
+*/
