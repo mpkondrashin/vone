@@ -1,63 +1,50 @@
 package vone
 
 import (
-	"fmt"
+	"io"
 	"strings"
 	"time"
 )
 
 type (
+	ListSubmissionsItem struct {
+		ID     string `json:"id"`
+		Action string `json:"action"`
+		Status string `json:"status"`
+		Error  struct {
+			Code    string `json:"code"`
+			Message string `json:"message"`
+		} `json:"error"`
+		CreatedDateTime    time.Time `json:"createdDateTime"`
+		LastActionDateTime time.Time `json:"lastActionDateTime"`
+		ResourceLocation   string    `json:"resourceLocation"`
+		IsCached           bool      `json:"isCached"`
+		Digest             struct {
+			MD5    string `json:"md5"`
+			SHA1   string `json:"sha1"`
+			SHA256 string `json:"sha256"`
+		} `json:"digest"`
+		Arguments string `json:"arguments"`
+	}
+
 	ListSubmissionsResponse struct {
-		Items []struct {
-			ID     string `json:"id"`
-			Action string `json:"action"`
-			Status string `json:"status"`
-			Error  struct {
-				Code    string `json:"code"`
-				Message string `json:"message"`
-			} `json:"error"`
-			CreatedDateTime    time.Time `json:"createdDateTime"`
-			LastActionDateTime time.Time `json:"lastActionDateTime"`
-			ResourceLocation   string    `json:"resourceLocation"`
-			IsCached           bool      `json:"isCached"`
-			Digest             struct {
-				MD5    string `json:"md5"`
-				SHA1   string `json:"sha1"`
-				SHA256 string `json:"sha256"`
-			} `json:"digest"`
-			Arguments string `json:"arguments"`
-		} `json:"items"`
-		NextLink string `json:"nextLink"`
+		Items    []ListSubmissionsItem `json:"items"`
+		NextLink string                `json:"nextLink"`
 	}
 )
 
 type ListSubmissionsFunc struct {
 	BaseFunc
-	Response *ListSubmissionsResponse
+	Response ListSubmissionsResponse
 }
 
 var _ Func = &ListSubmissionsFunc{}
 
-//func (v *VOne) ListSubmissions(startDateTime, endDateTime time.Time, dateTimeTarget DateTimeTarget, orderTarget DateTimeTarget, orderBy Order, filter string, top Top) (*ListSubmissionsResponse, error) {
-func (v *VOne) ListSubmissions() (*ListSubmissionsResponse, error) {
-	f, err := NewListSubmissionsFunc()
-	if err != nil {
-		return nil, fmt.Errorf("NewSubmitURLsToSandboxFunc: %w", err)
-	}
-	//	f.StartDateTime(startDateTime).EndDateTime(endDateTime).DateTimeTarget(dateTimeTarget)
-	//	f.OrderBy(orderTarget, orderBy)
-	//	f.Filter(filter)
-	//	f.Top(top)
-	if err := v.Call(f); err != nil {
-		return nil, fmt.Errorf("Call: %w", err)
-	}
-	return f.Response, nil
-}
-
-func NewListSubmissionsFunc() (*ListSubmissionsFunc, error) {
+func (v *VOne) SandboxListSubmissions() *ListSubmissionsFunc {
 	f := &ListSubmissionsFunc{}
-	f.BaseFunc.Init()
-	return f, nil
+	f.BaseFunc.Init(v)
+	//log.Println("AAA", f)
+	return f
 }
 
 func (f *ListSubmissionsFunc) StartDateTime(t time.Time) *ListSubmissionsFunc {
@@ -99,6 +86,7 @@ func (o Order) String() string {
 
 func (f *ListSubmissionsFunc) OrderBy(t DateTimeTarget, o Order) *ListSubmissionsFunc {
 	f.SetParameter("orderBy", strings.Join([]string{t.String(), o.String()}, " "))
+	//log.Println("BBB", f)
 	return f
 }
 
@@ -110,7 +98,7 @@ func (f *ListSubmissionsFunc) Filter(s string) *ListSubmissionsFunc {
 type Top int
 
 const (
-	Top50 Order = iota
+	Top50 Top = iota
 	Top100
 	Top200
 )
@@ -124,6 +112,13 @@ func (f *ListSubmissionsFunc) Top(t Top) *ListSubmissionsFunc {
 	return f
 }
 
+func (f *ListSubmissionsFunc) Do() (*ListSubmissionsResponse, error) {
+	if err := f.vone.Call(f); err != nil {
+		return nil, err
+	}
+	return &f.Response, nil
+}
+
 func (f *ListSubmissionsFunc) Method() string {
 	return "GET"
 }
@@ -132,46 +127,33 @@ func (*ListSubmissionsFunc) URL() string {
 	return "/v3.0/sandbox/tasks"
 }
 
+func (f *ListSubmissionsFunc) URI() string {
+	return f.Response.NextLink
+}
+
 func (f *ListSubmissionsFunc) ResponseStruct() any {
 	return &f.Response
 }
 
-type ListSubmissionsNextFunc struct {
-	BaseFunc
-	previousResponse *ListSubmissionsResponse
-	Response         *ListSubmissionsResponse
+func (f *ListSubmissionsFunc) Next() (*ListSubmissionsResponse, error) {
+	if f.Response.NextLink == "" {
+		return nil, io.EOF
+	}
+	return f.Do()
 }
 
-func NewListSubmissionsNextFunc(previousResponse *ListSubmissionsResponse) *ListSubmissionsNextFunc {
-	return &ListSubmissionsNextFunc{
-		previousResponse: previousResponse,
+func (f *ListSubmissionsFunc) IterateListSubmissions(callback func(*ListSubmissionsItem) error) error {
+	for {
+		if err := f.vone.Call(f); err != nil {
+			return err
+		}
+		for _, r := range f.Response.Items {
+			if err := callback(&r); err != nil {
+				return err
+			}
+		}
+		if f.Response.NextLink == "" {
+			return nil
+		}
 	}
-}
-
-func (f *ListSubmissionsNextFunc) URI() string {
-	return f.previousResponse.NextLink
-}
-
-func (v *VOne) ListSubmissionsNext(r *ListSubmissionsResponse) (*ListSubmissionsResponse, error) {
-	f := NewListSubmissionsNextFunc(r)
-	if err := v.Call(f); err != nil {
-		return nil, fmt.Errorf("Call: %w", err)
-	}
-	return f.Response, nil
-}
-
-//func (v *VOne) ListSubmissions(startDateTime, endDateTime time.Time, dateTimeTarget DateTimeTarget, orderTarget DateTimeTarget, orderBy Order, filter string, top Top) (*ListSubmissionsResponse, error) {
-func (v *VOne) LisdddtSubmissions() (*ListSubmissionsResponse, error) {
-	f, err := NewListSubmissionsFunc()
-	if err != nil {
-		return nil, fmt.Errorf("NewSubmitURLsToSandboxFunc: %w", err)
-	}
-	//	f.StartDateTime(startDateTime).EndDateTime(endDateTime).DateTimeTarget(dateTimeTarget)
-	//	f.OrderBy(orderTarget, orderBy)
-	//	f.Filter(filter)
-	//	f.Top(top)
-	if err := v.Call(f); err != nil {
-		return nil, fmt.Errorf("Call: %w", err)
-	}
-	return f.Response, nil
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -112,31 +111,32 @@ func (v *VOne) CallURL(f Func, uri string) error {
 	if f.RequestBody() != nil {
 		req.Header.Set("Content-Type", f.ContentType())
 	}
-	log.Print(req.Header)
+	f.Populate(req)
+	//log.Println("EEE", req)
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("http.Client.Do: %v", err)
 	}
-	//log.Println(resp)
+	//log.Println("EEE RESP", resp)
 	if resp.StatusCode > 299 {
 		var data bytes.Buffer
 		if _, err := io.Copy(&data, resp.Body); err != nil {
 			return fmt.Errorf("io.Copy: %v", err)
 		}
-		log.Printf("respond: %v\n", data.String())
+		//log.Printf("respond: %v\n", data.String())
 		vOneErr := new(VOneError)
 		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
 			return fmt.Errorf("json.Unmarshal: %v", err)
 		}
 		return fmt.Errorf("vOneErr: %w", vOneErr)
 	}
+	//respBody := io.TeeReader(resp.Body, os.Stdout)
 	err = json.NewDecoder(resp.Body).Decode(f.ResponseStruct())
 	resp.Body.Close()
 	if err != nil && err != io.EOF {
 		return fmt.Errorf("response error: %w", err)
 	}
-
 	return nil
 }
 

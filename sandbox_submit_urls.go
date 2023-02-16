@@ -3,7 +3,6 @@ package vone
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 )
 
@@ -37,18 +36,19 @@ type (
 		Body BodyStruct `json:"body,omitempty"`
 	}
 
-	SubmitURLsToSandboxDataResponse []SubmitURLsToSandboxStruct
+	SubmitURLsToSandboxResponse []SubmitURLsToSandboxStruct
 )
 
 type SubmitURLsToSandboxFunc struct {
 	BaseFunc
 	Request  SubmitURLsToSandboxRequest
-	Response SubmitURLsToSandboxDataResponse
+	Response SubmitURLsToSandboxResponse
 }
 
 var _ Func = &SubmitURLsToSandboxFunc{}
 
-func (v *VOne) SubmitURLsToSandbox(urls []string) (SubmitURLsToSandboxDataResponse, error) {
+/*
+func (v *VOne) SubmitURLsToSandbox(urls []string) (SubmitURLsToSandboxResponse, error) {
 	f, err := NewSubmitURLsToSandboxFunc()
 	if err != nil {
 		return nil, fmt.Errorf("NewSubmitURLsToSandboxFunc: %w", err)
@@ -61,7 +61,7 @@ func (v *VOne) SubmitURLsToSandbox(urls []string) (SubmitURLsToSandboxDataRespon
 	}
 	return f.Response, nil
 }
-
+*/
 /*
 func (v *VOne) SubmitURLsToSandboxData(urls []string) (SubmitURLsToSandboxDataResponse, error) {
 	var data SubmitURLsToSandboxRequest
@@ -78,15 +78,29 @@ func (v *VOne) SubmitURLsToSandboxData(urls []string) (SubmitURLsToSandboxDataRe
 }
 */
 
-func NewSubmitURLsToSandboxFunc() (*SubmitURLsToSandboxFunc, error) {
+func (v *VOne) NewSubmitURLsToSandbox() *SubmitURLsToSandboxFunc {
 	f := &SubmitURLsToSandboxFunc{}
-	f.BaseFunc.Init()
-	return f, nil
+	f.BaseFunc.Init(v)
+	return f
 }
 
 func (s *SubmitURLsToSandboxFunc) AddURL(url string) *SubmitURLsToSandboxFunc {
 	s.Request = append(s.Request, SubmitURLsToSandboxURL{URL: url})
 	return s
+}
+
+func (f *SubmitURLsToSandboxFunc) AddURLs(urls []string) *SubmitURLsToSandboxFunc {
+	for _, url := range urls {
+		f.AddURL(url)
+	}
+	return f
+}
+
+func (f *SubmitURLsToSandboxFunc) Do() (SubmitURLsToSandboxResponse, error) {
+	if err := f.vone.Call(f); err != nil {
+		return nil, err
+	}
+	return f.Response, nil
 }
 
 func (f *SubmitURLsToSandboxFunc) Method() string {

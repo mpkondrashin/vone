@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 
 	"github.com/mpkondrashin/vone"
@@ -35,16 +36,17 @@ func main() {
 	v1 := vone.NewVOne(url, token)
 	if false {
 		log.Println("*** SandboxGetDailyReserve ***")
-		reserve, err := v1.SandboxGetDailyReserve()
+		reserve, err := v1.SandboxDailyReserve().Do()
 		if err != nil {
 			panic(err)
 		}
 		log.Printf("Submission Remaining Count: %d", reserve.SubmissionRemainingCount)
 	}
+
 	if false {
 		log.Println("*** Submit URLs To Sandbox ***")
 		urls := []string{"test0001", "test0002"}
-		resp, err := v1.SubmitURLsToSandbox(urls)
+		resp, err := v1.NewSubmitURLsToSandbox().AddURLs(urls).Do()
 		if err != nil {
 			panic(err)
 		}
@@ -57,10 +59,15 @@ func main() {
 			}
 		}
 	}
+
 	if false {
 		log.Println("*** Submit File To Sandbox ***")
 		filePath := "main.go"
-		resp, err := v1.SubmitFileToSandbox(filePath)
+		submit, err := v1.SandboxSubmitFile().SetFileName(filePath)
+		if err != nil {
+			panic(err)
+		}
+		resp, err := submit.Do()
 		if err != nil {
 			panic(err)
 		}
@@ -70,23 +77,68 @@ func main() {
 		log.Printf("SHA1: %s", resp.Digest.SHA1)
 		log.Printf("SHA256: %s", resp.Digest.SHA256)
 	}
-	if true {
+
+	if false {
 		log.Println("*** List Submissions ***")
-		resp, err := v1.ListSubmissions()
+		listSubmissions := v1.SandboxListSubmissions().OrderBy(vone.CreatedDateTime, vone.Asc)
+		resp, err := listSubmissions.Do()
+		//		log.Println("CCC", resp, err)
 		if err != nil {
 			panic(err)
 		}
 		for _, item := range resp.Items {
 			log.Printf("ID: %v, action: %s, status: %s", item.ID, item.Action, item.Status)
 		}
-		log.Println("*** List Submissions Next ***")
-		resp2, err := v1.ListSubmissionsNext(resp)
-		if err != nil {
-			panic(err)
+		log.Printf("Next: %s", resp.NextLink)
+		if resp.NextLink != "" {
+			log.Println("*** List Submissions Next ***")
+			resp2, err := listSubmissions.Next()
+			if err != nil {
+				panic(err)
+			}
+			for _, item := range resp2.Items {
+				log.Printf("ID: %v, action: %s, status: %s", item.ID, item.Action, item.Status)
+			}
 		}
-		for _, item := range resp2.Items {
+		log.Println("*** Iterate List Submissions ***")
+		ls := v1.SandboxListSubmissions().OrderBy(vone.CreatedDateTime, vone.Asc)
+		err = ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {
 			log.Printf("ID: %v, action: %s, status: %s", item.ID, item.Action, item.Status)
+			status := v1.SubmissionStatus(item.ID)
+			result, err := status.Do()
+			if err != nil {
+				return err
+			}
+			log.Printf("ID: %v, ResourceLocation: %s", item.ID, result.ResourceLocation)
+			return nil
+		})
+		if err != nil {
+			log.Panic(err)
 		}
-
+	}
+	if true {
+		log.Println("*** Iterate List Submissions & Get Analysis Results ***")
+		ls := v1.SandboxListSubmissions().OrderBy(vone.CreatedDateTime, vone.Asc)
+		err := ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {
+			//log.Printf("ID: %v, action: %s, status: %s", item.ID, item.Action, item.Status)
+			results := v1.SandboxAnalysisResults(item.ID)
+			result, err := results.Do()
+			if err != nil {
+				var perr *vone.VOneError
+				if !errors.As(err, &perr) {
+					return err
+				}
+				if perr.ErrorData.Code != "NotFound" {
+					return err
+				}
+				log.Printf("ID: %v, NotFound", item.ID)
+				return nil
+			}
+			log.Printf("ID: %v, RiskLevel: %s", item.ID, result.RiskLevel)
+			return nil
+		})
+		if err != nil {
+			log.Panic(err)
+		}
 	}
 }

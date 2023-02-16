@@ -2,7 +2,6 @@ package vone
 
 import (
 	"io"
-	"log"
 	"net/http"
 )
 
@@ -13,11 +12,13 @@ type Func interface {
 	RequestBody() io.Reader // Body
 	ContentType() string    // application/json by default
 	ResponseStruct() any    // Pointer to struct/slice to parse JSON
+	Populate(*http.Request) // Pupulate request path and headers
 }
 
 var _ Func = &BaseFunc{}
 
 type BaseFunc struct {
+	vone       *VOne
 	parameters map[string]string
 	headers    map[string]string
 }
@@ -46,7 +47,8 @@ func (f *BaseFunc) ResponseStruct() any {
 	return &VOneError{}
 }
 
-func (f *BaseFunc) Init() {
+func (f *BaseFunc) Init(vone *VOne) {
+	f.vone = vone
 	f.parameters = make(map[string]string)
 	f.headers = make(map[string]string)
 }
@@ -63,12 +65,10 @@ func (f *BaseFunc) Populate(req *http.Request) {
 	q := req.URL.Query()
 	for key, value := range f.parameters {
 		q.Add(key, value)
-		log.Println("Q", key, value)
 	}
 	req.URL.RawQuery = q.Encode()
 	for key, value := range f.parameters {
 		req.Header.Add(key, value)
-		log.Println("H", key, value)
 	}
 }
 
