@@ -75,36 +75,3 @@ func (f *BaseFunc) Populate(req *http.Request) {
 		req.Header.Add(key, value)
 	}
 }
-
-/*
-func (f *BaseFunc) Perform(method, url string, body io.Reader, contentType string) (io.ReadCloser, error) {
-	req, err := http.NewRequest(method, f.vone.urlBase+url, body)
-	if err != nil {
-		return nil, fmt.Errorf("VOne: %w", err)
-	}
-	if body != nil {
-		f.SetHeader("Content-Type", contentType)
-	}
-	f.Populate(req)
-	for key, h := range req.Header {
-		log.Println("H", key, h)
-	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("VOne: %v", err)
-	}
-	if resp.StatusCode > 299 {
-		var data bytes.Buffer
-		if _, err := io.Copy(&data, resp.Body); err != nil {
-			return nil, err
-		}
-		vOneErr := new(VOneError)
-		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
-			return nil, err
-		}
-		return nil, vOneErr
-	}
-	return resp.Body, nil
-}
-*/

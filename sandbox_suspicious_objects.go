@@ -5,17 +5,15 @@ import (
 	"time"
 )
 
-type (
-	SandboxSuspiciousObjectsResponse struct {
-		Items []struct {
-			RiskLevel                  string    `json:"riskLevel"`
-			AnalysisCompletionDateTime time.Time `json:"analysisCompletionDateTime"`
-			ExpiredDateTime            time.Time `json:"expiredDateTime"`
-			RootSha1                   string    `json:"rootSha1"`
-			IP                         string    `json:"ip"`
-		} `json:"items"`
-	}
-)
+type SandboxSuspiciousObjectsResponse struct {
+	Items []struct {
+		RiskLevel                  string    `json:"riskLevel"`
+		AnalysisCompletionDateTime time.Time `json:"analysisCompletionDateTime"`
+		ExpiredDateTime            time.Time `json:"expiredDateTime"`
+		RootSha1                   string    `json:"rootSha1"`
+		IP                         string    `json:"ip"`
+	} `json:"items"`
+}
 
 type SandboxSuspiciousObjectsFunc struct {
 	BaseFunc
