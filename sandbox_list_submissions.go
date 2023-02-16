@@ -27,32 +27,30 @@ type (
 		Arguments string `json:"arguments"`
 	}
 
-	ListSubmissionsResponse struct {
+	SandboxSubmissionsResponse struct {
 		Items    []ListSubmissionsItem `json:"items"`
 		NextLink string                `json:"nextLink"`
 	}
 )
 
-type ListSubmissionsFunc struct {
+type SandboxSubmissionsFunc struct {
 	BaseFunc
-	Response ListSubmissionsResponse
+	Response SandboxSubmissionsResponse
 }
 
-var _ Func = &ListSubmissionsFunc{}
-
-func (v *VOne) SandboxListSubmissions() *ListSubmissionsFunc {
-	f := &ListSubmissionsFunc{}
+func (v *VOne) SandboxListSubmissions() *SandboxSubmissionsFunc {
+	f := &SandboxSubmissionsFunc{}
 	f.BaseFunc.Init(v)
 	//log.Println("AAA", f)
 	return f
 }
 
-func (f *ListSubmissionsFunc) StartDateTime(t time.Time) *ListSubmissionsFunc {
+func (f *SandboxSubmissionsFunc) StartDateTime(t time.Time) *SandboxSubmissionsFunc {
 	f.SetParameter("startDateTime", t.Format(timeFormat))
 	return f
 }
 
-func (f *ListSubmissionsFunc) EndDateTime(t time.Time) *ListSubmissionsFunc {
+func (f *SandboxSubmissionsFunc) EndDateTime(t time.Time) *SandboxSubmissionsFunc {
 	f.SetParameter("endDateTime", t.Format(timeFormat))
 	return f
 }
@@ -68,7 +66,7 @@ func (t DateTimeTarget) String() string {
 	return [...]string{"createdDateTime", "lastActionDateTime"}[t]
 }
 
-func (f *ListSubmissionsFunc) DateTimeTarget(t DateTimeTarget) *ListSubmissionsFunc {
+func (f *SandboxSubmissionsFunc) DateTimeTarget(t DateTimeTarget) *SandboxSubmissionsFunc {
 	f.SetParameter("sateTimeTarget", t.String())
 	return f
 }
@@ -84,13 +82,13 @@ func (o Order) String() string {
 	return [...]string{"desc", "asc"}[o]
 }
 
-func (f *ListSubmissionsFunc) OrderBy(t DateTimeTarget, o Order) *ListSubmissionsFunc {
+func (f *SandboxSubmissionsFunc) OrderBy(t DateTimeTarget, o Order) *SandboxSubmissionsFunc {
 	f.SetParameter("orderBy", strings.Join([]string{t.String(), o.String()}, " "))
 	//log.Println("BBB", f)
 	return f
 }
 
-func (f *ListSubmissionsFunc) Filter(s string) *ListSubmissionsFunc {
+func (f *SandboxSubmissionsFunc) Filter(s string) *SandboxSubmissionsFunc {
 	f.SetParameter("filter", s)
 	return f
 }
@@ -107,42 +105,42 @@ func (t Top) String() string {
 	return [...]string{"50", "100", "200"}[t]
 }
 
-func (f *ListSubmissionsFunc) Top(t Top) *ListSubmissionsFunc {
+func (f *SandboxSubmissionsFunc) Top(t Top) *SandboxSubmissionsFunc {
 	f.SetParameter("top", t.String())
 	return f
 }
 
-func (f *ListSubmissionsFunc) Do() (*ListSubmissionsResponse, error) {
+func (f *SandboxSubmissionsFunc) Do() (*SandboxSubmissionsResponse, error) {
 	if err := f.vone.Call(f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
 }
 
-func (f *ListSubmissionsFunc) Method() string {
+func (f *SandboxSubmissionsFunc) Method() string {
 	return "GET"
 }
 
-func (*ListSubmissionsFunc) URL() string {
+func (*SandboxSubmissionsFunc) URL() string {
 	return "/v3.0/sandbox/tasks"
 }
 
-func (f *ListSubmissionsFunc) URI() string {
+func (f *SandboxSubmissionsFunc) URI() string {
 	return f.Response.NextLink
 }
 
-func (f *ListSubmissionsFunc) ResponseStruct() any {
+func (f *SandboxSubmissionsFunc) ResponseStruct() any {
 	return &f.Response
 }
 
-func (f *ListSubmissionsFunc) Next() (*ListSubmissionsResponse, error) {
+func (f *SandboxSubmissionsFunc) Next() (*SandboxSubmissionsResponse, error) {
 	if f.Response.NextLink == "" {
 		return nil, io.EOF
 	}
 	return f.Do()
 }
 
-func (f *ListSubmissionsFunc) IterateListSubmissions(callback func(*ListSubmissionsItem) error) error {
+func (f *SandboxSubmissionsFunc) IterateListSubmissions(callback func(*ListSubmissionsItem) error) error {
 	for {
 		if err := f.vone.Call(f); err != nil {
 			return err

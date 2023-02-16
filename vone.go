@@ -131,11 +131,18 @@ func (v *VOne) CallURL(f Func, uri string) error {
 		}
 		return fmt.Errorf("vOneErr: %w", vOneErr)
 	}
-	//respBody := io.TeeReader(resp.Body, os.Stdout)
-	err = json.NewDecoder(resp.Body).Decode(f.ResponseStruct())
-	resp.Body.Close()
+	if f.ResponseStruct() == nil {
+		f.ResponseBody(resp.Body)
+		return nil
+	}
+	return v.DecodeBody(f, resp.Body)
+}
+
+func (v *VOne) DecodeBody(f Func, body io.ReadCloser) error {
+	defer body.Close()
+	err := json.NewDecoder(body).Decode(f.ResponseStruct())
 	if err != nil && err != io.EOF {
-		return fmt.Errorf("response error: %w", err)
+		return fmt.Errorf("response parse error: %w", err)
 	}
 	return nil
 }

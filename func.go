@@ -6,13 +6,14 @@ import (
 )
 
 type Func interface {
-	Method() string         // GET, POST, ...
-	URL() string            // last part of URI
-	URI() string            // full URI (with https://xdr...)
-	RequestBody() io.Reader // Body
-	ContentType() string    // application/json by default
-	ResponseStruct() any    // Pointer to struct/slice to parse JSON
-	Populate(*http.Request) // Pupulate request path and headers
+	Method() string             // GET, POST, ...
+	URL() string                // last part of URI
+	URI() string                // full URI (with https://xdr...)
+	RequestBody() io.Reader     // Body
+	ContentType() string        // application/json by default
+	ResponseStruct() any        // Pointer to struct/slice to parse JSON
+	ResponseBody(io.ReadCloser) // process body - is called only if ResponseStruct returns any
+	Populate(*http.Request)     // Pupulate request path and headers
 }
 
 var _ Func = &BaseFunc{}
@@ -45,6 +46,9 @@ func (f *BaseFunc) ContentType() string {
 
 func (f *BaseFunc) ResponseStruct() any {
 	return &VOneError{}
+}
+
+func (f *BaseFunc) ResponseBody(io.ReadCloser) {
 }
 
 func (f *BaseFunc) Init(vone *VOne) {

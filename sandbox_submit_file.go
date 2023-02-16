@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-type SubmitFileToSandboxResponse struct {
+type SanbboxSubmitFileResponse struct {
 	ID     string `json:"id"`
 	Digest struct {
 		MD5    string `json:"md5"`
@@ -18,15 +18,15 @@ type SubmitFileToSandboxResponse struct {
 	Arguments string `json:"arguments"`
 }
 
-type SubmitFileToSandboxFunc struct {
+type SandboxSubmitFileToSandboxFunc struct {
 	BaseFunc
 	//filePath            string
 	Request             io.Reader
 	formDataContentType string
-	Response            SubmitFileToSandboxResponse
+	Response            SanbboxSubmitFileResponse
 }
 
-var _ Func = &SubmitFileToSandboxFunc{}
+var _ Func = &SandboxSubmitFileToSandboxFunc{}
 
 /*
 func (v *VOne) SubmitFileToSandbox(filePath string) (*SubmitFileToSandboxResponse, error) {
@@ -40,13 +40,13 @@ func (v *VOne) SubmitFileToSandbox(filePath string) (*SubmitFileToSandboxRespons
 	return &f.Response, nil
 }
 */
-func (v *VOne) SandboxSubmitFile() *SubmitFileToSandboxFunc {
-	f := &SubmitFileToSandboxFunc{}
+func (v *VOne) SandboxSubmitFile() *SandboxSubmitFileToSandboxFunc {
+	f := &SandboxSubmitFileToSandboxFunc{}
 	f.BaseFunc.Init(v)
 	return f
 }
 
-func (f *SubmitFileToSandboxFunc) SetFileName(fileName string) (*SubmitFileToSandboxFunc, error) {
+func (f *SandboxSubmitFileToSandboxFunc) SetFileName(fileName string) (*SandboxSubmitFileToSandboxFunc, error) {
 	//	f.filePath = fileName
 	reader, err := os.Open(fileName)
 	if err != nil {
@@ -56,7 +56,7 @@ func (f *SubmitFileToSandboxFunc) SetFileName(fileName string) (*SubmitFileToSan
 	return f, f.SetReader(reader, filepath.Base(fileName))
 }
 
-func (f *SubmitFileToSandboxFunc) SetReader(reader io.Reader, fileName string) error {
+func (f *SandboxSubmitFileToSandboxFunc) SetReader(reader io.Reader, fileName string) error {
 	var data bytes.Buffer
 	writer := multipart.NewWriter(&data)
 	w, err := writer.CreateFormFile("file", fileName)
@@ -74,46 +74,46 @@ func (f *SubmitFileToSandboxFunc) SetReader(reader io.Reader, fileName string) e
 	return nil
 }
 
-func (s *SubmitFileToSandboxFunc) SetDocumentPassword(documentPassword string) *SubmitFileToSandboxFunc {
+func (s *SandboxSubmitFileToSandboxFunc) SetDocumentPassword(documentPassword string) *SandboxSubmitFileToSandboxFunc {
 	s.SetParameter("documentPassword", documentPassword)
 	return s
 }
 
-func (s *SubmitFileToSandboxFunc) SetArchivePassword(archivePassword string) *SubmitFileToSandboxFunc {
+func (s *SandboxSubmitFileToSandboxFunc) SetArchivePassword(archivePassword string) *SandboxSubmitFileToSandboxFunc {
 	s.SetParameter("archivePassword", archivePassword)
 	return s
 }
 
-func (s *SubmitFileToSandboxFunc) SetArguments(arguments string) *SubmitFileToSandboxFunc {
+func (s *SandboxSubmitFileToSandboxFunc) SetArguments(arguments string) *SandboxSubmitFileToSandboxFunc {
 	s.SetParameter("arguments", arguments)
 	return s
 }
 
-func (f *SubmitFileToSandboxFunc) Do() (*SubmitFileToSandboxResponse, error) {
+func (f *SandboxSubmitFileToSandboxFunc) Do() (*SanbboxSubmitFileResponse, error) {
 	if err := f.vone.Call(f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
 }
 
-func (f *SubmitFileToSandboxFunc) Method() string {
+func (f *SandboxSubmitFileToSandboxFunc) Method() string {
 	return "POST"
 }
 
-func (s *SubmitFileToSandboxFunc) URL() string {
+func (s *SandboxSubmitFileToSandboxFunc) URL() string {
 	return "/v3.0/sandbox/files/analyze"
 }
 
-func (f *SubmitFileToSandboxFunc) RequestBody() io.Reader {
+func (f *SandboxSubmitFileToSandboxFunc) RequestBody() io.Reader {
 
 	return f.Request
 }
 
-func (f *SubmitFileToSandboxFunc) ContentType() string {
+func (f *SandboxSubmitFileToSandboxFunc) ContentType() string {
 	return f.formDataContentType
 }
 
-func (f *SubmitFileToSandboxFunc) ResponseStruct() any {
+func (f *SandboxSubmitFileToSandboxFunc) ResponseStruct() any {
 	return &f.Response
 }
 

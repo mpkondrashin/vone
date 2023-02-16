@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"log"
+	"os"
+	"strings"
 
 	"github.com/mpkondrashin/vone"
 )
@@ -59,7 +61,6 @@ func main() {
 			}
 		}
 	}
-
 	if false {
 		log.Println("*** Submit File To Sandbox ***")
 		filePath := "main.go"
@@ -76,8 +77,68 @@ func main() {
 		log.Printf("MD5: %s", resp.Digest.MD5)
 		log.Printf("SHA1: %s", resp.Digest.SHA1)
 		log.Printf("SHA256: %s", resp.Digest.SHA256)
-	}
 
+		virus := strings.NewReader(`X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*`)
+		fileName := "eicar.com"
+		submit = v1.SandboxSubmitFile()
+		if err := submit.SetReader(virus, fileName); err != nil {
+			panic(err)
+		}
+		resp, err = submit.Do()
+		if err != nil {
+			panic(err)
+		}
+		log.Printf("Accepted: %v", fileName)
+		log.Printf("ID: %s", resp.ID)
+		log.Printf("MD5: %s", resp.Digest.MD5)
+		log.Printf("SHA1: %s", resp.Digest.SHA1)
+		log.Printf("SHA256: %s", resp.Digest.SHA256)
+
+	}
+	if false {
+		log.Println("*** Submit File To Sandbox ***")
+		dir, err := os.ReadDir(".")
+		if err != nil {
+			panic(err)
+		}
+		for _, each := range dir {
+			if each.IsDir() {
+				continue
+			}
+			if !strings.HasSuffix(each.Name(), ".exe") {
+				continue
+			}
+			filePath := each.Name()
+			submit, err := v1.SandboxSubmitFile().SetFileName(filePath)
+			if err != nil {
+				panic(err)
+			}
+			resp, err := submit.Do()
+			if err != nil {
+				panic(err)
+			}
+			log.Printf("Accepted: %v", filePath)
+			log.Printf("ID: %s", resp.ID)
+			log.Printf("MD5: %s", resp.Digest.MD5)
+			log.Printf("SHA1: %s", resp.Digest.SHA1)
+			log.Printf("SHA256: %s", resp.Digest.SHA256)
+
+		}
+		filePath := "main.go"
+		submit, err := v1.SandboxSubmitFile().SetFileName(filePath)
+		if err != nil {
+			panic(err)
+		}
+		resp, err := submit.Do()
+		if err != nil {
+			panic(err)
+		}
+		log.Printf("Accepted: %v", filePath)
+		log.Printf("ID: %s", resp.ID)
+		log.Printf("MD5: %s", resp.Digest.MD5)
+		log.Printf("SHA1: %s", resp.Digest.SHA1)
+		log.Printf("SHA256: %s", resp.Digest.SHA256)
+	}
 	if false {
 		log.Println("*** List Submissions ***")
 		listSubmissions := v1.SandboxListSubmissions().OrderBy(vone.CreatedDateTime, vone.Asc)
@@ -104,7 +165,7 @@ func main() {
 		ls := v1.SandboxListSubmissions().OrderBy(vone.CreatedDateTime, vone.Asc)
 		err = ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {
 			log.Printf("ID: %v, action: %s, status: %s", item.ID, item.Action, item.Status)
-			status := v1.SubmissionStatus(item.ID)
+			status := v1.SandboxSubmissionStatus(item.ID)
 			result, err := status.Do()
 			if err != nil {
 				return err
@@ -116,7 +177,7 @@ func main() {
 			log.Panic(err)
 		}
 	}
-	if true {
+	if false {
 		log.Println("*** Iterate List Submissions & Get Analysis Results ***")
 		ls := v1.SandboxListSubmissions().OrderBy(vone.CreatedDateTime, vone.Asc)
 		err := ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {
@@ -135,6 +196,55 @@ func main() {
 				return nil
 			}
 			log.Printf("ID: %v, RiskLevel: %s", item.ID, result.RiskLevel)
+			return nil
+		})
+		if err != nil {
+			log.Panic(err)
+		}
+	}
+	if false {
+		log.Println("*** Iterate List Submissions & Download Result ***")
+		ls := v1.SandboxListSubmissions()
+		err := ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {
+			//log.Printf("ID: %v, action: %s, status: %s", item.ID, item.Action, item.Status)
+			result, err := v1.SandboxAnalysisResults(item.ID).Do()
+			if err != nil {
+				var perr *vone.VOneError
+				if !errors.As(err, &perr) {
+					return err
+				}
+				if perr.ErrorData.Code != "NotFound" {
+					return err
+				}
+				log.Printf("ID: %v, NotFound", item.ID)
+				return nil
+			}
+			log.Printf("ID: %v, RiskLevel: %s", item.ID, result.RiskLevel)
+			return v1.SandboxDownloadResults(item.ID).Store(item.ID + ".pdf")
+		})
+		if err != nil {
+			log.Panic(err)
+		}
+	}
+	if true {
+		log.Println("*** Iterate List Submissions & Suspicious Objects ***")
+		ls := v1.SandboxListSubmissions()
+		err := ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {
+			result, err := v1.SandboxSuspiciousObjects(item.ID).Do()
+			if err != nil {
+				var perr *vone.VOneError
+				if !errors.As(err, &perr) {
+					return err
+				}
+				if perr.ErrorData.Code != "NotFound" {
+					return err
+				}
+				log.Printf("ID: %v, NotFound", item.ID)
+				return nil
+			}
+			for _, each := range result.Items {
+				log.Printf("ID: %v, RiskLevel: %s, SHA1: %s, IP: %s", item.ID, each.RiskLevel, each.RootSha1, each.IP)
+			}
 			return nil
 		})
 		if err != nil {

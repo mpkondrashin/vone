@@ -18,8 +18,6 @@ type SanboxDailyReserveFunc struct {
 	Response SandboxDailyReserveResponse
 }
 
-var _ Func = &SanboxDailyReserveFunc{}
-
 func (f *SanboxDailyReserveFunc) Do() (*SandboxDailyReserveResponse, error) {
 	if err := f.vone.Call(f); err != nil {
 		return nil, err

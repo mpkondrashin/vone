@@ -6,7 +6,7 @@ import (
 )
 
 type (
-	SubmissionStatusResponse struct {
+	SandboxSubmissionStatusResponse struct {
 		ID     string `json:"id"`
 		Action string `json:"action"`
 		Status string `json:"status"`
@@ -27,31 +27,31 @@ type (
 	}
 )
 
-type SubmissionStatusFunc struct {
+type SandboxSubmissionStatusFunc struct {
 	BaseFunc
 	id       string
-	Response SubmissionStatusResponse
+	Response SandboxSubmissionStatusResponse
 }
 
-func (v *VOne) SubmissionStatus(id string) *SubmissionStatusFunc {
-	f := &SubmissionStatusFunc{
+func (v *VOne) SandboxSubmissionStatus(id string) *SandboxSubmissionStatusFunc {
+	f := &SandboxSubmissionStatusFunc{
 		id: id,
 	}
 	f.BaseFunc.Init(v)
 	return f
 }
 
-func (f *SubmissionStatusFunc) Do() (*SubmissionStatusResponse, error) {
+func (f *SandboxSubmissionStatusFunc) Do() (*SandboxSubmissionStatusResponse, error) {
 	if err := f.vone.Call(f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
 }
 
-func (f *SubmissionStatusFunc) URL() string {
+func (f *SandboxSubmissionStatusFunc) URL() string {
 	return fmt.Sprintf("/v3.0/sandbox/tasks/%s", f.id)
 }
 
-func (f *SubmissionStatusFunc) ResponseStruct() any {
+func (f *SandboxSubmissionStatusFunc) ResponseStruct() any {
 	return &f.Response
 }
