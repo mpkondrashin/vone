@@ -1,3 +1,11 @@
+/*
+	Trend Micro Vision One API SDK
+	(c) 2023 by Mikhail Kondrashin (mkondrashin@gmail.com)
+
+	VOne - Web API SDK
+
+	vone.go - main SDK declarations
+*/
 package vone
 
 import (

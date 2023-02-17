@@ -1,3 +1,11 @@
+/*
+	Trend Micro Vision One API SDK
+	(c) 2023 by Mikhail Kondrashin (mkondrashin@gmail.com)
+
+	Sandbox API capabilities
+
+	sandbox_daily_reserve.go - get dalily usage quota
+*/
 package vone
 
 type SandboxDailyReserveResponse struct {

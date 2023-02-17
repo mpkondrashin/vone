@@ -1,3 +1,11 @@
+/*
+	Trend Micro Vision One API SDK
+	(c) 2023 by Mikhail Kondrashin (mkondrashin@gmail.com)
+
+	Sandbox API capabilities
+
+	sandbox_analysis_results.go - get analysis result
+*/
 package vone
 
 import (

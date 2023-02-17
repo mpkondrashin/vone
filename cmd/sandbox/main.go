@@ -36,13 +36,14 @@ SubmitURLsToSandboxDataResponse [][]struct {
 
 func main() {
 	v1 := vone.NewVOne(url, token)
-	if false {
+	if true {
 		log.Println("*** SandboxGetDailyReserve ***")
 		reserve, err := v1.SandboxDailyReserve().Do()
 		if err != nil {
 			panic(err)
 		}
 		log.Printf("Submission Remaining Count: %d", reserve.SubmissionRemainingCount)
+		log.Printf("Result: %v", reserve)
 	}
 
 	if false {
@@ -226,7 +227,7 @@ func main() {
 			log.Panic(err)
 		}
 	}
-	if true {
+	if false {
 		log.Println("*** Iterate List Submissions & Suspicious Objects ***")
 		ls := v1.SandboxListSubmissions()
 		err := ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {

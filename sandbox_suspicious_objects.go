@@ -1,3 +1,12 @@
+/*
+	Trend Micro Vision One API SDK
+	(c) 2023 by Mikhail Kondrashin (mkondrashin@gmail.com)
+
+	Sandbox API capabilities
+
+	sandbox_suspicious_objects.go - get list of IoC for previously submitted object ID
+*/
+
 package vone
 
 import (
