@@ -47,7 +47,7 @@ type VOne struct {
 
 func NewVOne(url string, bearer string) *VOne {
 	return &VOne{
-		urlBase: url,
+		urlBase: "https://" + url,
 		bearer:  bearer,
 	}
 }

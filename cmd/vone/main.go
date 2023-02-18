@@ -35,7 +35,7 @@ const (
 )
 
 const (
-	flagURL      = "url"
+	flagAddress  = "address"
 	flagToken    = "token"
 	flagFileName = "filename"
 	flagTimeout  = "timeout"
@@ -57,7 +57,7 @@ type baseCommand struct {
 func (c *baseCommand) Setup(name string) {
 	c.name = name
 	c.fs = pflag.NewFlagSet(name, pflag.ExitOnError)
-	c.fs.String(flagURL, "", "Vision One entry point URL")
+	c.fs.String(flagAddress, "", "Vision One entry point URL")
 	c.fs.String(flagToken, "", "Vision One API Token")
 }
 
@@ -100,7 +100,7 @@ func (c *baseCommand) Init(args []string) error {
 		//LogIt(Debug, "ReadInConfig: %v", notFoundErr)
 	}
 	c.visionOne = vone.NewVOne(
-		viper.GetString(flagURL),
+		viper.GetString(flagAddress),
 		viper.GetString(flagToken),
 	)
 	//	c.ctx = context.Background()
