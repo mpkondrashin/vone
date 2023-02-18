@@ -45,7 +45,7 @@ func (f *BaseFunc) ContentType() string {
 }
 
 func (f *BaseFunc) ResponseStruct() any {
-	return &VOneError{}
+	return &Error{}
 }
 
 func (f *BaseFunc) ResponseBody(io.ReadCloser) {

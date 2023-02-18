@@ -25,7 +25,7 @@ const (
 	timeFormat = "2006-1-02T15:04:05Z"
 )
 
-type VOneError struct {
+type Error struct {
 	ErrorData struct {
 		Message    string `json:"message"`
 		Code       string `json:"code"`
@@ -36,19 +36,8 @@ type VOneError struct {
 	} `json:"error"`
 }
 
-/*
-{"error":{"message":"Invalid token, Authorization token invaild for payload",
-"code":"InvalidCredentials","innererror":{"service":"svp","code":"InvalidToken"}}}
-*/
-/*func VOneErr(httpError int) VOneError {
-	return VOneError{
-		HttpError: httpError,
-	}
-}
-*/
-
-func (e *VOneError) Error() string {
-	return e.ErrorData.Message
+func (e *Error) Error() string {
+	return e.ErrorData.Code + ". " + e.ErrorData.Message
 }
 
 type VOne struct {
@@ -94,7 +83,7 @@ func (v *VOne) Request(method, url string, body io.Reader, contentType string) (
 		if _, err := io.Copy(&data, resp.Body); err != nil {
 			return nil, err
 		}
-		vOneErr := new(VOneError)
+		vOneErr := new(Error)
 		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
 			return nil, err
 		}
@@ -134,7 +123,7 @@ func (v *VOne) CallURL(f Func, uri string) error {
 			return fmt.Errorf("io.Copy: %v", err)
 		}
 		//log.Printf("respond: %v\n", data.String())
-		vOneErr := new(VOneError)
+		vOneErr := new(Error)
 		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
 			return fmt.Errorf("json.Unmarshal: %v", err)
 		}

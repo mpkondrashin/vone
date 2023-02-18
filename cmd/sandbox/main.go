@@ -186,7 +186,7 @@ func main() {
 			results := v1.SandboxAnalysisResults(item.ID)
 			result, err := results.Do()
 			if err != nil {
-				var perr *vone.VOneError
+				var perr *vone.Error
 				if !errors.As(err, &perr) {
 					return err
 				}
@@ -210,7 +210,7 @@ func main() {
 			//log.Printf("ID: %v, action: %s, status: %s", item.ID, item.Action, item.Status)
 			result, err := v1.SandboxAnalysisResults(item.ID).Do()
 			if err != nil {
-				var perr *vone.VOneError
+				var perr *vone.Error
 				if !errors.As(err, &perr) {
 					return err
 				}
@@ -233,7 +233,7 @@ func main() {
 		err := ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {
 			result, err := v1.SandboxSuspiciousObjects(item.ID).Do()
 			if err != nil {
-				var perr *vone.VOneError
+				var perr *vone.Error
 				if !errors.As(err, &perr) {
 					return err
 				}
