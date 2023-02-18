@@ -19,7 +19,7 @@ type SandboxSuspiciousObjectsResponse struct {
 		RiskLevel                  string    `json:"riskLevel"`
 		AnalysisCompletionDateTime time.Time `json:"analysisCompletionDateTime"`
 		ExpiredDateTime            time.Time `json:"expiredDateTime"`
-		RootSha1                   string    `json:"rootSha1"`
+		RootSHA1                   string    `json:"rootSha1"`
 		IP                         string    `json:"ip"`
 	} `json:"items"`
 }

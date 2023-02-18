@@ -244,7 +244,7 @@ func main() {
 				return nil
 			}
 			for _, each := range result.Items {
-				log.Printf("ID: %v, RiskLevel: %s, SHA1: %s, IP: %s", item.ID, each.RiskLevel, each.RootSha1, each.IP)
+				log.Printf("ID: %v, RiskLevel: %s, SHA1: %s, IP: %s", item.ID, each.RiskLevel, each.RootSHA1, each.IP)
 			}
 			return nil
 		})

@@ -6,6 +6,7 @@
 
 	vone.go - main SDK declarations
 */
+
 package vone
 
 import (
