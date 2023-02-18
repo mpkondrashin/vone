@@ -35,4 +35,3 @@ jobs:
             vone_darwin_amd64.tgz
             vone_darwin_arm64.tgz
             vone_windows_amd64.tgz
-            vone_windows_i386.tgz
