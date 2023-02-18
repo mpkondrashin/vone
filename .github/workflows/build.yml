@@ -1,5 +1,5 @@
 #
-# Itachi (c) 2022 by Michael Kondrashin (mkondrashin@gmail.com)
+# VOne (c) 2023 by Michael Kondrashin (mkondrashin@gmail.com)
 # Copyright under MIT Lincese. Please see LICENSE file for details
 #
 # build.yml - github actions file to build release
@@ -18,17 +18,8 @@ jobs:
         run: go version
       - name: Build
         run: |
-#          GOOS=linux GOARCH=amd64 go build ./cmd/vone
           go build ./cmd/vone
           tar tgzv vone_linux_amd64.tgz vone
-#          GOOS=darwin GOARCH=amd64 go build ./cmd/vone
-#          tar tgzv vone_darwin_amd64.tgz vone
-#          GOOS=darwin GOARCH=arm64 go build ./cmd/vone
-#          tar tgzv vone_darwin_arm64.tgz vone
-#          GOOS=windows GOARCH=amd64 go build ./cmd/vone
-#          tar tgzv vone_windows_amd64.tgz vone.exe
-#          GOOS=windows GOARCH=i386 go build ./cmd/vone
-#          tar tgzv vone_windows_i386.tgz vone.exe
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
