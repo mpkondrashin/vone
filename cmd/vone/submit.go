@@ -24,7 +24,7 @@ func newCommandSubmit() *commandSubmit {
 func (c *commandSubmit) Execute() error {
 	filePath := viper.GetString(flagFileName)
 	log.Printf("Uploading %s", filePath)
-	f, err := c.visionOne.SandboxSubmitFile().SetFileName(filePath)
+	f, err := c.visionOne.SandboxSubmitFile().SetFilePath(filePath)
 	if err != nil {
 		return err
 	}

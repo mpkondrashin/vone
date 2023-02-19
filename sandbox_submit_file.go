@@ -55,14 +55,17 @@ func (v *VOne) SandboxSubmitFile() *SandboxSubmitFileToSandboxFunc {
 	return f
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) SetFileName(fileName string) (*SandboxSubmitFileToSandboxFunc, error) {
-	//	f.filePath = fileName
-	reader, err := os.Open(fileName)
+func (f *SandboxSubmitFileToSandboxFunc) SetFilePath(filePath string) (*SandboxSubmitFileToSandboxFunc, error) {
+	return f.SetFilePathAndName(filePath, filepath.Base(filePath))
+}
+
+func (f *SandboxSubmitFileToSandboxFunc) SetFilePathAndName(filePath, fileName string) (*SandboxSubmitFileToSandboxFunc, error) {
+	reader, err := os.Open(filePath)
 	if err != nil {
 		return f, err
 	}
 	defer reader.Close()
-	return f, f.SetReader(reader, filepath.Base(fileName))
+	return f, f.SetReader(reader, fileName)
 }
 
 func (f *SandboxSubmitFileToSandboxFunc) SetReader(reader io.Reader, fileName string) error {
@@ -125,42 +128,3 @@ func (f *SandboxSubmitFileToSandboxFunc) ContentType() string {
 func (f *SandboxSubmitFileToSandboxFunc) ResponseStruct() any {
 	return &f.Response
 }
-
-/*
-func (s *SubmitFileToSandboxFunc) Do() (*SubmitFileToSandboxData, error) {
-	url := "/v3.0/sandbox/files/analyze"
-	var data bytes.Buffer
-	writer := multipart.NewWriter(&data)
-	w, err := writer.CreateFormFile("file", "file")
-	if err != nil {
-		return nil, err
-	}
-	reader, err := os.Open(s.filePath)
-	/// err!!!
-	if _, err := io.Copy(w, reader); err != nil {
-		return nil, err
-	}
-	if err := writer.Close(); err != nil {
-		return nil, err
-	}
-	body, err := s.Perform("POST", url, &data, writer.FormDataContentType())
-	if err != nil {
-		return nil, err
-	}
-	decoder := json.NewDecoder(body)
-	var respData SubmitFileToSandboxData
-	if err := decoder.Decode(&respData); err != nil && err != io.EOF {
-		return nil, fmt.Errorf("response error: %w", err)
-	}
-	return &respData, nil
-}
-*/
-/*
-func (v *VOne) SubmitFileToSandboxZ(filePath, fileName, documentPassword, archivePassword, arguments string) (*SubmitFileToSandboxData, error) {
-	f, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-	return v.SubmitFileToSandboxAsReader(f, fileName, documentPassword, archivePassword, arguments)
-}
-*/
