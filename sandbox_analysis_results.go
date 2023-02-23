@@ -13,6 +13,17 @@ import (
 	"time"
 )
 
+//go:generate stringer -type=RiskLevel
+
+type RiskLevel int
+
+const (
+	High RiskLevel = iota
+	Medium
+	Low
+	NoRisk
+)
+
 type SandboxAnalysisResultsResponse struct {
 	ID     string `json:"id"`
 	Type   string `json:"type"`
@@ -23,10 +34,11 @@ type SandboxAnalysisResultsResponse struct {
 	} `json:"digest"`
 	Arguments                  string    `json:"arguments"`
 	AnalysisCompletionDateTime time.Time `json:"analysisCompletionDateTime"`
-	RiskLevel                  string    `json:"riskLevel"`
-	DetectionNames             []string  `json:"detectionNames"`
-	ThreatTypes                []string  `json:"threatTypes"`
-	TrueFileType               string    `json:"trueFileType"`
+	RiskLevel                  RiskLevel `json:"riskLevel"`
+	//RiskLevel                  string    `json:"riskLevel"`
+	DetectionNames []string `json:"detectionNames"`
+	ThreatTypes    []string `json:"threatTypes"`
+	TrueFileType   string   `json:"trueFileType"`
 }
 
 type SandboxAnalysisResultsFunc struct {

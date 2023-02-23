@@ -70,21 +70,20 @@ func (c *commandSubmit) WaitForResult(id string) error {
 		if err != nil {
 			return fmt.Errorf("WaitForResult(%s): %w", id, err)
 		}
-		if status.Error.Code != "" {
-			return fmt.Errorf("%s. %s", status.Error.Code, status.Error.Message)
-		}
 		log.Printf("Status: %v", status.Status)
 		switch status.Status {
 		case "succeeded":
-		case "running":
 			return nil
+		case "running":
+			if time.Now().After(endTime) {
+				return ErrTimeout
+			}
+			time.Sleep(5 * time.Second)
+		case "failed":
+			return fmt.Errorf("%s: %s", status.Error.Code, status.Error.Message)
 		default:
 			return fmt.Errorf("unknown status: %s", status.Status)
 		}
-		if time.Now().After(endTime) {
-			return ErrTimeout
-		}
-		time.Sleep(5 * time.Second)
 	}
 }
 
@@ -102,7 +101,7 @@ func (c *commandSubmit) AnalysisResult(id string) (bool, error) {
 	if len(results.ThreatTypes) > 0 {
 		log.Printf("ThreatTypes: %s", strings.Join(results.ThreatTypes, ", "))
 	}
-	return results.RiskLevel == "high", nil
+	return results.RiskLevel != vone.NoRisk, nil //"high", nil
 }
 
 func ListSHA1(so *vone.SandboxSuspiciousObjectsResponse) (result []string) {

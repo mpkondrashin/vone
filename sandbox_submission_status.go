@@ -14,6 +14,11 @@ import (
 	"time"
 )
 
+const (
+	SandboxSubmissionStatusRunning = "running"
+	SandboxSubmissionStatusSucceed = "succeed"
+)
+
 type (
 	SandboxSubmissionStatusResponse struct {
 		ID     string `json:"id"`
