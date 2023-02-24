@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/mpkondrashin/enum v0.0.0-20230223201358-15ad67801fcf // indirect
+	github.com/mpkondrashin/enum v0.0.0-20230224074915-f6d9fce8d4d8 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
