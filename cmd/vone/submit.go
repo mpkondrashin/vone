@@ -279,5 +279,5 @@ func (c *commandSubmit) Setup(name string) {
 	c.fs.String(flagMask, "", "Sample files mask")
 	c.fs.String(flagURL, "", "Sample URL")
 	c.fs.String(flagURLsFile, "", "File with URLs")
-	c.fs.Duration(flagTimeout, 10*time.Minute, "Analisys timeout")
+	c.fs.Duration(flagTimeout, 10*time.Minute, "Analysis timeout")
 }

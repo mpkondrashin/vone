@@ -18,6 +18,7 @@ jobs:
         run: go version
       - name: Build
         run: |
+          go generate
           GOOS=linux GOARCH=amd64 go build ./cmd/vone
           tar cfvz vone_linux_amd64.tgz vone
           GOOS=darwin GOARCH=amd64 go build ./cmd/vone
