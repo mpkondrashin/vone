@@ -10,10 +10,11 @@ type Func interface {
 	URL() string                // last part of URI
 	URI() string                // full URI (with https://xdr...)
 	RequestBody() io.Reader     // Body
+	Populate(*http.Request)     // Pupulate request path and headers
 	ContentType() string        // application/json by default
 	ResponseStruct() any        // Pointer to struct/slice to parse JSON
+	ResponseHeader() any        // Return struct to populate with response headers
 	ResponseBody(io.ReadCloser) // process body - is called only if ResponseStruct returns any
-	Populate(*http.Request)     // Pupulate request path and headers
 }
 
 var _ Func = &BaseFunc{}
@@ -74,4 +75,8 @@ func (f *BaseFunc) Populate(req *http.Request) {
 	for key, value := range f.parameters {
 		req.Header.Add(key, value)
 	}
+}
+
+func (f *BaseFunc) ResponseHeader() any {
+	return nil
 }

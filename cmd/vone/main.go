@@ -12,6 +12,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -37,7 +38,11 @@ const (
 const (
 	flagAddress  = "address"
 	flagToken    = "token"
+	flagLog      = "log"
 	flagFileName = "filename"
+	flagMask     = "mask"
+	flagURL      = "url"
+	flagURLsFile = "urlfile"
 	flagTimeout  = "timeout"
 )
 
@@ -59,6 +64,8 @@ func (c *baseCommand) Setup(name string) {
 	c.fs = pflag.NewFlagSet(name, pflag.ExitOnError)
 	c.fs.String(flagAddress, "", "Vision One entry point URL")
 	c.fs.String(flagToken, "", "Vision One API Token")
+	c.fs.String(flagLog, "", "Log file path")
+
 }
 
 func (c *baseCommand) Name() string {
@@ -109,32 +116,14 @@ func (c *baseCommand) Init(args []string) error {
 	//			fmt.Println(line)
 	//		})
 	//	}
-	return nil
-}
-
-type commandQuota struct {
-	baseCommand
-}
-
-func newCommandQuota() *commandQuota {
-	c := &commandQuota{}
-	c.Setup(cmdQuota)
-	return c
-}
-
-func (c *commandQuota) Execute() error {
-	quota, err := c.visionOne.SandboxDailyReserve().Do()
-	if err != nil {
-		return err
+	logFilePath := viper.GetString(flagLog)
+	if logFilePath != "" {
+		logFile, err := os.Create(logFilePath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.SetOutput(io.MultiWriter(os.Stdout, logFile))
 	}
-	log.Printf("Submission Reserve Count: %d", quota.SubmissionReserveCount)
-	log.Printf("Submission Remaining Count: %d", quota.SubmissionRemainingCount)
-	log.Printf("Submission Count: %d", quota.SubmissionCount)
-	log.Printf("Submission ExemptionCount: %d", quota.SubmissionExemptionCount)
-	log.Printf("Submission Count Detail: File Count: %d", quota.SubmissionCountDetail.FileCount)
-	log.Printf("Submission Count Detail: File Exemption Count: %d", quota.SubmissionCountDetail.FileExemptionCount)
-	log.Printf("Submission Count Detail: URL Count: %d", quota.SubmissionCountDetail.URLCount)
-	log.Printf("Submission Count Detail: URL Exemption Count: %d", quota.SubmissionCountDetail.URLExemptionCount)
 	return nil
 }
 

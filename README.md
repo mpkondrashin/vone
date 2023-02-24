@@ -15,8 +15,11 @@ Each parameter can be provided in three ways:
 | address<br/>--address<br/>VONE_ADDRESS | Vision One URL (See https://automation.trendmicro.com/xdr/Guides/Regional-Domains) |
 | token<br/>--token<br/>VONE_TOKEN | Vision One Token (Generate using Vision One console) |
 | filename<br/>--filename<br/>VONE_FILENAME | Path to file |
+| mask<br/>--mask<br/>VONE_MASK | Files mask |
+| url<br/>--url<br/>VONE_URL | URL |
+| urlfile<br/>--urlfile<br/>VONE_URLFILE | Text file with URLs (one per line) |
 | timeout<br>--timeout<br>VONE_TIMEOUT | Timeout for sample analysis |
-
+| log<br>--log<br>VONE_LOG | Log file path |
 
 Any combination of parameters can be used with ```vone```. For example, creating following configuration file (config.yaml):
 ```yaml
@@ -34,7 +37,7 @@ In this example, address and token are taken from config.yaml file.
 
 ## Commands
 
-### Submit Sample
+### Submit Samples
 Submit file for analisys
 
 Required parameters: address, token, filename

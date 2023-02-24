@@ -15,7 +15,7 @@ import (
 )
 
 // g o : g enerate stringer -type=Status
-//go:generate enum -package=vone -type=Status -values=suceed,running,failed
+//go:generate enum -package=vone -type=Status -values=succeeded,running,failed
 
 /*type Status int
 

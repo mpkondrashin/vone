@@ -13,8 +13,9 @@ import (
 	"time"
 )
 
-//go:generate stringer -type=RiskLevel
-
+// go: generate stringer -type=RiskLevel
+//go:generate enum -package=vone -type=RiskLevel -values=high,medium,low,noRisk
+/*
 type RiskLevel int
 
 const (
@@ -23,6 +24,7 @@ const (
 	Low
 	NoRisk
 )
+*/
 
 type SandboxAnalysisResultsResponse struct {
 	ID     string `json:"id"`

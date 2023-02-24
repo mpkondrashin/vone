@@ -50,11 +50,12 @@ type (
 
 type SandboxSubmitURLsToSandboxFunc struct {
 	BaseFunc
-	Request  SubmitURLsToSandboxRequest
-	Response SandboxSubmitURLsToSandboxResponse
+	Request         SubmitURLsToSandboxRequest
+	Response        SandboxSubmitURLsToSandboxResponse
+	ResponseHeaders SandboxSubmitFileResponseHeaders
 }
 
-func (v *VOne) NewSubmitURLsToSandbox() *SandboxSubmitURLsToSandboxFunc {
+func (v *VOne) SandboxSubmitURLs() *SandboxSubmitURLsToSandboxFunc {
 	f := &SandboxSubmitURLsToSandboxFunc{}
 	f.BaseFunc.Init(v)
 	return f
@@ -72,11 +73,11 @@ func (f *SandboxSubmitURLsToSandboxFunc) AddURLs(urls []string) *SandboxSubmitUR
 	return f
 }
 
-func (f *SandboxSubmitURLsToSandboxFunc) Do() (SandboxSubmitURLsToSandboxResponse, error) {
+func (f *SandboxSubmitURLsToSandboxFunc) Do() (SandboxSubmitURLsToSandboxResponse, *SandboxSubmitFileResponseHeaders, error) {
 	if err := f.vone.Call(f); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return f.Response, nil
+	return f.Response, &f.ResponseHeaders, nil
 }
 
 func (f *SandboxSubmitURLsToSandboxFunc) Method() string {
@@ -94,4 +95,8 @@ func (f *SandboxSubmitURLsToSandboxFunc) RequestBody() io.Reader {
 
 func (f *SandboxSubmitURLsToSandboxFunc) ResponseStruct() any {
 	return &f.Response
+}
+
+func (f *SandboxSubmitURLsToSandboxFunc) ResponseHeader() any {
+	return &f.ResponseHeaders
 }

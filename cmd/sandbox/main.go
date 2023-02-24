@@ -49,7 +49,7 @@ func main() {
 	if false {
 		log.Println("*** Submit URLs To Sandbox ***")
 		urls := []string{"test0001", "test0002"}
-		resp, err := v1.NewSubmitURLsToSandbox().AddURLs(urls).Do()
+		resp, _, err := v1.SandboxSubmitURLs().AddURLs(urls).Do()
 		if err != nil {
 			panic(err)
 		}
@@ -65,11 +65,11 @@ func main() {
 	if false {
 		log.Println("*** Submit File To Sandbox ***")
 		filePath := "main.go"
-		submit, err := v1.SandboxSubmitFile().SetFileName(filePath)
+		submit, err := v1.SandboxSubmitFile().SetFilePath(filePath)
 		if err != nil {
 			panic(err)
 		}
-		resp, err := submit.Do()
+		resp, _, err := submit.Do()
 		if err != nil {
 			panic(err)
 		}
@@ -85,7 +85,7 @@ func main() {
 		if err := submit.SetReader(virus, fileName); err != nil {
 			panic(err)
 		}
-		resp, err = submit.Do()
+		resp, _, err = submit.Do()
 		if err != nil {
 			panic(err)
 		}
@@ -110,11 +110,11 @@ func main() {
 				continue
 			}
 			filePath := each.Name()
-			submit, err := v1.SandboxSubmitFile().SetFileName(filePath)
+			submit, err := v1.SandboxSubmitFile().SetFilePath(filePath)
 			if err != nil {
 				panic(err)
 			}
-			resp, err := submit.Do()
+			resp, _, err := submit.Do()
 			if err != nil {
 				panic(err)
 			}
@@ -126,11 +126,11 @@ func main() {
 
 		}
 		filePath := "main.go"
-		submit, err := v1.SandboxSubmitFile().SetFileName(filePath)
+		submit, err := v1.SandboxSubmitFile().SetFilePath(filePath)
 		if err != nil {
 			panic(err)
 		}
-		resp, err := submit.Do()
+		resp, _, err := submit.Do()
 		if err != nil {
 			panic(err)
 		}

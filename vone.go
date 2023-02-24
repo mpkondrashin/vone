@@ -12,9 +12,12 @@ package vone
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
+	"strconv"
 )
 
 const (
@@ -52,22 +55,22 @@ func NewVOne(url string, bearer string) *VOne {
 	}
 }
 
-func (v *VOne) RequestJSON(method, url string, bodyData any) (io.ReadCloser, error) {
+func (v *VOne) RequestJSON(method, url string, bodyData any) (io.ReadCloser, http.Header, error) {
 	var body io.Reader
 	if bodyData != nil {
 		buffer, err := json.Marshal(bodyData)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		body = bytes.NewReader(buffer)
 	}
 	return v.Request(method, url, body, application_json)
 }
 
-func (v *VOne) Request(method, url string, body io.Reader, contentType string) (io.ReadCloser, error) {
+func (v *VOne) Request(method, url string, body io.Reader, contentType string) (io.ReadCloser, http.Header, error) {
 	req, err := http.NewRequest(method, v.urlBase+url, body)
 	if err != nil {
-		return nil, fmt.Errorf("VOne: %w", err)
+		return nil, nil, fmt.Errorf("VOne: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+v.bearer)
 	if body != nil {
@@ -76,20 +79,20 @@ func (v *VOne) Request(method, url string, body io.Reader, contentType string) (
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("VOne: %v", err)
+		return nil, nil, fmt.Errorf("VOne: %v", err)
 	}
 	if resp.StatusCode > 299 {
 		var data bytes.Buffer
 		if _, err := io.Copy(&data, resp.Body); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		vOneErr := new(Error)
 		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		return nil, vOneErr
+		return nil, nil, vOneErr
 	}
-	return resp.Body, nil
+	return resp.Body, resp.Header, nil
 }
 
 func (v *VOne) Call(f Func) error {
@@ -129,6 +132,10 @@ func (v *VOne) CallURL(f Func, uri string) error {
 		}
 		return fmt.Errorf("vOneErr: %w", vOneErr)
 	}
+	if err := v.PopulateResponseStruct(f.ResponseHeader(), resp.Header); err != nil {
+		return err
+	}
+	//io.Copy(os.Stdout, resp.Body)
 	if f.ResponseStruct() == nil {
 		f.ResponseBody(resp.Body)
 		return nil
@@ -154,3 +161,76 @@ func (v *VOne) Post(url string, body any, contentType string) (io.ReadCloser, er
 	return v.Request("POST", url, body, contentType)
 }
 */
+
+func (v *VOne) PopulateResponseStruct(structPtr any, header http.Header) error {
+	if structPtr == nil {
+		return nil
+	}
+	structPtrValue := reflect.ValueOf(structPtr)
+	structValue := reflect.Indirect(structPtrValue)
+	structValueType := structValue.Type()
+	for i := 0; i < structValueType.NumField(); i++ {
+		fieldType := structValueType.Field(i)
+		fieldValue := structValue.Field(i)
+		headerName := fieldType.Tag.Get("header")
+		headerValue := header.Get(headerName)
+		kind := fieldValue.Kind()
+		switch kind {
+		case reflect.String:
+			fieldValue.SetString(headerValue)
+		case reflect.Int:
+			x, err := strconv.Atoi(headerValue)
+			if err != nil {
+				return err
+			}
+			fieldValue.SetInt(int64(x))
+		default:
+			return fmt.Errorf("%s: %v", ErrUnsupportedType, kind)
+		}
+	}
+	return nil
+}
+
+var ErrUnsupportedType = errors.New("unsupported type")
+
+/*	Invalid Kind = iota
+	Bool
+	Int
+	Int8
+	Int16
+	Int32
+	Int64
+	Uint
+	Uint8
+	Uint16
+	Uint32
+	Uint64
+	Uintptr
+	Float32
+	Float64
+	Complex64
+	Complex128
+	Array
+	Chan
+	Func
+	Interface
+	Map
+	Pointer
+	Slice
+	String
+	Struct
+	UnsafePointer*/
+
+type HTTPCodeRange int
+
+const (
+	HTTPCodeInformational HTTPCodeRange = iota + 1
+	HTTPCodeSuccess
+	HTTPCodeRedirect
+	HTTPCodeClientError
+	HTTPCodeServerError
+)
+
+func GetHTTPCodeRange(code int) HTTPCodeRange {
+	return HTTPCodeRange(code / 100)
+}

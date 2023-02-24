@@ -17,7 +17,7 @@ import (
 	"path/filepath"
 )
 
-type SanbboxSubmitFileResponse struct {
+type SandboxSubmitFileResponse struct {
 	ID     string `json:"id"`
 	Digest struct {
 		MD5    string `json:"md5"`
@@ -27,28 +27,25 @@ type SanbboxSubmitFileResponse struct {
 	Arguments string `json:"arguments"`
 }
 
+type SandboxSubmitFileResponseHeaders struct {
+	OperationLocation        string `header:"Operation-Location"`
+	SubmissionReserveCount   int    `header:"TMV1-Submission-Reserve-Count"`
+	SubmissionRemainingCount int    `header:"TMV1-Submission-Remaining-Count"`
+	SubmissionCount          int    `header:"TMV1-Submission-Count"`
+	SubmissionExemptionCount int    `header:"TMV1-Submission-Exemption-Count"`
+}
+
 type SandboxSubmitFileToSandboxFunc struct {
 	BaseFunc
 	//filePath            string
 	Request             io.Reader
 	formDataContentType string
-	Response            SanbboxSubmitFileResponse
+	Response            SandboxSubmitFileResponse
+	ResponseHeaders     SandboxSubmitFileResponseHeaders
 }
 
 var _ Func = &SandboxSubmitFileToSandboxFunc{}
 
-/*
-func (v *VOne) SubmitFileToSandbox(filePath string) (*SubmitFileToSandboxResponse, error) {
-	f, err := SandboxSubmitFile(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("SandboxSubmitFile: %w", err)
-	}
-	if err := v.Call(f); err != nil {
-		return nil, fmt.Errorf("Call: %w", err)
-	}
-	return &f.Response, nil
-}
-*/
 func (v *VOne) SandboxSubmitFile() *SandboxSubmitFileToSandboxFunc {
 	f := &SandboxSubmitFileToSandboxFunc{}
 	f.BaseFunc.Init(v)
@@ -101,11 +98,11 @@ func (s *SandboxSubmitFileToSandboxFunc) SetArguments(arguments string) *Sandbox
 	return s
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) Do() (*SanbboxSubmitFileResponse, error) {
+func (f *SandboxSubmitFileToSandboxFunc) Do() (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
 	if err := f.vone.Call(f); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return &f.Response, nil
+	return &f.Response, &f.ResponseHeaders, nil
 }
 
 func (f *SandboxSubmitFileToSandboxFunc) Method() string {
@@ -127,4 +124,8 @@ func (f *SandboxSubmitFileToSandboxFunc) ContentType() string {
 
 func (f *SandboxSubmitFileToSandboxFunc) ResponseStruct() any {
 	return &f.Response
+}
+
+func (f *SandboxSubmitFileToSandboxFunc) ResponseHeader() any {
+	return &f.ResponseHeaders
 }
