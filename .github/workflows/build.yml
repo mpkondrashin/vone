@@ -22,6 +22,7 @@ jobs:
         run: go install github.com/mpkondrashin/enum
       - name: Build
         run: |
+          export PATH=${PATH}:`go env GOPATH`/bin
           go generate
           GOOS=linux GOARCH=amd64 go build ./cmd/vone
           tar cfvz vone_linux_amd64.tgz vone
