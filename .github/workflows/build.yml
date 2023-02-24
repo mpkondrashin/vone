@@ -16,6 +16,10 @@ jobs:
         uses: actions/setup-go@v2
       - name: Check Go version
         run: go version
+      - name: Get enum
+        run: go get github.com/mpkondrashin/enum
+      - name: Install enum
+        run: go install github.com/mpkondrashin/enum
       - name: Build
         run: |
           go generate
