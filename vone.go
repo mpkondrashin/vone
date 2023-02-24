@@ -106,36 +106,32 @@ func (v *VOne) Call(f Func) error {
 func (v *VOne) CallURL(f Func, uri string) error {
 	req, err := http.NewRequest(f.Method(), uri, f.RequestBody())
 	if err != nil {
-		return fmt.Errorf("http.NewRequest: %w", err)
+		return fmt.Errorf("create request: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+v.bearer)
 	if f.RequestBody() != nil {
 		req.Header.Set("Content-Type", f.ContentType())
 	}
 	f.Populate(req)
-	//log.Println("EEE", req)
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("http.Client.Do: %v", err)
+		return fmt.Errorf("HTTP request: %v", err)
 	}
-	//log.Println("EEE RESP", resp)
-	if resp.StatusCode > 299 {
+	if HTTPCodeRange(resp.StatusCode) != HTTPCodeSuccess {
 		var data bytes.Buffer
 		if _, err := io.Copy(&data, resp.Body); err != nil {
-			return fmt.Errorf("io.Copy: %v", err)
+			return fmt.Errorf("download error: %v", err)
 		}
-		//log.Printf("respond: %v\n", data.String())
 		vOneErr := new(Error)
 		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
-			return fmt.Errorf("json.Unmarshal: %v", err)
+			return fmt.Errorf("parse error: %v", err)
 		}
-		return fmt.Errorf("vOneErr: %w", vOneErr)
+		return fmt.Errorf("Request error: %w", vOneErr)
 	}
 	if err := v.PopulateResponseStruct(f.ResponseHeader(), resp.Header); err != nil {
 		return err
 	}
-	//io.Copy(os.Stdout, resp.Body)
 	if f.ResponseStruct() == nil {
 		f.ResponseBody(resp.Body)
 		return nil
@@ -151,16 +147,6 @@ func (v *VOne) DecodeBody(f Func, body io.ReadCloser) error {
 	}
 	return nil
 }
-
-/*
-func (v *VOne) Get(url string, body any, contentType string) (io.ReadCloser, error) {
-	return v.Request("GET", url, body, contentType)
-}
-
-func (v *VOne) Post(url string, body any, contentType string) (io.ReadCloser, error) {
-	return v.Request("POST", url, body, contentType)
-}
-*/
 
 func (v *VOne) PopulateResponseStruct(structPtr any, header http.Header) error {
 	if structPtr == nil {
@@ -192,34 +178,6 @@ func (v *VOne) PopulateResponseStruct(structPtr any, header http.Header) error {
 }
 
 var ErrUnsupportedType = errors.New("unsupported type")
-
-/*	Invalid Kind = iota
-	Bool
-	Int
-	Int8
-	Int16
-	Int32
-	Int64
-	Uint
-	Uint8
-	Uint16
-	Uint32
-	Uint64
-	Uintptr
-	Float32
-	Float64
-	Complex64
-	Complex128
-	Array
-	Chan
-	Func
-	Interface
-	Map
-	Pointer
-	Slice
-	String
-	Struct
-	UnsafePointer*/
 
 type HTTPCodeRange int
 

@@ -23,15 +23,3 @@ func (c *commandQuota) Execute() error {
 	log.Printf("Submitted unsupported (not accounted in quota) objects: %d (files: %d, urls: %d) ", quota.SubmissionExemptionCount, quota.SubmissionCountDetail.FileExemptionCount, quota.SubmissionCountDetail.URLExemptionCount)
 	return nil
 }
-
-/*
-	log.Printf("%s Daily quota: %d", id, headers.SubmissionReserveCount)
-	note := ""
-	if headers.SubmissionRemainingCount == 0 {
-		note = " (consider to add Credits to sandbox feature)"
-	}
-	log.Printf("%s Quota left: %d%s", id, headers.SubmissionRemainingCount, note)
-	log.Printf("%s Today submissions: %d", id, headers.SubmissionCount)
-	log.Printf("%s Today submissions of unsupported files: %d (not accounted in quota)", id, headers.SubmissionExemptionCount)
-}
-*/

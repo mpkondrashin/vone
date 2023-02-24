@@ -42,13 +42,10 @@ func (c *commandSubmit) Execute() error {
 			wg.Add(1)
 			go c.SubmitFileGoRoutine(m, &wg)
 		}
-		// np tears stats
-		// 328
 	}
 
 	url := viper.GetString(flagURL)
 	if url != "" {
-		//log.Println("XXX url", url)
 		wg.Add(1)
 		go c.SubmitURLGoRoutine(url, &wg)
 	}
