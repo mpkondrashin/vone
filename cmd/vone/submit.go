@@ -72,14 +72,14 @@ func (c *commandSubmit) WaitForResult(id string) error {
 		}
 		log.Printf("Status: %v", status.Status)
 		switch status.Status {
-		case "succeeded":
+		case vone.Succeed:
 			return nil
-		case "running":
+		case vone.Running:
 			if time.Now().After(endTime) {
 				return ErrTimeout
 			}
 			time.Sleep(5 * time.Second)
-		case "failed":
+		case vone.Failed:
 			return fmt.Errorf("%s: %s", status.Error.Code, status.Error.Message)
 		default:
 			return fmt.Errorf("unknown status: %s", status.Status)

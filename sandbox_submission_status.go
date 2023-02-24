@@ -14,16 +14,42 @@ import (
 	"time"
 )
 
+// g o : g enerate stringer -type=Status
+//go:generate enum -package=vone -type=Status -values=suceed,running,failed
+
+/*type Status int
+
 const (
-	SandboxSubmissionStatusRunning = "running"
-	SandboxSubmissionStatusSucceed = "succeed"
+	Succeed Status = iota
+	Running
+	Failed
 )
 
+var ErrUnknown = errors.New("unknown")
+
+func (s *Status) UnmarshalJSON(data []byte) error {
+	m := map[string]Status{
+		"succeed": Succeed,
+		"running": Running,
+		"failed":  Failed,
+	}
+	var v string
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	result, ok := m[v]
+	if !ok {
+		return fmt.Errorf("%w: %s", ErrUnknown, v)
+	}
+	*s = result
+	return nil
+}
+*/
 type (
 	SandboxSubmissionStatusResponse struct {
 		ID     string `json:"id"`
 		Action string `json:"action"`
-		Status string `json:"status"`
+		Status Status `json:"status"`
 		Error  struct {
 			Code    string `json:"code"`
 			Message string `json:"message"`
