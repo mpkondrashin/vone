@@ -53,7 +53,7 @@ Required parameters: address, token, filename
 ./vone submit --mask <mask> <options>
 ```
 
-### Submit single URL
+### Submit Single URL
 Submit URL for analisys
 
 Required parameters: address, token, filename
@@ -61,7 +61,7 @@ Required parameters: address, token, filename
 ./vone submit --url <url> <options>
 ```
 
-### Submit URLs from file
+### Submit URLs From File
 Submit multiply urls for analisys
 
 Required parameters: address, token, filename
@@ -76,3 +76,19 @@ Required parameters: address, token
 ```commandline
 ./vone quota <options>
 ```
+
+# Go Library
+
+If this repo is treated as go package to use Vision One Web API (github.com/mpkondrashin/vone), followig functions are supported:
+- Get daily reserve
+- Submit URLs to sandbox
+- Submit file to sandbox
+- List submissions
+- Get submission status
+- Get list of analysis results - not supported!
+- Get analysis results
+- Download analysis results
+- Download Investigation Package
+- Download suspicious object list
+
+For package usage examples, please check cmd/vone folder and cmd/sandbox/main.go file.

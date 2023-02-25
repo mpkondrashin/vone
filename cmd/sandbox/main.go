@@ -1,3 +1,12 @@
+/*
+	Trend Micro Vision One API SDK
+	(c) 2023 by Mikhail Kondrashin (mkondrashin@gmail.com)
+
+	Sandbox API capabilities
+
+	main.go - various SDK tests
+*/
+
 package main
 
 import (
@@ -8,31 +17,6 @@ import (
 
 	"github.com/mpkondrashin/vone"
 )
-
-/*
-SubmitURLsToSandboxDataResponse [][]struct {
-	Status  int `json:"status"`
-	Headers []struct {
-		Name  string `json:"name"`
-		Value string `json:"value"`
-	} `json:"headers,omitempty"`
-	Body struct {
-		URL    string `json:"url"`
-		ID     string `json:"id"`
-		Digest struct {
-			Md5    string `json:"md5"`
-			Sha1   string `json:"sha1"`
-			Sha256 string `json:"sha256"`
-		} `json:"digest"`
-	} `json:"body,omitempty"`
-	BodyError struct {
-		URL   string `json:"url"`
-		Error struct {
-			Code    string `json:"code"`
-			Message string `json:"message"`
-		} `json:"error"`
-	} `json:"body,omitempty"`
-}*/
 
 func main() {
 	v1 := vone.NewVOne(url, token)
