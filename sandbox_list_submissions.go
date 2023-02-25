@@ -18,8 +18,8 @@ import (
 type (
 	ListSubmissionsItem struct {
 		ID     string `json:"id"`
-		Action string `json:"action"`
-		Status string `json:"status"`
+		Action Action `json:"action"`
+		Status Status `json:"status"`
 		Error  struct {
 			Code    string `json:"code"`
 			Message string `json:"message"`

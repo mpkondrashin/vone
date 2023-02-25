@@ -4,8 +4,9 @@
 
 	Sandbox API capabilities
 
-	sandbox_download_results.go - get file check results
+	sandbox_investigation_package.go - download investigation package
 */
+
 package vone
 
 import (

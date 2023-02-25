@@ -6,22 +6,9 @@
 
 	sandbox_daily_reserve.go - get dalily usage quota
 */
+
 package vone
 
-/*
-{
-   "submissionReserveCount":50,
-   "submissionRemainingCount":19,
-   "submissionCount":31,
-   "submissionExemptionCount":5,
-   "submissionCountDetail":{
-      "fileCount":27,
-      "fileExemptionCount":5,
-      "urlCount":4,
-      "urlExemptionCount":0
-   }
-}
-*/
 type SandboxDailyReserveResponse struct {
 	SubmissionReserveCount   int `json:"submissionReserveCount"`
 	SubmissionRemainingCount int `json:"submissionRemainingCount"`

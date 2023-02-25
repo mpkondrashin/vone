@@ -118,7 +118,7 @@ func (c *commandSubmit) SubmitURL(url string) error {
 		return fmt.Errorf("wrong response length: %d", len(response))
 	}
 	resp := response[0]
-	if vone.GetHTTPCodeRange(resp.Status) != vone.HTTPCodeSuccess {
+	if vone.GetHTTPCodeRange(resp.Status) != vone.HTTPCodeSuccessRange {
 		return fmt.Errorf("%s: %s", resp.Body.Error.Code, resp.Body.Error.Code)
 	}
 	id := response[0].Body.ID

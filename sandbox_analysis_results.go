@@ -6,25 +6,13 @@
 
 	sandbox_analysis_results.go - get analysis result
 */
+
 package vone
 
 import (
 	"fmt"
 	"time"
 )
-
-// go: generate stringer -type=RiskLevel
-//go:generate enum -package=vone -type=RiskLevel -values=high,medium,low,noRisk
-/*
-type RiskLevel int
-
-const (
-	High RiskLevel = iota
-	Medium
-	Low
-	NoRisk
-)
-*/
 
 type SandboxAnalysisResultsResponse struct {
 	ID     string `json:"id"`

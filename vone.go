@@ -30,8 +30,8 @@ const (
 
 type Error struct {
 	ErrorData struct {
-		Message    string `json:"message"`
-		Code       string `json:"code"`
+		Message    string    `json:"message"`
+		Code       ErrorCode `json:"code"`
 		Innererror struct {
 			Service string `json:"service"`
 			Code    string `json:"code"`
@@ -40,7 +40,7 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
-	return e.ErrorData.Code + ". " + e.ErrorData.Message
+	return fmt.Sprintf("%v: %s", e.ErrorData.Code, e.ErrorData.Message)
 }
 
 type VOne struct {
@@ -55,6 +55,7 @@ func NewVOne(url string, bearer string) *VOne {
 	}
 }
 
+/*
 func (v *VOne) RequestJSON(method, url string, bodyData any) (io.ReadCloser, http.Header, error) {
 	var body io.Reader
 	if bodyData != nil {
@@ -66,6 +67,7 @@ func (v *VOne) RequestJSON(method, url string, bodyData any) (io.ReadCloser, htt
 	}
 	return v.Request(method, url, body, application_json)
 }
+
 
 func (v *VOne) Request(method, url string, body io.Reader, contentType string) (io.ReadCloser, http.Header, error) {
 	req, err := http.NewRequest(method, v.urlBase+url, body)
@@ -94,7 +96,7 @@ func (v *VOne) Request(method, url string, body io.Reader, contentType string) (
 	}
 	return resp.Body, resp.Header, nil
 }
-
+*/
 func (v *VOne) Call(f Func) error {
 	uri := f.URI()
 	if uri == "" {
@@ -118,7 +120,7 @@ func (v *VOne) CallURL(f Func, uri string) error {
 	if err != nil {
 		return fmt.Errorf("HTTP request: %v", err)
 	}
-	if HTTPCodeRange(resp.StatusCode) != HTTPCodeSuccess {
+	if GetHTTPCodeRange(resp.StatusCode) != HTTPCodeSuccessRange {
 		var data bytes.Buffer
 		if _, err := io.Copy(&data, resp.Body); err != nil {
 			return fmt.Errorf("download error: %v", err)
@@ -129,13 +131,16 @@ func (v *VOne) CallURL(f Func, uri string) error {
 		}
 		return fmt.Errorf("Request error: %w", vOneErr)
 	}
+
 	if err := v.PopulateResponseStruct(f.ResponseHeader(), resp.Header); err != nil {
 		return err
 	}
+
 	if f.ResponseStruct() == nil {
 		f.ResponseBody(resp.Body)
 		return nil
 	}
+
 	return v.DecodeBody(f, resp.Body)
 }
 
@@ -182,11 +187,11 @@ var ErrUnsupportedType = errors.New("unsupported type")
 type HTTPCodeRange int
 
 const (
-	HTTPCodeInformational HTTPCodeRange = iota + 1
-	HTTPCodeSuccess
-	HTTPCodeRedirect
-	HTTPCodeClientError
-	HTTPCodeServerError
+	HTTPCodeInformationalRange HTTPCodeRange = iota + 1
+	HTTPCodeSuccessRange
+	HTTPCodeRedirectRange
+	HTTPCodeClientErrorRange
+	HTTPCodeServerErrorRange
 )
 
 func GetHTTPCodeRange(code int) HTTPCodeRange {

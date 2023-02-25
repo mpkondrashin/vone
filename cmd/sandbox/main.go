@@ -190,7 +190,7 @@ func main() {
 				if !errors.As(err, &perr) {
 					return err
 				}
-				if perr.ErrorData.Code != "NotFound" {
+				if perr.ErrorData.Code != vone.ErrorCodeNotFound {
 					return err
 				}
 				log.Printf("ID: %v, NotFound", item.ID)
@@ -214,7 +214,7 @@ func main() {
 				if !errors.As(err, &perr) {
 					return err
 				}
-				if perr.ErrorData.Code != "NotFound" {
+				if perr.ErrorData.Code != vone.ErrorCodeNotFound {
 					return err
 				}
 				log.Printf("ID: %v, NotFound", item.ID)
@@ -237,7 +237,7 @@ func main() {
 				if !errors.As(err, &perr) {
 					return err
 				}
-				if perr.ErrorData.Code != "NotFound" {
+				if perr.ErrorData.Code != vone.ErrorCodeNotFound {
 					return err
 				}
 				log.Printf("ID: %v, NotFound", item.ID)

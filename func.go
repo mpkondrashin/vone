@@ -1,3 +1,12 @@
+/*
+	Trend Micro Vision One API SDK
+	(c) 2023 by Mikhail Kondrashin (mkondrashin@gmail.com)
+
+	Sandbox API capabilities
+
+	funcs.go - base struct for all Web API functions
+*/
+
 package vone
 
 import (

@@ -16,7 +16,7 @@ import (
 
 type SandboxSuspiciousObjectsResponse struct {
 	Items []struct {
-		RiskLevel                  string    `json:"riskLevel"`
+		RiskLevel                  RiskLevel `json:"riskLevel"`
 		AnalysisCompletionDateTime time.Time `json:"analysisCompletionDateTime"`
 		ExpiredDateTime            time.Time `json:"expiredDateTime"`
 		RootSHA1                   string    `json:"rootSha1"`
