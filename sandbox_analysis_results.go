@@ -52,7 +52,7 @@ func (f *SandboxAnalysisResultsFunc) Do(ctx context.Context) (*SandboxAnalysisRe
 }
 
 func (f *SandboxAnalysisResultsFunc) Method() string {
-	return "GET"
+	return GET
 }
 
 func (s *SandboxAnalysisResultsFunc) URL() string {

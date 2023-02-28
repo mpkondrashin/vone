@@ -82,7 +82,7 @@ func (f *SandboxSubmitURLsToSandboxFunc) Do(ctx context.Context) (SandboxSubmitU
 }
 
 func (f *SandboxSubmitURLsToSandboxFunc) Method() string {
-	return "POST"
+	return POST
 }
 
 func (s *SandboxSubmitURLsToSandboxFunc) URL() string {

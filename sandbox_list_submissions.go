@@ -128,7 +128,7 @@ func (f *SandboxSubmissionsFunc) Do(ctx context.Context) (*SandboxSubmissionsRes
 }
 
 func (f *SandboxSubmissionsFunc) Method() string {
-	return "GET"
+	return GET
 }
 
 func (*SandboxSubmissionsFunc) URL() string {

@@ -111,7 +111,7 @@ func (f *SandboxSubmitFileToSandboxFunc) Do(ctx context.Context) (*SandboxSubmit
 }
 
 func (f *SandboxSubmitFileToSandboxFunc) Method() string {
-	return "POST"
+	return POST
 }
 
 func (s *SandboxSubmitFileToSandboxFunc) URL() string {
@@ -119,7 +119,6 @@ func (s *SandboxSubmitFileToSandboxFunc) URL() string {
 }
 
 func (f *SandboxSubmitFileToSandboxFunc) RequestBody() io.Reader {
-
 	return f.Request
 }
 

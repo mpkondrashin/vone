@@ -45,7 +45,7 @@ func (f *SandboxSuspiciousObjectsFunc) Do(ctx context.Context) (*SandboxSuspicio
 }
 
 func (f *SandboxSuspiciousObjectsFunc) Method() string {
-	return "GET"
+	return GET
 }
 
 func (f *SandboxSuspiciousObjectsFunc) URL() string {

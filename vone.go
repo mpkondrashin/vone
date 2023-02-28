@@ -22,7 +22,8 @@ import (
 )
 
 const (
-	GET = "GET"
+	GET  = "GET"
+	POST = "POST"
 
 	application_json = "application/json"
 
@@ -56,48 +57,6 @@ func NewVOne(url string, bearer string) *VOne {
 	}
 }
 
-/*
-func (v *VOne) RequestJSON(method, url string, bodyData any) (io.ReadCloser, http.Header, error) {
-	var body io.Reader
-	if bodyData != nil {
-		buffer, err := json.Marshal(bodyData)
-		if err != nil {
-			return nil, nil, err
-		}
-		body = bytes.NewReader(buffer)
-	}
-	return v.Request(method, url, body, application_json)
-}
-
-
-func (v *VOne) Request(method, url string, body io.Reader, contentType string) (io.ReadCloser, http.Header, error) {
-	req, err := http.NewRequest(method, v.urlBase+url, body)
-	if err != nil {
-		return nil, nil, fmt.Errorf("VOne: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+v.bearer)
-	if body != nil {
-		req.Header.Set("Content-Type", contentType)
-	}
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, nil, fmt.Errorf("VOne: %v", err)
-	}
-	if resp.StatusCode > 299 {
-		var data bytes.Buffer
-		if _, err := io.Copy(&data, resp.Body); err != nil {
-			return nil, nil, err
-		}
-		vOneErr := new(Error)
-		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
-			return nil, nil, err
-		}
-		return nil, nil, vOneErr
-	}
-	return resp.Body, resp.Header, nil
-}
-*/
 func (v *VOne) Call(ctx context.Context, f Func) error {
 	uri := f.URI()
 	if uri == "" {
@@ -154,6 +113,8 @@ func (v *VOne) DecodeBody(f Func, body io.ReadCloser) error {
 	return nil
 }
 
+var ErrUnsupportedType = errors.New("unsupported type")
+
 func (v *VOne) PopulateResponseStruct(structPtr any, header http.Header) error {
 	if structPtr == nil {
 		return nil
@@ -162,9 +123,8 @@ func (v *VOne) PopulateResponseStruct(structPtr any, header http.Header) error {
 	structValue := reflect.Indirect(structPtrValue)
 	structValueType := structValue.Type()
 	for i := 0; i < structValueType.NumField(); i++ {
-		fieldType := structValueType.Field(i)
 		fieldValue := structValue.Field(i)
-		headerName := fieldType.Tag.Get("header")
+		headerName := structValueType.Field(i).Tag.Get("header")
 		headerValue := header.Get(headerName)
 		kind := fieldValue.Kind()
 		switch kind {
@@ -177,13 +137,11 @@ func (v *VOne) PopulateResponseStruct(structPtr any, header http.Header) error {
 			}
 			fieldValue.SetInt(int64(x))
 		default:
-			return fmt.Errorf("%w: %v", ErrUnsupportedType, kind)
+			return fmt.Errorf("%s: %w", kind, ErrUnsupportedType)
 		}
 	}
 	return nil
 }
-
-var ErrUnsupportedType = errors.New("unsupported type")
 
 type HTTPCodeRange int
 
