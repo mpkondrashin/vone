@@ -10,6 +10,7 @@
 package vone
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
@@ -43,8 +44,8 @@ func (v *VOne) SandboxAnalysisResults(id string) *SandboxAnalysisResultsFunc {
 	return f
 }
 
-func (f *SandboxAnalysisResultsFunc) Do() (*SandboxAnalysisResultsResponse, error) {
-	if err := f.vone.Call(f); err != nil {
+func (f *SandboxAnalysisResultsFunc) Do(ctx context.Context) (*SandboxAnalysisResultsResponse, error) {
+	if err := f.vone.Call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil

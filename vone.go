@@ -11,6 +11,7 @@ package vone
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -97,16 +98,16 @@ func (v *VOne) Request(method, url string, body io.Reader, contentType string) (
 	return resp.Body, resp.Header, nil
 }
 */
-func (v *VOne) Call(f Func) error {
+func (v *VOne) Call(ctx context.Context, f Func) error {
 	uri := f.URI()
 	if uri == "" {
 		uri = v.urlBase + f.URL()
 	}
-	return v.CallURL(f, uri)
+	return v.CallURL(ctx, f, uri)
 }
 
-func (v *VOne) CallURL(f Func, uri string) error {
-	req, err := http.NewRequest(f.Method(), uri, f.RequestBody())
+func (v *VOne) CallURL(ctx context.Context, f Func, uri string) error {
+	req, err := http.NewRequestWithContext(ctx, f.Method(), uri, f.RequestBody())
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
@@ -118,16 +119,16 @@ func (v *VOne) CallURL(f Func, uri string) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("HTTP request: %v", err)
+		return fmt.Errorf("HTTP request: %w", err)
 	}
 	if GetHTTPCodeRange(resp.StatusCode) != HTTPCodeSuccessRange {
 		var data bytes.Buffer
 		if _, err := io.Copy(&data, resp.Body); err != nil {
-			return fmt.Errorf("download error: %v", err)
+			return fmt.Errorf("download error: %w", err)
 		}
 		vOneErr := new(Error)
 		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
-			return fmt.Errorf("parse error: %v", err)
+			return fmt.Errorf("parse error: %w", err)
 		}
 		return fmt.Errorf("Request error: %w", vOneErr)
 	}
@@ -147,7 +148,7 @@ func (v *VOne) CallURL(f Func, uri string) error {
 func (v *VOne) DecodeBody(f Func, body io.ReadCloser) error {
 	defer body.Close()
 	err := json.NewDecoder(body).Decode(f.ResponseStruct())
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("response parse error: %w", err)
 	}
 	return nil
@@ -176,7 +177,7 @@ func (v *VOne) PopulateResponseStruct(structPtr any, header http.Header) error {
 			}
 			fieldValue.SetInt(int64(x))
 		default:
-			return fmt.Errorf("%s: %v", ErrUnsupportedType, kind)
+			return fmt.Errorf("%w: %v", ErrUnsupportedType, kind)
 		}
 	}
 	return nil

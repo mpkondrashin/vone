@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -49,6 +52,7 @@ func (c *commandSubmit) Execute() error {
 		wg.Add(1)
 		go c.SubmitURLGoRoutine(url, &wg)
 	}
+
 	c.ProcessURLsFile(&wg)
 	wg.Wait()
 	return nil
@@ -59,19 +63,31 @@ func (c *commandSubmit) ProcessURLsFile(wg *sync.WaitGroup) {
 	if urlfile == "" {
 		return
 	}
-	data, err := os.ReadFile(urlfile)
-	if err != nil {
-		log.Println(err)
-		return
+	var data []byte
+	var err error
+	if urlfile == "-" {
+		var buf bytes.Buffer
+		if _, err := io.Copy(&buf, os.Stdin); err != nil {
+			log.Println(err)
+			return
+		}
+		data = buf.Bytes()
+	} else {
+		data, err = os.ReadFile(urlfile)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	}
 	urls := strings.Split(string(data), "\n")
+	log.Printf("Loaded %d lines", len(urls))
 	for _, url := range urls {
 		url = strings.TrimSpace(url)
 		if url == "" {
 			continue
 		}
 		wg.Add(1)
-		c.SubmitURLGoRoutine(url, wg)
+		go c.SubmitURLGoRoutine(url, wg)
 	}
 }
 
@@ -97,7 +113,7 @@ func (c *commandSubmit) SubmitFile(filePath string) error {
 	if err != nil {
 		return err
 	}
-	response, headers, err := f.Do()
+	response, headers, err := f.Do(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -109,22 +125,30 @@ func (c *commandSubmit) SubmitFile(filePath string) error {
 
 func (c *commandSubmit) SubmitURL(url string) error {
 	log.Printf("Uploading URL %s", url)
+	start := time.Now()
 	submit := c.visionOne.SandboxSubmitURLs().AddURL(url)
-	response, headers, err := submit.Do()
+	response, headers, err := submit.Do(context.TODO())
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", url, err)
 	}
 	if len(response) != 1 {
 		return fmt.Errorf("wrong response length: %d", len(response))
 	}
 	resp := response[0]
 	if vone.GetHTTPCodeRange(resp.Status) != vone.HTTPCodeSuccessRange {
-		return fmt.Errorf("%s: %s", resp.Body.Error.Code, resp.Body.Error.Code)
+		return fmt.Errorf("%s: %s: %s", url, resp.Body.Error.Code, resp.Body.Error.Code)
 	}
 	id := response[0].Body.ID
-	log.Printf("URL accepted. ID = %s", id)
+	defer func() {
+		duration := time.Since(start)
+		log.Printf("%s Analysis time: %v", id, duration.Round(1*time.Second))
+	}()
+	log.Printf("%s URL accepted: %s", id, url)
 	c.LogQuota(id, headers)
-	return c.ProcessObject(id)
+	if err := c.ProcessObject(id); err != nil {
+		return fmt.Errorf("%s %w", id, err)
+	}
+	return nil
 }
 
 func (c *commandSubmit) LogQuota(id string, headers *vone.SandboxSubmitFileResponseHeaders) {
@@ -167,7 +191,7 @@ func (c *commandSubmit) WaitForResult(id string) error {
 	timeout := viper.GetDuration(flagTimeout)
 	endTime := time.Now().Add(timeout)
 	for {
-		status, err := c.visionOne.SandboxSubmissionStatus(id).Do()
+		status, err := c.visionOne.SandboxSubmissionStatus(id).Do(context.TODO())
 		if err != nil {
 			return fmt.Errorf("WaitForResult(%s): %w", id, err)
 		}
@@ -189,7 +213,7 @@ func (c *commandSubmit) WaitForResult(id string) error {
 }
 
 func (c *commandSubmit) AnalysisResult(id string) (bool, error) {
-	results, err := c.visionOne.SandboxAnalysisResults(id).Do()
+	results, err := c.visionOne.SandboxAnalysisResults(id).Do(context.TODO())
 	if err != nil {
 		return false, err
 	}
@@ -235,7 +259,7 @@ func ListIP(so *vone.SandboxSuspiciousObjectsResponse) (result []string) {
 
 func (c *commandSubmit) SuspiciousObjects(id string) error {
 	log.Printf("%s Request Suspicious Objects", id)
-	so, err := c.visionOne.SandboxSuspiciousObjects(id).Do()
+	so, err := c.visionOne.SandboxSuspiciousObjects(id).Do(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -253,7 +277,7 @@ func (c *commandSubmit) SuspiciousObjects(id string) error {
 func (c *commandSubmit) PDFReport(id string) error {
 	log.Printf("%s Download report PDF", id)
 	pdfFileName := id + ".pdf"
-	if err := c.visionOne.SandboxDownloadResults(id).Store(pdfFileName); err != nil {
+	if err := c.visionOne.SandboxDownloadResults(id).Store(context.TODO(), pdfFileName); err != nil {
 		return err
 	}
 	log.Printf("%s PDF report saved: %s", id, pdfFileName)
@@ -263,7 +287,7 @@ func (c *commandSubmit) PDFReport(id string) error {
 func (c *commandSubmit) InvestigationPackage(id string) error {
 	log.Printf("%s Download Investigation Package", id)
 	zipFileName := id + ".zip"
-	if err := c.visionOne.SandboxInvestigationPackage(id).Store(zipFileName); err != nil {
+	if err := c.visionOne.SandboxInvestigationPackage(id).Store(context.TODO(), zipFileName); err != nil {
 		return err
 	}
 	log.Printf("%s Investigation Package Saved: %s", id, zipFileName)

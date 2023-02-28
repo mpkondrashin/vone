@@ -148,7 +148,7 @@ func pickCommand(args []string) error {
 		if cmd.Name() == subcommand {
 			err := cmd.Init(args[1:])
 			if err != nil {
-				return fmt.Errorf("Init error: %v", err)
+				return fmt.Errorf("Init error: %w", err)
 			}
 			log.Printf("Command %s\n", cmd.Name())
 			return cmd.Execute()

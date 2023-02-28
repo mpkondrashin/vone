@@ -10,6 +10,7 @@
 package vone
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -23,15 +24,15 @@ func (v *VOne) SandboxInvestigationPackage(id string) *SandboxInvestigationPacka
 	return &SandboxInvestigationPackageFunc{*v.SandboxDownloadResults(id)}
 }
 
-func (f *SandboxInvestigationPackageFunc) Do() (io.ReadCloser, error) {
-	if err := f.vone.Call(f); err != nil {
+func (f *SandboxInvestigationPackageFunc) Do(ctx context.Context) (io.ReadCloser, error) {
+	if err := f.vone.Call(ctx, f); err != nil {
 		return nil, err
 	}
 	return f.Response, nil
 }
 
-func (f *SandboxInvestigationPackageFunc) Store(filePath string) error {
-	if _, err := f.Do(); err != nil {
+func (f *SandboxInvestigationPackageFunc) Store(ctx context.Context, filePath string) error {
+	if _, err := f.Do(ctx); err != nil {
 		return nil
 	}
 	defer f.Response.Close()

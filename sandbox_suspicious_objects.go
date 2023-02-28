@@ -10,6 +10,7 @@
 package vone
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
@@ -36,8 +37,8 @@ func (v *VOne) SandboxSuspiciousObjects(id string) *SandboxSuspiciousObjectsFunc
 	return f
 }
 
-func (f *SandboxSuspiciousObjectsFunc) Do() (*SandboxSuspiciousObjectsResponse, error) {
-	if err := f.vone.Call(f); err != nil {
+func (f *SandboxSuspiciousObjectsFunc) Do(ctx context.Context) (*SandboxSuspiciousObjectsResponse, error) {
+	if err := f.vone.Call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil

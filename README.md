@@ -17,7 +17,7 @@ Each parameter can be provided in three ways:
 | filename<br/>--filename<br/>VONE_FILENAME | Path to file |
 | mask<br/>--mask<br/>VONE_MASK | Files mask |
 | url<br/>--url<br/>VONE_URL | URL |
-| urlfile<br/>--urlfile<br/>VONE_URLFILE | Text file with URLs (one per line) |
+| urlfile<br/>--urlfile<br/>VONE_URLFILE | Text file with URLs (one per line). Use "-" name to use stdin |
 | timeout<br>--timeout<br>VONE_TIMEOUT | Timeout for sample analysis |
 | log<br>--log<br>VONE_LOG | Log file path |
 

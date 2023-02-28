@@ -11,6 +11,7 @@ package vone
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 )
@@ -73,8 +74,8 @@ func (f *SandboxSubmitURLsToSandboxFunc) AddURLs(urls []string) *SandboxSubmitUR
 	return f
 }
 
-func (f *SandboxSubmitURLsToSandboxFunc) Do() (SandboxSubmitURLsToSandboxResponse, *SandboxSubmitFileResponseHeaders, error) {
-	if err := f.vone.Call(f); err != nil {
+func (f *SandboxSubmitURLsToSandboxFunc) Do(ctx context.Context) (SandboxSubmitURLsToSandboxResponse, *SandboxSubmitFileResponseHeaders, error) {
+	if err := f.vone.Call(ctx, f); err != nil {
 		return nil, nil, err
 	}
 	return f.Response, &f.ResponseHeaders, nil

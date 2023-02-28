@@ -10,6 +10,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log"
 	"os"
@@ -22,7 +23,7 @@ func main() {
 	v1 := vone.NewVOne(url, token)
 	if true {
 		log.Println("*** SandboxGetDailyReserve ***")
-		reserve, err := v1.SandboxDailyReserve().Do()
+		reserve, err := v1.SandboxDailyReserve().Do(context.TODO())
 		if err != nil {
 			panic(err)
 		}
@@ -33,7 +34,7 @@ func main() {
 	if false {
 		log.Println("*** Submit URLs To Sandbox ***")
 		urls := []string{"test0001", "test0002"}
-		resp, _, err := v1.SandboxSubmitURLs().AddURLs(urls).Do()
+		resp, _, err := v1.SandboxSubmitURLs().AddURLs(urls).Do(context.TODO())
 		if err != nil {
 			panic(err)
 		}
@@ -53,7 +54,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		resp, _, err := submit.Do()
+		resp, _, err := submit.Do(context.TODO())
 		if err != nil {
 			panic(err)
 		}
@@ -69,7 +70,7 @@ func main() {
 		if err := submit.SetReader(virus, fileName); err != nil {
 			panic(err)
 		}
-		resp, _, err = submit.Do()
+		resp, _, err = submit.Do(context.TODO())
 		if err != nil {
 			panic(err)
 		}
@@ -98,7 +99,7 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			resp, _, err := submit.Do()
+			resp, _, err := submit.Do(context.TODO())
 			if err != nil {
 				panic(err)
 			}
@@ -114,7 +115,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		resp, _, err := submit.Do()
+		resp, _, err := submit.Do(context.TODO())
 		if err != nil {
 			panic(err)
 		}
@@ -127,7 +128,7 @@ func main() {
 	if false {
 		log.Println("*** List Submissions ***")
 		listSubmissions := v1.SandboxListSubmissions().OrderBy(vone.CreatedDateTime, vone.Asc)
-		resp, err := listSubmissions.Do()
+		resp, err := listSubmissions.Do(context.TODO())
 		//		log.Println("CCC", resp, err)
 		if err != nil {
 			panic(err)
@@ -138,7 +139,7 @@ func main() {
 		log.Printf("Next: %s", resp.NextLink)
 		if resp.NextLink != "" {
 			log.Println("*** List Submissions Next ***")
-			resp2, err := listSubmissions.Next()
+			resp2, err := listSubmissions.Next(context.TODO())
 			if err != nil {
 				panic(err)
 			}
@@ -148,10 +149,10 @@ func main() {
 		}
 		log.Println("*** Iterate List Submissions ***")
 		ls := v1.SandboxListSubmissions().OrderBy(vone.CreatedDateTime, vone.Asc)
-		err = ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {
+		err = ls.IterateListSubmissions(context.TODO(), func(item *vone.ListSubmissionsItem) error {
 			log.Printf("ID: %v, action: %s, status: %s", item.ID, item.Action, item.Status)
 			status := v1.SandboxSubmissionStatus(item.ID)
-			result, err := status.Do()
+			result, err := status.Do(context.TODO())
 			if err != nil {
 				return err
 			}
@@ -165,10 +166,10 @@ func main() {
 	if false {
 		log.Println("*** Iterate List Submissions & Get Analysis Results ***")
 		ls := v1.SandboxListSubmissions().OrderBy(vone.CreatedDateTime, vone.Asc)
-		err := ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {
+		err := ls.IterateListSubmissions(context.TODO(), func(item *vone.ListSubmissionsItem) error {
 			//log.Printf("ID: %v, action: %s, status: %s", item.ID, item.Action, item.Status)
 			results := v1.SandboxAnalysisResults(item.ID)
-			result, err := results.Do()
+			result, err := results.Do(context.TODO())
 			if err != nil {
 				var perr *vone.Error
 				if !errors.As(err, &perr) {
@@ -190,9 +191,9 @@ func main() {
 	if false {
 		log.Println("*** Iterate List Submissions & Download Result ***")
 		ls := v1.SandboxListSubmissions()
-		err := ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {
+		err := ls.IterateListSubmissions(context.TODO(), func(item *vone.ListSubmissionsItem) error {
 			//log.Printf("ID: %v, action: %s, status: %s", item.ID, item.Action, item.Status)
-			result, err := v1.SandboxAnalysisResults(item.ID).Do()
+			result, err := v1.SandboxAnalysisResults(item.ID).Do(context.TODO())
 			if err != nil {
 				var perr *vone.Error
 				if !errors.As(err, &perr) {
@@ -205,7 +206,7 @@ func main() {
 				return nil
 			}
 			log.Printf("ID: %v, RiskLevel: %s", item.ID, result.RiskLevel)
-			return v1.SandboxDownloadResults(item.ID).Store(item.ID + ".pdf")
+			return v1.SandboxDownloadResults(item.ID).Store(context.TODO(), item.ID+".pdf")
 		})
 		if err != nil {
 			log.Panic(err)
@@ -214,8 +215,8 @@ func main() {
 	if false {
 		log.Println("*** Iterate List Submissions & Suspicious Objects ***")
 		ls := v1.SandboxListSubmissions()
-		err := ls.IterateListSubmissions(func(item *vone.ListSubmissionsItem) error {
-			result, err := v1.SandboxSuspiciousObjects(item.ID).Do()
+		err := ls.IterateListSubmissions(context.TODO(), func(item *vone.ListSubmissionsItem) error {
+			result, err := v1.SandboxSuspiciousObjects(item.ID).Do(context.TODO())
 			if err != nil {
 				var perr *vone.Error
 				if !errors.As(err, &perr) {

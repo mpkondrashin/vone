@@ -10,6 +10,7 @@
 package vone
 
 import (
+	"context"
 	"io"
 	"strings"
 	"time"
@@ -119,8 +120,8 @@ func (f *SandboxSubmissionsFunc) Top(t Top) *SandboxSubmissionsFunc {
 	return f
 }
 
-func (f *SandboxSubmissionsFunc) Do() (*SandboxSubmissionsResponse, error) {
-	if err := f.vone.Call(f); err != nil {
+func (f *SandboxSubmissionsFunc) Do(ctx context.Context) (*SandboxSubmissionsResponse, error) {
+	if err := f.vone.Call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
@@ -142,20 +143,20 @@ func (f *SandboxSubmissionsFunc) ResponseStruct() any {
 	return &f.Response
 }
 
-func (f *SandboxSubmissionsFunc) Next() (*SandboxSubmissionsResponse, error) {
+func (f *SandboxSubmissionsFunc) Next(ctx context.Context) (*SandboxSubmissionsResponse, error) {
 	if f.Response.NextLink == "" {
 		return nil, io.EOF
 	}
-	return f.Do()
+	return f.Do(ctx)
 }
 
-func (f *SandboxSubmissionsFunc) IterateListSubmissions(callback func(*ListSubmissionsItem) error) error {
+func (f *SandboxSubmissionsFunc) IterateListSubmissions(ctx context.Context, callback func(*ListSubmissionsItem) error) error {
 	for {
-		if err := f.vone.Call(f); err != nil {
+		if err := f.vone.Call(ctx, f); err != nil {
 			return err
 		}
-		for _, r := range f.Response.Items {
-			if err := callback(&r); err != nil {
+		for i := range f.Response.Items {
+			if err := callback(&f.Response.Items[i]); err != nil {
 				return err
 			}
 		}

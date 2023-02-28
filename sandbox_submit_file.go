@@ -11,12 +11,14 @@ package vone
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"mime/multipart"
 	"os"
 	"path/filepath"
 )
 
+// SandboxSubmitFileResponse - Submit file or url to sanbox response JSON format
 type SandboxSubmitFileResponse struct {
 	ID     string `json:"id"`
 	Digest struct {
@@ -27,6 +29,7 @@ type SandboxSubmitFileResponse struct {
 	Arguments string `json:"arguments"`
 }
 
+// SandboxSubmitFileResponse - struct used to return value of HTTP headers from file or url submit to sanbox
 type SandboxSubmitFileResponseHeaders struct {
 	OperationLocation        string `header:"Operation-Location"`
 	SubmissionReserveCount   int    `header:"TMV1-Submission-Reserve-Count"`
@@ -35,6 +38,7 @@ type SandboxSubmitFileResponseHeaders struct {
 	SubmissionExemptionCount int    `header:"TMV1-Submission-Exemption-Count"`
 }
 
+// SandboxSubmitFileToSandboxFunc - function to submit file to sandbox
 type SandboxSubmitFileToSandboxFunc struct {
 	BaseFunc
 	//filePath            string
@@ -46,6 +50,7 @@ type SandboxSubmitFileToSandboxFunc struct {
 
 var _ Func = &SandboxSubmitFileToSandboxFunc{}
 
+// SandboxSubmitFile - return new submit to sandbox file
 func (v *VOne) SandboxSubmitFile() *SandboxSubmitFileToSandboxFunc {
 	f := &SandboxSubmitFileToSandboxFunc{}
 	f.BaseFunc.Init(v)
@@ -98,8 +103,8 @@ func (s *SandboxSubmitFileToSandboxFunc) SetArguments(arguments string) *Sandbox
 	return s
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) Do() (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
-	if err := f.vone.Call(f); err != nil {
+func (f *SandboxSubmitFileToSandboxFunc) Do(ctx context.Context) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
+	if err := f.vone.Call(ctx, f); err != nil {
 		return nil, nil, err
 	}
 	return &f.Response, &f.ResponseHeaders, nil

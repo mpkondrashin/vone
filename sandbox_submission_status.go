@@ -10,6 +10,7 @@
 package vone
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
@@ -50,8 +51,8 @@ func (v *VOne) SandboxSubmissionStatus(id string) *SandboxSubmissionStatusFunc {
 	return f
 }
 
-func (f *SandboxSubmissionStatusFunc) Do() (*SandboxSubmissionStatusResponse, error) {
-	if err := f.vone.Call(f); err != nil {
+func (f *SandboxSubmissionStatusFunc) Do(ctx context.Context) (*SandboxSubmissionStatusResponse, error) {
+	if err := f.vone.Call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil

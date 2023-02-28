@@ -1,6 +1,9 @@
 package main
 
-import "log"
+import (
+	"context"
+	"log"
+)
 
 type commandQuota struct {
 	baseCommand
@@ -13,7 +16,7 @@ func newCommandQuota() *commandQuota {
 }
 
 func (c *commandQuota) Execute() error {
-	quota, err := c.visionOne.SandboxDailyReserve().Do()
+	quota, err := c.visionOne.SandboxDailyReserve().Do(context.TODO())
 	if err != nil {
 		return err
 	}

@@ -9,6 +9,8 @@
 
 package vone
 
+import "context"
+
 type SandboxDailyReserveResponse struct {
 	SubmissionReserveCount   int `json:"submissionReserveCount"`
 	SubmissionRemainingCount int `json:"submissionRemainingCount"`
@@ -27,8 +29,8 @@ type SanboxDailyReserveFunc struct {
 	Response SandboxDailyReserveResponse
 }
 
-func (f *SanboxDailyReserveFunc) Do() (*SandboxDailyReserveResponse, error) {
-	if err := f.vone.Call(f); err != nil {
+func (f *SanboxDailyReserveFunc) Do(ctx context.Context) (*SandboxDailyReserveResponse, error) {
+	if err := f.vone.Call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
