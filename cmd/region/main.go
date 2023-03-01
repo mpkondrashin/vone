@@ -15,7 +15,7 @@ func main() {
 		fmt.Println("Usage: region <token> (or \"-\" for stdin)")
 		os.Exit(2)
 	}
-	token = os.Args[1]
+	token := os.Args[1]
 	if token == "-" {
 		var sb strings.Builder
 		io.Copy(&sb, os.Stdin)
