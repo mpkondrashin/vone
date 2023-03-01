@@ -67,25 +67,25 @@ func (f *SandboxSubmitFileToSandboxFunc) SetFilePathAndName(filePath, fileName s
 		return f, err
 	}
 	defer reader.Close()
-	return f, f.SetReader(reader, fileName)
+	return f.SetReader(reader, fileName)
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) SetReader(reader io.Reader, fileName string) error {
+func (f *SandboxSubmitFileToSandboxFunc) SetReader(reader io.Reader, fileName string) (*SandboxSubmitFileToSandboxFunc, error) {
 	var data bytes.Buffer
 	writer := multipart.NewWriter(&data)
 	w, err := writer.CreateFormFile("file", fileName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if _, err := io.Copy(w, reader); err != nil {
-		return err
+		return nil, err
 	}
 	if err := writer.Close(); err != nil {
-		return err
+		return nil, err
 	}
 	f.Request = &data
 	f.formDataContentType = writer.FormDataContentType()
-	return nil
+	return f, nil
 }
 
 func (s *SandboxSubmitFileToSandboxFunc) SetDocumentPassword(documentPassword string) *SandboxSubmitFileToSandboxFunc {

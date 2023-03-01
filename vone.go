@@ -89,7 +89,7 @@ func (v *VOne) CallURL(ctx context.Context, f Func, uri string) error {
 		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
 			return fmt.Errorf("parse error: %w", err)
 		}
-		return fmt.Errorf("Request error: %w", vOneErr)
+		return fmt.Errorf("request error: %w", vOneErr)
 	}
 
 	if err := v.PopulateResponseStruct(f.ResponseHeader(), resp.Header); err != nil {

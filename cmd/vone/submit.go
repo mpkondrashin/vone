@@ -32,6 +32,7 @@ func (c *commandSubmit) Execute() error {
 
 	filePath := viper.GetString(flagFileName)
 	if filePath != "" {
+		wg.Add(1)
 		go c.SubmitFileGoRoutine(filePath, &wg)
 	}
 
@@ -107,8 +108,29 @@ func (c *commandSubmit) SubmitURLGoRoutine(url string, wg *sync.WaitGroup) {
 	}
 }
 
+/*
+func GetReader(filePath string) (io.Reader, error) {
+	info, err := os.Stat(filePath)
+	if err != nil {
+		return nil, err
+	}
+	f, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	prefix := fmt.Sprintf("Upload %s: ", filePath)
+	reader := NewReader(f, info.Size(), prefix)
+	return reader, nil
+
+}*/
+
 func (c *commandSubmit) SubmitFile(filePath string) error {
 	log.Printf("Uploading %s", filePath)
+	/*reader, err := GetReader(filePath)
+	if err != nil {
+		return err
+	}
+	*/
 	f, err := c.visionOne.SandboxSubmitFile().SetFilePath(filePath)
 	if err != nil {
 		return err
