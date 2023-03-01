@@ -25,13 +25,17 @@ jobs:
           export PATH=${PATH}:`go env GOPATH`/bin
           go generate
           GOOS=linux GOARCH=amd64 go build ./cmd/vone
-          tar cfvz vone_linux_amd64.tgz vone
+          GOOS=linux GOARCH=amd64 go build ./cmd/region
+          tar cfvz vone_linux_amd64.tgz vone region
           GOOS=darwin GOARCH=amd64 go build ./cmd/vone
-          tar cfvz vone_darwin_amd64.tgz vone
+          GOOS=darwin GOARCH=amd64 go build ./cmd/region
+          tar cfvz vone_darwin_amd64.tgz vone region
           GOOS=darwin GOARCH=arm64 go build ./cmd/vone
-          tar cfvz vone_darwin_arm64.tgz vone
+          GOOS=darwin GOARCH=arm64 go build ./cmd/region
+          tar cfvz vone_darwin_arm64.tgz vone region
           GOOS=windows GOARCH=amd64 go build ./cmd/vone
-          tar cfvz vone_windows_amd64.tgz vone.exe
+          GOOS=windows GOARCH=amd64 go build ./cmd/region
+          tar cfvz vone_windows_amd64.tgz vone.exe region.exe
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
