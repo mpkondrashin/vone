@@ -11,6 +11,7 @@ package vone
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -36,6 +37,15 @@ type (
 		Arguments string `json:"arguments"`
 	}
 )
+
+var ErrSubmission = errors.New("submission error")
+
+func (s *SandboxSubmissionStatusResponse) GetError() error {
+	if s.Error.Code == "" {
+		return nil
+	}
+	return fmt.Errorf("%w: %v: %s", ErrSubmission, s.Error.Code, s.Error.Message)
+}
 
 type SandboxSubmissionStatusFunc struct {
 	BaseFunc
