@@ -33,6 +33,7 @@ const (
 const (
 	cmdSubmit = "submit"
 	cmdQuota  = "quota"
+	cmdPDF    = "pdf"
 )
 
 const (
@@ -44,6 +45,7 @@ const (
 	flagURL      = "url"
 	flagURLsFile = "urlfile"
 	flagTimeout  = "timeout"
+	flagID       = "id"
 )
 
 type command interface {
@@ -130,6 +132,7 @@ func (c *baseCommand) Init(args []string) error {
 var commands = []command{
 	newCommandSubmit(),
 	newCommandQuota(),
+	newCommandPDF(),
 }
 
 func usage() {

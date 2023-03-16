@@ -140,7 +140,7 @@ func (c *commandSubmit) SubmitFile(filePath string) error {
 		return err
 	}
 	id := response.ID
-	log.Printf("File accepted. ID = %s", id)
+	log.Printf("%s accepted. ID = %s", filePath, id)
 	c.LogQuota(id, headers)
 	return c.ProcessObject(id)
 }
