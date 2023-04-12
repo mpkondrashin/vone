@@ -1,17 +1,13 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"log"
 	"time"
 
-	"github.com/mpkondrashin/vone"
 	"github.com/spf13/viper"
 )
 
 type commandPDF struct {
-	baseCommand
+	commandSubmit
 }
 
 func newCommandPDF() *commandPDF {
@@ -32,6 +28,7 @@ func (c *commandPDF) ProcessObject(id string) error {
 	return c.PDFReport(id)
 }
 
+/*
 func (c *commandPDF) WaitForResult(id string) error {
 	timeout := viper.GetDuration(flagTimeout)
 	endTime := time.Now().Add(timeout)
@@ -66,7 +63,7 @@ func (c *commandPDF) PDFReport(id string) error {
 	log.Printf("%s PDF report saved: %s", id, pdfFileName)
 	return nil
 }
-
+*/
 func (c *commandPDF) Setup(name string) {
 	c.baseCommand.Setup(name)
 	c.fs.String(flagID, "", "Sample file path")
