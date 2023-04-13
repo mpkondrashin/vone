@@ -19,15 +19,6 @@ var RegionalDomains = []RegionalDomain{
 	{"Europe", "api.eu.xdr.trendmicro.com"},
 }
 
-var Domains = []string{
-	"api.au.xdr.trendmicro.com",
-	"api.in.xdr.trendmicro.com",
-	"api.xdr.trendmicro.co.jp",
-	"api.sg.xdr.trendmicro.com",
-	"api.xdr.trendmicro.com",
-	"api.eu.xdr.trendmicro.com",
-}
-
 // DetectVisionOneDomain return correct domain for given token or empty string
 func DetectVisionOneDomain(ctx context.Context, token string) (result string) {
 	ctx, cancel := context.WithCancel(ctx)

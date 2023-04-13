@@ -46,21 +46,21 @@ func (e *Error) Error() string {
 }
 
 type VOne struct {
-	urlBase string
-	bearer  string
+	Domain string
+	Token  string
 }
 
-func NewVOne(url string, bearer string) *VOne {
+func NewVOne(domain string, token string) *VOne {
 	return &VOne{
-		urlBase: "https://" + url,
-		bearer:  bearer,
+		Domain: domain,
+		Token:  token,
 	}
 }
 
 func (v *VOne) Call(ctx context.Context, f Func) error {
 	uri := f.URI()
 	if uri == "" {
-		uri = v.urlBase + f.URL()
+		uri = "https://" + v.Domain + f.URL()
 	}
 	return v.CallURL(ctx, f, uri)
 }
@@ -70,7 +70,7 @@ func (v *VOne) CallURL(ctx context.Context, f Func, uri string) error {
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
-	req.Header.Set("Authorization", "Bearer "+v.bearer)
+	req.Header.Set("Authorization", "Bearer "+v.Token)
 	if f.RequestBody() != nil {
 		req.Header.Set("Content-Type", f.ContentType())
 	}
