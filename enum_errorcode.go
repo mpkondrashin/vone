@@ -4,8 +4,10 @@ package vone
 
 import (
     "encoding/json"
+	"errors"
     "fmt"
     "strconv"
+	"strings"
 )
 
 type ErrorCode int
@@ -15,6 +17,7 @@ const (
     ErrorCodeBadRequest ErrorCode = iota
     ErrorCodeConditionNotMet ErrorCode = iota
     ErrorCodeInternalServerError ErrorCode = iota
+    ErrorCodeInvalidCredentials ErrorCode = iota
     ErrorCodeNotFound ErrorCode = iota
     ErrorCodeParameterNotAccepted ErrorCode = iota
     ErrorCodeRequestEntityTooLarge ErrorCode = iota
@@ -22,12 +25,14 @@ const (
     ErrorCodeUnsupported ErrorCode = iota
 )
 
+// String - return string representation for ErrorCode value
 func (v ErrorCode)String() string {
     s, ok := map[ErrorCode]string {
         ErrorCodeAccessDenied: "AccessDenied",
         ErrorCodeBadRequest: "BadRequest",
         ErrorCodeConditionNotMet: "ConditionNotMet",
         ErrorCodeInternalServerError: "InternalServerError",
+        ErrorCodeInvalidCredentials: "InvalidCredentials",
         ErrorCodeNotFound: "NotFound",
         ErrorCodeParameterNotAccepted: "ParameterNotAccepted",
         ErrorCodeRequestEntityTooLarge: "RequestEntityTooLarge",
@@ -40,25 +45,47 @@ func (v ErrorCode)String() string {
     return "ErrorCode(" + strconv.FormatInt(int64(v), 10) + ")"
 }
 
+// ErrUnknownErrorCode - will be returned wrapped when parsing string
+// containing unrecognized value.
+var ErrUnknownErrorCode = errors.New("unknown ErrorCode")
+
+var mapErrorCodeFromString = map[string]ErrorCode{
+    "accessdenied": ErrorCodeAccessDenied,
+    "badrequest": ErrorCodeBadRequest,
+    "conditionnotmet": ErrorCodeConditionNotMet,
+    "internalservererror": ErrorCodeInternalServerError,
+    "invalidcredentials": ErrorCodeInvalidCredentials,
+    "notfound": ErrorCodeNotFound,
+    "parameternotaccepted": ErrorCodeParameterNotAccepted,
+    "requestentitytoolarge": ErrorCodeRequestEntityTooLarge,
+    "toomanyrequests": ErrorCodeTooManyRequests,
+    "unsupported": ErrorCodeUnsupported,
+}
+
+// UnmarshalJSON implements the Unmarshaler interface of the json package for ErrorCode.
 func (s *ErrorCode) UnmarshalJSON(data []byte) error {
     var v string
     if err := json.Unmarshal(data, &v); err != nil {
         return err
     }
-    result, ok := map[string]ErrorCode{
-        "AccessDenied": ErrorCodeAccessDenied,
-        "BadRequest": ErrorCodeBadRequest,
-        "ConditionNotMet": ErrorCodeConditionNotMet,
-        "InternalServerError": ErrorCodeInternalServerError,
-        "NotFound": ErrorCodeNotFound,
-        "ParameterNotAccepted": ErrorCodeParameterNotAccepted,
-        "RequestEntityTooLarge": ErrorCodeRequestEntityTooLarge,
-        "TooManyRequests": ErrorCodeTooManyRequests,
-        "Unsupported": ErrorCodeUnsupported,
-    }[v]
+    result, ok := mapErrorCodeFromString[strings.ToLower(v)]
     if !ok {
-        return fmt.Errorf("%w: %s", ErrEnumUnknown, v)
+        return fmt.Errorf("%w: %s", ErrUnknownErrorCode, v)
     }
     *s = result
     return nil
+}
+
+// UnmarshalYAML implements the Unmarshaler interface of the yaml.v3 package for ErrorCode.
+func (s *ErrorCode) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var v string
+	if err := unmarshal(&v); err != nil {
+		return err
+	}
+	result, ok := mapErrorCodeFromString[strings.ToLower(v)]		
+	if !ok {
+		return fmt.Errorf("%w: %s", ErrUnknownErrorCode, v)
+	}
+	*s = result
+	return nil
 }

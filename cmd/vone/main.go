@@ -31,9 +31,10 @@ const (
 )
 
 const (
-	cmdSubmit = "submit"
-	cmdQuota  = "quota"
-	cmdPDF    = "pdf"
+	cmdSubmit          = "submit"
+	cmdQuota           = "quota"
+	cmdPDF             = "pdf"
+	cmdGetEndpointData = "endpoint"
 )
 
 const (
@@ -46,6 +47,8 @@ const (
 	flagURLsFile = "urlfile"
 	flagTimeout  = "timeout"
 	flagID       = "id"
+	flagQuery    = "query"
+	flagTop      = "top"
 )
 
 type command interface {
@@ -133,6 +136,7 @@ var commands = []command{
 	newCommandSubmit(),
 	newCommandQuota(),
 	newCommandPDF(),
+	newCommandGetEndpointData(),
 }
 
 func usage() {

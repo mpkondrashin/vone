@@ -103,18 +103,6 @@ func (f *SandboxSubmissionsFunc) Filter(s string) *SandboxSubmissionsFunc {
 	return f
 }
 
-type Top int
-
-const (
-	Top50 Top = iota
-	Top100
-	Top200
-)
-
-func (t Top) String() string {
-	return [...]string{"50", "100", "200"}[t]
-}
-
 func (f *SandboxSubmissionsFunc) Top(t Top) *SandboxSubmissionsFunc {
 	f.SetParameter("top", t.String())
 	return f

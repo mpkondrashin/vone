@@ -4,8 +4,10 @@ package vone
 
 import (
     "encoding/json"
+	"errors"
     "fmt"
     "strconv"
+	"strings"
 )
 
 type Action int
@@ -15,6 +17,7 @@ const (
     ActionAnalyzeUrl Action = iota
 )
 
+// String - return string representation for Action value
 func (v Action)String() string {
     s, ok := map[Action]string {
         ActionAnalyzeFile: "analyzeFile",
@@ -26,18 +29,39 @@ func (v Action)String() string {
     return "Action(" + strconv.FormatInt(int64(v), 10) + ")"
 }
 
+// ErrUnknownAction - will be returned wrapped when parsing string
+// containing unrecognized value.
+var ErrUnknownAction = errors.New("unknown Action")
+
+var mapActionFromString = map[string]Action{
+    "analyzefile": ActionAnalyzeFile,
+    "analyzeurl": ActionAnalyzeUrl,
+}
+
+// UnmarshalJSON implements the Unmarshaler interface of the json package for Action.
 func (s *Action) UnmarshalJSON(data []byte) error {
     var v string
     if err := json.Unmarshal(data, &v); err != nil {
         return err
     }
-    result, ok := map[string]Action{
-        "analyzeFile": ActionAnalyzeFile,
-        "analyzeUrl": ActionAnalyzeUrl,
-    }[v]
+    result, ok := mapActionFromString[strings.ToLower(v)]
     if !ok {
-        return fmt.Errorf("%w: %s", ErrEnumUnknown, v)
+        return fmt.Errorf("%w: %s", ErrUnknownAction, v)
     }
     *s = result
     return nil
+}
+
+// UnmarshalYAML implements the Unmarshaler interface of the yaml.v3 package for Action.
+func (s *Action) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var v string
+	if err := unmarshal(&v); err != nil {
+		return err
+	}
+	result, ok := mapActionFromString[strings.ToLower(v)]		
+	if !ok {
+		return fmt.Errorf("%w: %s", ErrUnknownAction, v)
+	}
+	*s = result
+	return nil
 }

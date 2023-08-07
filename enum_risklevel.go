@@ -4,8 +4,10 @@ package vone
 
 import (
     "encoding/json"
+	"errors"
     "fmt"
     "strconv"
+	"strings"
 )
 
 type RiskLevel int
@@ -17,6 +19,7 @@ const (
     RiskLevelNoRisk RiskLevel = iota
 )
 
+// String - return string representation for RiskLevel value
 func (v RiskLevel)String() string {
     s, ok := map[RiskLevel]string {
         RiskLevelHigh: "high",
@@ -30,20 +33,41 @@ func (v RiskLevel)String() string {
     return "RiskLevel(" + strconv.FormatInt(int64(v), 10) + ")"
 }
 
+// ErrUnknownRiskLevel - will be returned wrapped when parsing string
+// containing unrecognized value.
+var ErrUnknownRiskLevel = errors.New("unknown RiskLevel")
+
+var mapRiskLevelFromString = map[string]RiskLevel{
+    "high": RiskLevelHigh,
+    "medium": RiskLevelMedium,
+    "low": RiskLevelLow,
+    "norisk": RiskLevelNoRisk,
+}
+
+// UnmarshalJSON implements the Unmarshaler interface of the json package for RiskLevel.
 func (s *RiskLevel) UnmarshalJSON(data []byte) error {
     var v string
     if err := json.Unmarshal(data, &v); err != nil {
         return err
     }
-    result, ok := map[string]RiskLevel{
-        "high": RiskLevelHigh,
-        "medium": RiskLevelMedium,
-        "low": RiskLevelLow,
-        "noRisk": RiskLevelNoRisk,
-    }[v]
+    result, ok := mapRiskLevelFromString[strings.ToLower(v)]
     if !ok {
-        return fmt.Errorf("%w: %s", ErrEnumUnknown, v)
+        return fmt.Errorf("%w: %s", ErrUnknownRiskLevel, v)
     }
     *s = result
     return nil
+}
+
+// UnmarshalYAML implements the Unmarshaler interface of the yaml.v3 package for RiskLevel.
+func (s *RiskLevel) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var v string
+	if err := unmarshal(&v); err != nil {
+		return err
+	}
+	result, ok := mapRiskLevelFromString[strings.ToLower(v)]		
+	if !ok {
+		return fmt.Errorf("%w: %s", ErrUnknownRiskLevel, v)
+	}
+	*s = result
+	return nil
 }
