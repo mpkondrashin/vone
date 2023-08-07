@@ -20,6 +20,8 @@ Each parameter can be provided in three ways:
 | urlfile<br/>--urlfile<br/>VONE_URLFILE | Text file with URLs (one per line). Use "-" name to use stdin |
 | timeout<br>--timeout<br>VONE_TIMEOUT | Timeout for sample analysis |
 | log<br>--log<br>VONE_LOG | Log file path |
+| query<br>--query<br>VONE_QUERY | Query expression |
+| top<br>--top<br>VONE_TOP | Limit mount of downloaded data (50, 100, or 200) |
 
 Any combination of parameters can be used with ```vone```. For example, creating following configuration file (config.yaml):
 ```yaml
