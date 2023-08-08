@@ -15,32 +15,34 @@ import (
 	"time"
 )
 
+type SearchEndPointDataResponseItem struct {
+	AgentGUID    string `json:"agentGuid"`
+	LoginAccount struct {
+		Value           []string  `json:"value"`
+		UpdatedDateTime time.Time `json:"updatedDateTime"`
+	} `json:"loginAccount"`
+	EndpointName struct {
+		Value           string    `json:"value"`
+		UpdatedDateTime time.Time `json:"updatedDateTime"`
+	} `json:"endpointName"`
+	MacAddress struct {
+		Value           []string  `json:"value"`
+		UpdatedDateTime time.Time `json:"updatedDateTime"`
+	} `json:"macAddress"`
+	IP struct {
+		Value           []string  `json:"value"`
+		UpdatedDateTime time.Time `json:"updatedDateTime"`
+	} `json:"ip"`
+	OsName                string   `json:"osName"`
+	OsVersion             string   `json:"osVersion"`
+	OsDescription         string   `json:"osDescription"`
+	ProductCode           string   `json:"productCode"`
+	InstalledProductCodes []string `json:"installedProductCodes"`
+}
+
 type SearchEndPointDataResponse struct {
-	Items []struct {
-		AgentGUID    string `json:"agentGuid"`
-		LoginAccount struct {
-			Value           []string  `json:"value"`
-			UpdatedDateTime time.Time `json:"updatedDateTime"`
-		} `json:"loginAccount"`
-		EndpointName struct {
-			Value           string    `json:"value"`
-			UpdatedDateTime time.Time `json:"updatedDateTime"`
-		} `json:"endpointName"`
-		MacAddress struct {
-			Value           []string  `json:"value"`
-			UpdatedDateTime time.Time `json:"updatedDateTime"`
-		} `json:"macAddress"`
-		IP struct {
-			Value           []string  `json:"value"`
-			UpdatedDateTime time.Time `json:"updatedDateTime"`
-		} `json:"ip"`
-		OsName                string   `json:"osName"`
-		OsVersion             string   `json:"osVersion"`
-		OsDescription         string   `json:"osDescription"`
-		ProductCode           string   `json:"productCode"`
-		InstalledProductCodes []string `json:"installedProductCodes"`
-	} `json:"items"`
-	NextLink string `json:"nextLink"`
+	Items    []SearchEndPointDataResponseItem `json:"items"`
+	NextLink string                           `json:"nextLink"`
 }
 
 type SearchEndPointDataFunc struct {
@@ -62,6 +64,25 @@ func (f *SearchEndPointDataFunc) Next(ctx context.Context) (*SearchEndPointDataR
 		return nil, err
 	}
 	return &f.Response, nil
+}
+
+func (f *SearchEndPointDataFunc) Iterate(ctx context.Context,
+	callback func(item *SearchEndPointDataResponseItem) error) error {
+	for {
+		response, err := f.Do(ctx)
+		if err != nil {
+			return err
+		}
+		for n := range response.Items {
+			if err := callback(&response.Items[n]); err != nil {
+				return err
+			}
+		}
+		if response.NextLink == "" {
+			break
+		}
+	}
+	return nil
 }
 
 func (v *VOne) SearchEndPointData() *SearchEndPointDataFunc {

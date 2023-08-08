@@ -70,7 +70,6 @@ func (c *baseCommand) Setup(name string) {
 	c.fs.String(flagAddress, "", "Vision One entry point URL")
 	c.fs.String(flagToken, "", "Vision One API Token")
 	c.fs.String(flagLog, "", "Log file path")
-
 }
 
 func (c *baseCommand) Name() string {
