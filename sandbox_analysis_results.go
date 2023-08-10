@@ -33,32 +33,34 @@ type SandboxAnalysisResultsResponse struct {
 }
 
 type SandboxAnalysisResultsFunc struct {
-	BaseFunc
+	baseFunc
 	id       string
 	Response SandboxAnalysisResultsResponse
 }
 
+var _ vOneFunc = &SandboxAnalysisResultsFunc{}
+
 func (v *VOne) SandboxAnalysisResults(id string) *SandboxAnalysisResultsFunc {
 	f := &SandboxAnalysisResultsFunc{id: id}
-	f.BaseFunc.Init(v)
+	f.baseFunc.init(v)
 	return f
 }
 
 func (f *SandboxAnalysisResultsFunc) Do(ctx context.Context) (*SandboxAnalysisResultsResponse, error) {
-	if err := f.vone.Call(ctx, f); err != nil {
+	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
 }
 
-func (f *SandboxAnalysisResultsFunc) Method() string {
-	return GET
+func (f *SandboxAnalysisResultsFunc) method() string {
+	return methodGet
 }
 
-func (s *SandboxAnalysisResultsFunc) URL() string {
+func (s *SandboxAnalysisResultsFunc) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s", s.id)
 }
 
-func (f *SandboxAnalysisResultsFunc) ResponseStruct() any {
+func (f *SandboxAnalysisResultsFunc) responseStruct() any {
 	return &f.Response
 }

@@ -16,12 +16,14 @@ type CheckConnectionResponse struct {
 }
 
 type SanboxCheckConnectionFunc struct {
-	BaseFunc
+	baseFunc
 	Response CheckConnectionResponse
 }
 
+var _ vOneFunc = &SanboxCheckConnectionFunc{}
+
 func (f *SanboxCheckConnectionFunc) Do(ctx context.Context) (*CheckConnectionResponse, error) {
-	if err := f.vone.Call(ctx, f); err != nil {
+	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
@@ -29,14 +31,14 @@ func (f *SanboxCheckConnectionFunc) Do(ctx context.Context) (*CheckConnectionRes
 
 func (v *VOne) CheckConnection() *SanboxCheckConnectionFunc {
 	f := &SanboxCheckConnectionFunc{}
-	f.BaseFunc.Init(v)
+	f.baseFunc.init(v)
 	return f
 }
 
-func (s *SanboxCheckConnectionFunc) URL() string {
+func (s *SanboxCheckConnectionFunc) url() string {
 	return "/v3.0/healthcheck/connectivity"
 }
 
-func (f *SanboxCheckConnectionFunc) ResponseStruct() any {
+func (f *SanboxCheckConnectionFunc) responseStruct() any {
 	return &f.Response
 }

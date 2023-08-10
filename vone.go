@@ -22,10 +22,10 @@ import (
 )
 
 const (
-	GET  = "GET"
-	POST = "POST"
+	methodGet  = "GET"
+	methodPost = "POST"
 
-	application_json = "application/json"
+	applicationJSON = "application/json"
 
 	timeFormat = "2006-1-02T15:04:05Z"
 )
@@ -57,24 +57,24 @@ func NewVOne(domain string, token string) *VOne {
 	}
 }
 
-func (v *VOne) Call(ctx context.Context, f Func) error {
-	uri := f.URI()
+func (v *VOne) call(ctx context.Context, f vOneFunc) error {
+	uri := f.uri()
 	if uri == "" {
-		uri = "https://" + v.Domain + f.URL()
+		uri = "https://" + v.Domain + f.url()
 	}
-	return v.CallURL(ctx, f, uri)
+	return v.callURL(ctx, f, uri)
 }
 
-func (v *VOne) CallURL(ctx context.Context, f Func, uri string) error {
-	req, err := http.NewRequestWithContext(ctx, f.Method(), uri, f.RequestBody())
+func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
+	req, err := http.NewRequestWithContext(ctx, f.method(), uri, f.requestBody())
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
 	req.Header.Set("Authorization", "Bearer "+v.Token)
-	if f.RequestBody() != nil {
-		req.Header.Set("Content-Type", f.ContentType())
+	if f.requestBody() != nil {
+		req.Header.Set("Content-Type", f.contentType())
 	}
-	f.Populate(req)
+	f.populate(req)
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -92,21 +92,21 @@ func (v *VOne) CallURL(ctx context.Context, f Func, uri string) error {
 		return fmt.Errorf("request error: %w", vOneErr)
 	}
 
-	if err := v.PopulateResponseStruct(f.ResponseHeader(), resp.Header); err != nil {
+	if err := v.PopulateResponseStruct(f.responseHeader(), resp.Header); err != nil {
 		return err
 	}
 
-	if f.ResponseStruct() == nil {
-		f.ResponseBody(resp.Body)
+	if f.responseStruct() == nil {
+		f.responseBody(resp.Body)
 		return nil
 	}
 
 	return v.DecodeBody(f, resp.Body)
 }
 
-func (v *VOne) DecodeBody(f Func, body io.ReadCloser) error {
+func (v *VOne) DecodeBody(f vOneFunc, body io.ReadCloser) error {
 	defer body.Close()
-	err := json.NewDecoder(body).Decode(f.ResponseStruct())
+	err := json.NewDecoder(body).Decode(f.responseStruct())
 	if err != nil && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("response parse error: %w", err)
 	}

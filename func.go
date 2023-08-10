@@ -14,68 +14,68 @@ import (
 	"net/http"
 )
 
-type Func interface {
-	Method() string             // GET, POST, ...
-	URL() string                // last part of URI
-	URI() string                // full URI (with https://xdr...)
-	RequestBody() io.Reader     // Body
-	Populate(*http.Request)     // Pupulate request path and headers
-	ContentType() string        // application/json by default
-	ResponseStruct() any        // Pointer to struct/slice to parse JSON
-	ResponseHeader() any        // Return struct to populate with response headers
-	ResponseBody(io.ReadCloser) // process body - is called only if ResponseStruct returns any
+type vOneFunc interface {
+	method() string             // GET, POST, ...
+	url() string                // last part of URI
+	uri() string                // full URI (with https://xdr...)
+	requestBody() io.Reader     // Body
+	populate(*http.Request)     // Pupulate request path and headers
+	contentType() string        // application/json by default
+	responseStruct() any        // Pointer to struct/slice to parse JSON
+	responseHeader() any        // Return struct to populate with response headers
+	responseBody(io.ReadCloser) // process body - is called only if ResponseStruct returns any
 }
 
-var _ Func = &BaseFunc{}
+var _ vOneFunc = &baseFunc{}
 
-type BaseFunc struct {
+type baseFunc struct {
 	vone       *VOne
 	parameters map[string]string
 	headers    map[string]string
 }
 
-func (f *BaseFunc) Method() string {
-	return "GET"
+func (f *baseFunc) method() string {
+	return methodGet
 }
 
-func (f *BaseFunc) URL() string {
+func (f *baseFunc) url() string {
 	return ""
 }
 
-func (f *BaseFunc) URI() string {
+func (f *baseFunc) uri() string {
 	return ""
 }
 
-func (f *BaseFunc) RequestBody() io.Reader {
+func (f *baseFunc) requestBody() io.Reader {
 	return nil
 }
 
-func (f *BaseFunc) ContentType() string {
-	return "application/json"
+func (f *baseFunc) contentType() string {
+	return applicationJSON
 }
 
-func (f *BaseFunc) ResponseStruct() any {
+func (f *baseFunc) responseStruct() any {
 	return &Error{}
 }
 
-func (f *BaseFunc) ResponseBody(io.ReadCloser) {
+func (f *baseFunc) responseBody(io.ReadCloser) {
 }
 
-func (f *BaseFunc) Init(vone *VOne) {
+func (f *baseFunc) init(vone *VOne) {
 	f.vone = vone
 	f.parameters = make(map[string]string)
 	f.headers = make(map[string]string)
 }
 
-func (f *BaseFunc) SetHeader(name, value string) {
+func (f *baseFunc) setHeader(name, value string) {
 	f.headers[name] = value
 }
 
-func (f *BaseFunc) SetParameter(name, value string) {
+func (f *baseFunc) setParameter(name, value string) {
 	f.parameters[name] = value
 }
 
-func (f *BaseFunc) Populate(req *http.Request) {
+func (f *baseFunc) populate(req *http.Request) {
 	q := req.URL.Query()
 	for key, value := range f.parameters {
 		q.Add(key, value)
@@ -86,6 +86,6 @@ func (f *BaseFunc) Populate(req *http.Request) {
 	}
 }
 
-func (f *BaseFunc) ResponseHeader() any {
+func (f *baseFunc) responseHeader() any {
 	return nil
 }

@@ -25,12 +25,14 @@ type SandboxDailyReserveResponse struct {
 }
 
 type SanboxDailyReserveFunc struct {
-	BaseFunc
+	baseFunc
 	Response SandboxDailyReserveResponse
 }
 
+var _ vOneFunc = &SanboxDailyReserveFunc{}
+
 func (f *SanboxDailyReserveFunc) Do(ctx context.Context) (*SandboxDailyReserveResponse, error) {
-	if err := f.vone.Call(ctx, f); err != nil {
+	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
@@ -38,14 +40,14 @@ func (f *SanboxDailyReserveFunc) Do(ctx context.Context) (*SandboxDailyReserveRe
 
 func (v *VOne) SandboxDailyReserve() *SanboxDailyReserveFunc {
 	f := &SanboxDailyReserveFunc{}
-	f.BaseFunc.Init(v)
+	f.baseFunc.init(v)
 	return f
 }
 
-func (s *SanboxDailyReserveFunc) URL() string {
+func (s *SanboxDailyReserveFunc) url() string {
 	return "/v3.0/sandbox/submissionUsage"
 }
 
-func (f *SanboxDailyReserveFunc) ResponseStruct() any {
+func (f *SanboxDailyReserveFunc) responseStruct() any {
 	return &f.Response
 }

@@ -31,6 +31,7 @@ const (
 )
 
 const (
+	cmdCheck           = "check"
 	cmdSubmit          = "submit"
 	cmdQuota           = "quota"
 	cmdPDF             = "pdf"
@@ -132,6 +133,7 @@ func (c *baseCommand) Init(args []string) error {
 }
 
 var commands = []command{
+	newCommandCheck(),
 	newCommandSubmit(),
 	newCommandQuota(),
 	newCommandPDF(),
@@ -143,7 +145,8 @@ func usage() {
 	for _, c := range commands {
 		commandNames = append(commandNames, c.Name())
 	}
-	fmt.Printf("VOne\nUsage: %s%s {%s} [options]\n",
+	fmt.Printf("VOne — various Trend Micro Vision One API functions demo\nUsage: %s%s {%s} [options]\n"+
+		"For more details, run vone <command> --help\n",
 		name(), exe(), strings.Join(commandNames, "|"))
 	os.Exit(2)
 }

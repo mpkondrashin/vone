@@ -26,32 +26,32 @@ type SandboxSuspiciousObjectsResponse struct {
 }
 
 type SandboxSuspiciousObjectsFunc struct {
-	BaseFunc
+	baseFunc
 	id       string
 	Response SandboxSuspiciousObjectsResponse
 }
 
 func (v *VOne) SandboxSuspiciousObjects(id string) *SandboxSuspiciousObjectsFunc {
 	f := &SandboxSuspiciousObjectsFunc{id: id}
-	f.BaseFunc.Init(v)
+	f.baseFunc.init(v)
 	return f
 }
 
 func (f *SandboxSuspiciousObjectsFunc) Do(ctx context.Context) (*SandboxSuspiciousObjectsResponse, error) {
-	if err := f.vone.Call(ctx, f); err != nil {
+	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
 }
 
-func (f *SandboxSuspiciousObjectsFunc) Method() string {
-	return GET
+func (f *SandboxSuspiciousObjectsFunc) method() string {
+	return methodGet
 }
 
-func (f *SandboxSuspiciousObjectsFunc) URL() string {
+func (f *SandboxSuspiciousObjectsFunc) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s/suspiciousObjects", f.id)
 }
 
-func (f *SandboxSuspiciousObjectsFunc) ResponseStruct() any {
+func (f *SandboxSuspiciousObjectsFunc) responseStruct() any {
 	return &f.Response
 }

@@ -44,24 +44,24 @@ type (
 )
 
 type SandboxSubmissionsFunc struct {
-	BaseFunc
+	baseFunc
 	Response SandboxSubmissionsResponse
 }
 
 func (v *VOne) SandboxListSubmissions() *SandboxSubmissionsFunc {
 	f := &SandboxSubmissionsFunc{}
-	f.BaseFunc.Init(v)
+	f.baseFunc.init(v)
 	//log.Println("AAA", f)
 	return f
 }
 
 func (f *SandboxSubmissionsFunc) StartDateTime(t time.Time) *SandboxSubmissionsFunc {
-	f.SetParameter("startDateTime", t.Format(timeFormat))
+	f.setParameter("startDateTime", t.Format(timeFormat))
 	return f
 }
 
 func (f *SandboxSubmissionsFunc) EndDateTime(t time.Time) *SandboxSubmissionsFunc {
-	f.SetParameter("endDateTime", t.Format(timeFormat))
+	f.setParameter("endDateTime", t.Format(timeFormat))
 	return f
 }
 
@@ -77,7 +77,7 @@ func (t DateTimeTarget) String() string {
 }
 
 func (f *SandboxSubmissionsFunc) DateTimeTarget(t DateTimeTarget) *SandboxSubmissionsFunc {
-	f.SetParameter("sateTimeTarget", t.String())
+	f.setParameter("sateTimeTarget", t.String())
 	return f
 }
 
@@ -93,30 +93,29 @@ func (o Order) String() string {
 }
 
 func (f *SandboxSubmissionsFunc) OrderBy(t DateTimeTarget, o Order) *SandboxSubmissionsFunc {
-	f.SetParameter("orderBy", strings.Join([]string{t.String(), o.String()}, " "))
-	//log.Println("BBB", f)
+	f.setParameter("orderBy", strings.Join([]string{t.String(), o.String()}, " "))
 	return f
 }
 
 func (f *SandboxSubmissionsFunc) Filter(s string) *SandboxSubmissionsFunc {
-	f.SetParameter("filter", s)
+	f.setParameter("filter", s)
 	return f
 }
 
 func (f *SandboxSubmissionsFunc) Top(t Top) *SandboxSubmissionsFunc {
-	f.SetParameter("top", t.String())
+	f.setParameter("top", t.String())
 	return f
 }
 
 func (f *SandboxSubmissionsFunc) Do(ctx context.Context) (*SandboxSubmissionsResponse, error) {
-	if err := f.vone.Call(ctx, f); err != nil {
+	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
 }
 
 func (f *SandboxSubmissionsFunc) Method() string {
-	return GET
+	return methodGet
 }
 
 func (*SandboxSubmissionsFunc) URL() string {
@@ -140,7 +139,7 @@ func (f *SandboxSubmissionsFunc) Next(ctx context.Context) (*SandboxSubmissionsR
 
 func (f *SandboxSubmissionsFunc) IterateListSubmissions(ctx context.Context, callback func(*ListSubmissionsItem) error) error {
 	for {
-		if err := f.vone.Call(ctx, f); err != nil {
+		if err := f.vone.call(ctx, f); err != nil {
 			return err
 		}
 		for i := range f.Response.Items {

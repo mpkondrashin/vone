@@ -17,19 +17,21 @@ import (
 )
 
 type SandboxDownloadResultsFunc struct {
-	BaseFunc
+	baseFunc
 	id       string
 	Response io.ReadCloser
 }
 
+var _ vOneFunc = &SandboxDownloadResultsFunc{}
+
 func (v *VOne) SandboxDownloadResults(id string) *SandboxDownloadResultsFunc {
 	f := &SandboxDownloadResultsFunc{id: id}
-	f.BaseFunc.Init(v)
+	f.baseFunc.init(v)
 	return f
 }
 
 func (f *SandboxDownloadResultsFunc) Do(ctx context.Context) (io.ReadCloser, error) {
-	if err := f.vone.Call(ctx, f); err != nil {
+	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return f.Response, nil
@@ -49,14 +51,14 @@ func (f *SandboxDownloadResultsFunc) Store(ctx context.Context, filePath string)
 	return err
 }
 
-func (s *SandboxDownloadResultsFunc) URL() string {
+func (s *SandboxDownloadResultsFunc) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s/report", s.id)
 }
 
-func (f *SandboxDownloadResultsFunc) ResponseStruct() any {
+func (f *SandboxDownloadResultsFunc) responseStruct() any {
 	return nil
 }
 
-func (s *SandboxDownloadResultsFunc) ResponseBody(body io.ReadCloser) {
+func (s *SandboxDownloadResultsFunc) responseBody(body io.ReadCloser) {
 	s.Response = body
 }

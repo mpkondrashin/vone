@@ -40,7 +40,7 @@ type SandboxSubmitFileResponseHeaders struct {
 
 // SandboxSubmitFileToSandboxFunc - function to submit file to sandbox
 type SandboxSubmitFileToSandboxFunc struct {
-	BaseFunc
+	baseFunc
 	//filePath            string
 	Request             io.Reader
 	formDataContentType string
@@ -48,12 +48,12 @@ type SandboxSubmitFileToSandboxFunc struct {
 	ResponseHeaders     SandboxSubmitFileResponseHeaders
 }
 
-var _ Func = &SandboxSubmitFileToSandboxFunc{}
+var _ vOneFunc = &SandboxSubmitFileToSandboxFunc{}
 
 // SandboxSubmitFile - return new submit to sandbox file
 func (v *VOne) SandboxSubmitFile() *SandboxSubmitFileToSandboxFunc {
 	f := &SandboxSubmitFileToSandboxFunc{}
-	f.BaseFunc.Init(v)
+	f.baseFunc.init(v)
 	return f
 }
 
@@ -89,47 +89,47 @@ func (f *SandboxSubmitFileToSandboxFunc) SetReader(reader io.Reader, fileName st
 }
 
 func (s *SandboxSubmitFileToSandboxFunc) SetDocumentPassword(documentPassword string) *SandboxSubmitFileToSandboxFunc {
-	s.SetParameter("documentPassword", documentPassword)
+	s.setParameter("documentPassword", documentPassword)
 	return s
 }
 
 func (s *SandboxSubmitFileToSandboxFunc) SetArchivePassword(archivePassword string) *SandboxSubmitFileToSandboxFunc {
-	s.SetParameter("archivePassword", archivePassword)
+	s.setParameter("archivePassword", archivePassword)
 	return s
 }
 
 func (s *SandboxSubmitFileToSandboxFunc) SetArguments(arguments string) *SandboxSubmitFileToSandboxFunc {
-	s.SetParameter("arguments", arguments)
+	s.setParameter("arguments", arguments)
 	return s
 }
 
 func (f *SandboxSubmitFileToSandboxFunc) Do(ctx context.Context) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
-	if err := f.vone.Call(ctx, f); err != nil {
+	if err := f.vone.call(ctx, f); err != nil {
 		return nil, nil, err
 	}
 	return &f.Response, &f.ResponseHeaders, nil
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) Method() string {
-	return POST
+func (f *SandboxSubmitFileToSandboxFunc) method() string {
+	return methodPost
 }
 
-func (s *SandboxSubmitFileToSandboxFunc) URL() string {
+func (s *SandboxSubmitFileToSandboxFunc) url() string {
 	return "/v3.0/sandbox/files/analyze"
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) RequestBody() io.Reader {
+func (f *SandboxSubmitFileToSandboxFunc) requestBody() io.Reader {
 	return f.Request
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) ContentType() string {
+func (f *SandboxSubmitFileToSandboxFunc) contentType() string {
 	return f.formDataContentType
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) ResponseStruct() any {
+func (f *SandboxSubmitFileToSandboxFunc) responseStruct() any {
 	return &f.Response
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) ResponseHeader() any {
+func (f *SandboxSubmitFileToSandboxFunc) responseHeader() any {
 	return &f.ResponseHeaders
 }

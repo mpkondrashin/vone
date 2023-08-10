@@ -25,7 +25,7 @@ func (v *VOne) SandboxInvestigationPackage(id string) *SandboxInvestigationPacka
 }
 
 func (f *SandboxInvestigationPackageFunc) Do(ctx context.Context) (io.ReadCloser, error) {
-	if err := f.vone.Call(ctx, f); err != nil {
+	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return f.Response, nil

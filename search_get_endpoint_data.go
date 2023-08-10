@@ -49,22 +49,14 @@ type SearchEndPointDataResponse struct {
 
 // SearchEndPointDataFunc - search for endpoints
 type SearchEndPointDataFunc struct {
-	BaseFunc
+	baseFunc
 	Response SearchEndPointDataResponse
 	query    string
 }
 
 // Do - run request
 func (f *SearchEndPointDataFunc) Do(ctx context.Context) (*SearchEndPointDataResponse, error) {
-	if err := f.vone.Call(ctx, f); err != nil {
-		return nil, err
-	}
-	return &f.Response, nil
-}
-
-// Next - get next portion of the endpoints list
-func (f *SearchEndPointDataFunc) Next(ctx context.Context) (*SearchEndPointDataResponse, error) {
-	if err := f.vone.Call(ctx, f); err != nil {
+	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
@@ -94,7 +86,7 @@ func (f *SearchEndPointDataFunc) Iterate(ctx context.Context,
 // SearchEndPointData - get new search for endpoint data function
 func (v *VOne) SearchEndPointData() *SearchEndPointDataFunc {
 	f := &SearchEndPointDataFunc{}
-	f.BaseFunc.Init(v)
+	f.baseFunc.init(v)
 	return f
 
 }
@@ -110,22 +102,22 @@ func (f *SearchEndPointDataFunc) Query(query string) *SearchEndPointDataFunc {
 
 // top - set limit for returned amount of items
 func (f *SearchEndPointDataFunc) Top(t Top) *SearchEndPointDataFunc {
-	f.SetParameter("top", t.String())
+	f.setParameter("top", t.String())
 	return f
 }
 
-func (s *SearchEndPointDataFunc) URL() string {
+func (s *SearchEndPointDataFunc) url() string {
 	if s.Response.NextLink != "" {
 		return s.Response.NextLink
 	}
 	return "/v3.0/eiqs/endpoints"
 }
 
-func (s *SearchEndPointDataFunc) Populate(req *http.Request) {
-	s.BaseFunc.Populate(req)
+func (s *SearchEndPointDataFunc) populate(req *http.Request) {
+	s.baseFunc.populate(req)
 	req.Header.Set("TMV1-Query", s.query)
 }
 
-func (f *SearchEndPointDataFunc) ResponseStruct() any {
+func (f *SearchEndPointDataFunc) responseStruct() any {
 	return &f.Response
 }

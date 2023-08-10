@@ -48,7 +48,7 @@ func (s *SandboxSubmissionStatusResponse) GetError() error {
 }
 
 type SandboxSubmissionStatusFunc struct {
-	BaseFunc
+	baseFunc
 	id       string
 	Response SandboxSubmissionStatusResponse
 }
@@ -57,12 +57,12 @@ func (v *VOne) SandboxSubmissionStatus(id string) *SandboxSubmissionStatusFunc {
 	f := &SandboxSubmissionStatusFunc{
 		id: id,
 	}
-	f.BaseFunc.Init(v)
+	f.baseFunc.init(v)
 	return f
 }
 
 func (f *SandboxSubmissionStatusFunc) Do(ctx context.Context) (*SandboxSubmissionStatusResponse, error) {
-	if err := f.vone.Call(ctx, f); err != nil {
+	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.Response, nil
