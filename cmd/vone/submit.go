@@ -317,7 +317,7 @@ func (c *commandSubmit) InvestigationPackage(id string) error {
 }
 
 func (c *commandSubmit) Setup(name string) {
-	c.baseCommand.Setup(name)
+	c.baseCommand.Setup(name, "Upload file/URL to sandbox and download analysis result")
 	c.fs.String(flagFileName, "", "Sample file path")
 	c.fs.String(flagMask, "", "Sample files mask")
 	c.fs.String(flagURL, "", "Sample URL")

@@ -54,27 +54,39 @@ const (
 
 type command interface {
 	Name() string
+	Description() string
 	Init(args []string) error
 	Execute() error
 }
 
 type baseCommand struct {
-	name      string
-	visionOne *vone.VOne
-	ctx       context.Context
-	fs        *pflag.FlagSet
+	name        string
+	description string
+	visionOne   *vone.VOne
+	ctx         context.Context
+	fs          *pflag.FlagSet
 }
 
-func (c *baseCommand) Setup(name string) {
+func (c *baseCommand) Setup(name, description string) {
 	c.name = name
+	c.description = description
 	c.fs = pflag.NewFlagSet(name, pflag.ExitOnError)
 	c.fs.String(flagAddress, "", "Vision One entry point URL")
 	c.fs.String(flagToken, "", "Vision One API Token")
 	c.fs.String(flagLog, "", "Log file path")
+	c.fs.Usage = func() {
+		fmt.Fprintf(os.Stderr, "%s\nAvailable options:\n", c.description)
+		c.fs.PrintDefaults()
+	}
+
 }
 
 func (c *baseCommand) Name() string {
 	return c.name
+}
+
+func (c *baseCommand) Description() string {
+	return c.description
 }
 
 func (c *baseCommand) String() string {
@@ -145,9 +157,13 @@ func usage() {
 	for _, c := range commands {
 		commandNames = append(commandNames, c.Name())
 	}
-	fmt.Printf("VOne — various Trend Micro Vision One API functions demo\nUsage: %s%s {%s} [options]\n"+
-		"For more details, run vone <command> --help\n",
+	fmt.Fprintf(os.Stderr, "VOne — various Trend Micro Vision One API functions demo\nUsage: %s%s {%s} [options]\n",
 		name(), exe(), strings.Join(commandNames, "|"))
+	fmt.Fprintf(os.Stderr, "Commands available:\n")
+	for _, c := range commands {
+		fmt.Fprintf(os.Stderr, "\t%s - %s\n", c.Name(), c.Description())
+	}
+	fmt.Fprintf(os.Stderr, "For more details, run vone <command> --help\n")
 	os.Exit(2)
 }
 

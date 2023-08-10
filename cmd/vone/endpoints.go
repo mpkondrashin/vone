@@ -16,7 +16,7 @@ type commandGetEndpointData struct {
 
 func newCommandGetEndpointData() *commandGetEndpointData {
 	c := &commandGetEndpointData{}
-	c.Setup(cmdGetEndpointData)
+	c.Setup(cmdGetEndpointData, "List endpoints")
 	c.fs.String(flagQuery, "", "Endpoints filter. Parameters:"+
 		" agentGuid, loginAccount, endpointName, macAddress, ip,"+
 		" osName (Linux, Windows, macOS, macOSX), osVersion,"+

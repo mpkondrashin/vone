@@ -11,7 +11,7 @@ type commandQuota struct {
 
 func newCommandQuota() *commandQuota {
 	c := &commandQuota{}
-	c.Setup(cmdQuota)
+	c.Setup(cmdQuota, "Get allocated daily files/URLs submission limit")
 	return c
 }
 
