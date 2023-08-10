@@ -15,6 +15,7 @@ import (
 	"time"
 )
 
+// SandboxAnalysisResultsResponse - structure of VisionOne sandbox analysis results JSON
 type SandboxAnalysisResultsResponse struct {
 	ID     string `json:"id"`
 	Type   string `json:"type"`
@@ -40,12 +41,14 @@ type SandboxAnalysisResultsFunc struct {
 
 var _ vOneFunc = &SandboxAnalysisResultsFunc{}
 
+// SandboxAnalysisResults - get function that downloads sanbox analysis results
 func (v *VOne) SandboxAnalysisResults(id string) *SandboxAnalysisResultsFunc {
 	f := &SandboxAnalysisResultsFunc{id: id}
 	f.baseFunc.init(v)
 	return f
 }
 
+// Do - get sanbox analysis results
 func (f *SandboxAnalysisResultsFunc) Do(ctx context.Context) (*SandboxAnalysisResultsResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err

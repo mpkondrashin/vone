@@ -1,3 +1,12 @@
+/*
+	Trend Micro Vision One API SDK
+	(c) 2023 by Mikhail Kondrashin (mkondrashin@gmail.com)
+
+	Sandbox API capabilities
+
+	top.go - limit of API calls response type
+*/
+
 package vone
 
 import "fmt"
@@ -8,6 +17,7 @@ const (
 	Top50 Top = iota
 	Top100
 	Top200
+
 	TopDefault = Top50
 )
 
