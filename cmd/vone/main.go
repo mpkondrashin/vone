@@ -10,7 +10,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"log"
@@ -36,6 +35,7 @@ const (
 	cmdQuota           = "quota"
 	cmdPDF             = "pdf"
 	cmdGetEndpointData = "endpoint"
+	cmdPing            = "ping"
 )
 
 const (
@@ -63,8 +63,8 @@ type baseCommand struct {
 	name        string
 	description string
 	visionOne   *vone.VOne
-	ctx         context.Context
-	fs          *pflag.FlagSet
+	//ctx         context.Context
+	fs *pflag.FlagSet
 }
 
 func (c *baseCommand) Setup(name, description string) {

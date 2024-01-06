@@ -15,7 +15,7 @@ var RegionalDomains = []RegionalDomain{
 	{"India", "api.in.xdr.trendmicro.com"},
 	{"Japan", "api.xdr.trendmicro.co.jp"},
 	{"Singapore", "api.sg.xdr.trendmicro.com"},
-	{"Unated States", "api.xdr.trendmicro.com"},
+	{"United States", "api.xdr.trendmicro.com"},
 	{"Europe", "api.eu.xdr.trendmicro.com"},
 }
 

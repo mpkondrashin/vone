@@ -80,6 +80,24 @@ Required parameters: address, token
 ./vone quota <options>
 ```
 
+
+### Get List of the Endpoints
+Get endpoints registered in Vision One
+
+Required parameters: address, token, query
+Optional parameter: top
+```commandline
+./vone endpoint <options>
+```
+
+#### Query Syntax
+- Parameters available: agentGuid, loginAccount, endpointName, macAddress, ip, osName , productCode, installedProductCodes, osVersion. 
+- osName values available:Linux, Windows, macOS, macOSX
+- productCode values available: sao, sds, xes,
+- Logical operators available: eq, and, or, not
+
+**Example:** ./vone endpoint ---query "not (osName eq 'macOS')"
+
 # Go Library
 
 If this repo is treated as go package to use Vision One Web API (github.com/mpkondrashin/vone), followig functions are supported:
@@ -94,4 +112,4 @@ If this repo is treated as go package to use Vision One Web API (github.com/mpko
 - Download Investigation Package
 - Download suspicious object list
 
-For package usage examples, please check cmd/vone folder and cmd/sandbox/main.go file.
+For package usage examples, please check cmd/vone folder of this repo.
