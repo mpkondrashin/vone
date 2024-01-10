@@ -63,8 +63,7 @@ type baseCommand struct {
 	name        string
 	description string
 	visionOne   *vone.VOne
-	//ctx         context.Context
-	fs *pflag.FlagSet
+	fs          *pflag.FlagSet
 }
 
 func (c *baseCommand) Setup(name, description string) {
