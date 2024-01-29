@@ -106,9 +106,14 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 
 func (v *VOne) DecodeBody(f vOneFunc, body io.ReadCloser) error {
 	defer body.Close()
-	err := json.NewDecoder(body).Decode(f.responseStruct())
+	bodyBytes, err := io.ReadAll(body)
+	if err != nil {
+		return fmt.Errorf("read body : %w", err)
+	}
+	err = json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(f.responseStruct())
+	//err := json.NewDecoder(body).Decode(f.responseStruct())
 	if err != nil && !errors.Is(err, io.EOF) {
-		return fmt.Errorf("response parse error: %w", err)
+		return fmt.Errorf("response parse error: %w [%s]", err, string(bodyBytes))
 	}
 	return nil
 }
