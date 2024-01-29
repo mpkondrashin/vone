@@ -45,6 +45,6 @@ func (f *SandboxInvestigationPackageFunc) Store(ctx context.Context, filePath st
 	return err
 }
 
-func (s *SandboxInvestigationPackageFunc) URL() string {
+func (s *SandboxInvestigationPackageFunc) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s/investigationPackage", s.id)
 }

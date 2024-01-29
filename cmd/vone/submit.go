@@ -207,7 +207,10 @@ func (c *commandSubmit) ProcessObject(id string) error {
 	return nil
 }
 
-var ErrTimeout = errors.New("Timeout")
+var (
+	ErrTimeout             = errors.New("timeout")
+	ErrUnsupportedFileType = errors.New("unsupported file type")
+)
 
 func (c *commandSubmit) WaitForResult(id string) error {
 	timeout := viper.GetDuration(flagTimeout)
@@ -216,6 +219,9 @@ func (c *commandSubmit) WaitForResult(id string) error {
 		status, err := c.visionOne.SandboxSubmissionStatus(id).Do(context.TODO())
 		if err != nil {
 			return fmt.Errorf("WaitForResult(%s): %w", id, err)
+		}
+		if status.ResourceLocation == "" {
+			return fmt.Errorf("%s: %w", id, ErrUnsupportedFileType)
 		}
 		log.Printf("%s Status: %v", id, status.Status)
 		switch status.Status {

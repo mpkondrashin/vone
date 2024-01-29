@@ -118,11 +118,11 @@ func (f *SandboxSubmissionsFunc) Method() string {
 	return methodGet
 }
 
-func (*SandboxSubmissionsFunc) URL() string {
+func (*SandboxSubmissionsFunc) url() string {
 	return "/v3.0/sandbox/tasks"
 }
 
-func (f *SandboxSubmissionsFunc) URI() string {
+func (f *SandboxSubmissionsFunc) uri() string {
 	return f.Response.NextLink
 }
 

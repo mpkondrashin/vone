@@ -68,7 +68,7 @@ func (f *SandboxSubmissionStatusFunc) Do(ctx context.Context) (*SandboxSubmissio
 	return &f.Response, nil
 }
 
-func (f *SandboxSubmissionStatusFunc) URL() string {
+func (f *SandboxSubmissionStatusFunc) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/tasks/%s", f.id)
 }
 
