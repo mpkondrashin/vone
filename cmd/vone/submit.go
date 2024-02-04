@@ -131,16 +131,19 @@ func (c *commandSubmit) SubmitFile(filePath string) error {
 		return err
 	}
 	*/
+
 	f, err := c.visionOne.SandboxSubmitFile().SetFilePath(filePath)
 	if err != nil {
 		return err
 	}
+
+	//log.Printf("SandboxSubmitFile %s", filePath)
 	response, headers, err := f.Do(context.TODO())
 	if err != nil {
 		return err
 	}
 	id := response.ID
-	log.Printf("%s accepted. ID = %s", filePath, id)
+	log.Printf("%s: Accepted %s accepted", id, filePath)
 	c.LogQuota(id, headers)
 	return c.ProcessObject(id)
 }
@@ -216,13 +219,22 @@ func (c *commandSubmit) WaitForResult(id string) error {
 	timeout := viper.GetDuration(flagTimeout)
 	endTime := time.Now().Add(timeout)
 	for {
+		//log.Printf("SandboxSubmissionStatus(%s)", id)
 		status, err := c.visionOne.SandboxSubmissionStatus(id).Do(context.TODO())
 		if err != nil {
 			return fmt.Errorf("WaitForResult(%s): %w", id, err)
 		}
-		if status.ResourceLocation == "" {
-			return fmt.Errorf("%s: %w", id, ErrUnsupportedFileType)
-		}
+		//if status.ResourceLocation == "" {
+		//	return fmt.Errorf("%s: %w", id, ErrUnsupportedFileType)
+		//}
+		//		log.Printf("XXX %s status struct: %v", id, status)
+		//		log.Printf("XXX %s Action: %v", id, status.Action)
+		//		log.Printf("XXX %s ResourceLocation: %v", id, status.ResourceLocation)
+		//		log.Printf("XXX %s Error: %v", id, status.Error)
+		//		log.Printf("XXX %s IsCached: %v", id, status.IsCached)
+		//		log.Printf("XXX %s Digest: %v", id, status.Digest)
+		//		log.Printf("XXX %s Arguments: %v", id, status.Arguments)
+		//		log.Printf("XXX %s lastActionDateTime: %v", id, status.LastActionDateTime)
 		log.Printf("%s Status: %v", id, status.Status)
 		switch status.Status {
 		case vone.StatusSucceeded:
@@ -241,6 +253,7 @@ func (c *commandSubmit) WaitForResult(id string) error {
 }
 
 func (c *commandSubmit) AnalysisResult(id string) (bool, error) {
+	log.Printf("SandboxAnalysisResults(%s)", id)
 	results, err := c.visionOne.SandboxAnalysisResults(id).Do(context.TODO())
 	if err != nil {
 		return false, err
@@ -305,8 +318,20 @@ func (c *commandSubmit) SuspiciousObjects(id string) error {
 func (c *commandSubmit) PDFReport(id string) error {
 	log.Printf("%s Download report PDF", id)
 	pdfFileName := id + ".pdf"
-	if err := c.visionOne.SandboxDownloadResults(id).Store(context.TODO(), pdfFileName); err != nil {
-		return err
+	for {
+		log.Println("Download PDF")
+		err := c.visionOne.SandboxDownloadResults(id).Store(context.TODO(), pdfFileName)
+		if err != nil {
+			var vOneErr *vone.Error
+			if !errors.As(err, &vOneErr) {
+				return err
+			}
+			if vOneErr.ErrorData.Code == vone.ErrorCodeNotFound {
+				continue
+			}
+			return err
+		}
+		break
 	}
 	log.Printf("%s PDF report saved: %s", id, pdfFileName)
 	return nil

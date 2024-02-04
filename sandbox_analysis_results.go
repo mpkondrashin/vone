@@ -12,7 +12,6 @@ package vone
 import (
 	"context"
 	"fmt"
-	"time"
 )
 
 // SandboxAnalysisResultsResponse - structure of VisionOne sandbox analysis results JSON
@@ -24,13 +23,12 @@ type SandboxAnalysisResultsResponse struct {
 		SHA1   string `json:"sha1"`
 		SHA256 string `json:"sha256"`
 	} `json:"digest"`
-	Arguments                  string    `json:"arguments"`
-	AnalysisCompletionDateTime time.Time `json:"analysisCompletionDateTime"`
-	RiskLevel                  RiskLevel `json:"riskLevel"`
-	//RiskLevel                  string    `json:"riskLevel"`
-	DetectionNames []string `json:"detectionNames"`
-	ThreatTypes    []string `json:"threatTypes"`
-	TrueFileType   string   `json:"trueFileType"`
+	Arguments                  string        `json:"arguments"`
+	AnalysisCompletionDateTime VisionOneTime `json:"analysisCompletionDateTime"`
+	RiskLevel                  RiskLevel     `json:"riskLevel"`
+	DetectionNames             []string      `json:"detectionNames"`
+	ThreatTypes                []string      `json:"threatTypes"`
+	TrueFileType               string        `json:"trueFileType"`
 }
 
 type SandboxAnalysisResultsFunc struct {

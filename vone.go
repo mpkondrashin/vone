@@ -19,6 +19,8 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"strings"
+	"time"
 )
 
 const (
@@ -27,7 +29,7 @@ const (
 
 	applicationJSON = "application/json"
 
-	timeFormat = "2006-1-02T15:04:05Z"
+	timeFormat = "2006-01-02T15:04:05Z"
 )
 
 type Error struct {
@@ -42,12 +44,50 @@ type Error struct {
 }
 
 func (e *Error) Error() string {
-	return fmt.Sprintf("%v: %s", e.ErrorData.Code, e.ErrorData.Message)
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "%d (%v): %s",
+		e.ErrorData.Code,
+		e.ErrorData.Code,
+		e.ErrorData.Message)
+	if e.ErrorData.Innererror.Code != "" {
+		fmt.Fprintf(&sb, " (%s: %s)",
+			e.ErrorData.Innererror.Service,
+			e.ErrorData.Innererror.Code,
+		)
+	}
+	return sb.String()
+}
+
+type VisionOneTime time.Time
+
+var _ json.Unmarshaler = (*VisionOneTime)(nil)
+
+// Implement Marshaler interface
+func (vot *VisionOneTime) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), "\"")
+	//log.Println("UnmarshalJSON s ", s)
+	t, err := time.Parse(timeFormat, s)
+	if err != nil {
+		return err
+	}
+	//log.Println("UnmarshalJSON  t ", t)
+	*vot = VisionOneTime(t)
+	return nil
+}
+
+// Implement Unmarshaler interface
+func (vot VisionOneTime) MarshalJSON() ([]byte, error) {
+	return []byte(vot.String()), nil
+}
+
+func (vot VisionOneTime) String() string {
+	return time.Time(vot).Format(timeFormat)
 }
 
 type VOne struct {
-	Domain string
-	Token  string
+	Domain      string
+	Token       string
+	rateLimiter RateLimiter
 }
 
 func NewVOne(domain string, token string) *VOne {
@@ -57,7 +97,24 @@ func NewVOne(domain string, token string) *VOne {
 	}
 }
 
-func (v *VOne) call(ctx context.Context, f vOneFunc) error {
+func (v *VOne) SetRateLimiter(rateLimiter RateLimiter) *VOne {
+	v.rateLimiter = rateLimiter
+	return v
+}
+
+const HTTPResponseTooManyRequests = 429
+
+var VOneRateLimitSurpassedError RateLimitSurpassed = func(err error) bool {
+	//log.Printf("RateLimitSurpassed(%v)", err)
+	var vOneErr *Error
+	if !errors.As(err, &vOneErr) {
+		return false
+	}
+	//log.Printf("RateLimitSurpassed(%v): vOneErr.ErrorData.Code = %d ", err, vOneErr.ErrorData.Code)
+	return vOneErr.ErrorData.Code == HTTPResponseTooManyRequests
+}
+
+func (v *VOne) callWithoutLimiter(ctx context.Context, f vOneFunc) error {
 	uri := f.uri()
 	if uri == "" {
 		uri = "https://" + v.Domain + f.url()
@@ -65,7 +122,50 @@ func (v *VOne) call(ctx context.Context, f vOneFunc) error {
 	return v.callURL(ctx, f, uri)
 }
 
+func (v *VOne) callWithLimiter(ctx context.Context, f vOneFunc) error {
+	for {
+		if v.rateLimiter.ShouldAbort() {
+			//	log.Println("return ErrStop")
+			return ErrStop
+		}
+		//log.Println("no should abort")
+		err := v.callWithoutLimiter(ctx, f)
+		//log.Println("err", err)
+		err = v.rateLimiter.CheckError(err)
+		//log.Println("err after CheckError", err)
+		if err == ErrOnceMore {
+			//log.Println("ErrOnceMore")
+			continue
+		}
+		//log.Println("return", err)
+		return err
+	}
+}
+
+/*
+	func AddLimiter(f func(context.Context, vOneFunc) error, limiter RateLimiter) func(context.Context, vOneFunc) error {
+		return func(context.Context, vOneFunc) error {
+			for {
+				if err := limiter.Sleep(); err != nil {
+					return err
+				}
+				err := f(ctx, f)
+				if err.Error() == "419" {
+
+				}
+			}
+		}
+	}
+*/
+func (v *VOne) call(ctx context.Context, f vOneFunc) error {
+	if v.rateLimiter != nil {
+		return v.callWithLimiter(ctx, f)
+	}
+	return v.callWithoutLimiter(ctx, f)
+}
+
 func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
+	//log.Println("Call ", f.method(), " ", uri)
 	req, err := http.NewRequestWithContext(ctx, f.method(), uri, f.requestBody())
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
@@ -89,6 +189,7 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
 			return fmt.Errorf("parse error: %w", err)
 		}
+		//vOneErr.ErrorData.Message += strconv.Itoa(resp.StatusCode)
 		return fmt.Errorf("request error: %w", vOneErr)
 	}
 
@@ -105,17 +206,28 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 }
 
 func (v *VOne) DecodeBody(f vOneFunc, body io.ReadCloser) error {
+	//log.Printf("%v (%T)", f, f)
+	//log.Printf("%v (%T)", f.responseStruct(), f.responseStruct())
 	defer body.Close()
+
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {
 		return fmt.Errorf("read body : %w", err)
 	}
-	err = json.NewDecoder(bytes.NewReader(bodyBytes)).Decode(f.responseStruct())
-	//err := json.NewDecoder(body).Decode(f.responseStruct())
-	if err != nil && !errors.Is(err, io.EOF) {
+	//log.Println("Body: ", string(bodyBytes))
+	r := f.responseStruct()
+	err = json.Unmarshal(bodyBytes, r)
+	//log.Printf("response err: %v, %v (%T)", err, r, r)
+	if err != nil {
 		return fmt.Errorf("response parse error: %w [%s]", err, string(bodyBytes))
 	}
 	return nil
+	/*err := json.NewDecoder(body).Decode(f.responseStruct())
+	if err != nil && !errors.Is(err, io.EOF) {
+		return fmt.Errorf("response parse error: %w", err)
+		//		return fmt.Errorf("response parse error: %w [%s]", err, string(bodyBytes))
+	}
+	return nil*/
 }
 
 var ErrUnsupportedType = errors.New("unsupported type")

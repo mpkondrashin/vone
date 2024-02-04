@@ -13,7 +13,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 )
 
 type (
@@ -25,10 +24,10 @@ type (
 			Code    string `json:"code"`
 			Message string `json:"message"`
 		} `json:"error"`
-		CreatedDateTime    time.Time `json:"createdDateTime"`
-		LastActionDateTime time.Time `json:"lastActionDateTime"`
-		ResourceLocation   string    `json:"resourceLocation"`
-		IsCached           bool      `json:"isCached"`
+		CreatedDateTime    VisionOneTime `json:"createdDateTime"`
+		LastActionDateTime VisionOneTime `json:"lastActionDateTime"`
+		ResourceLocation   string        `json:"resourceLocation"`
+		IsCached           bool          `json:"isCached"`
 		Digest             struct {
 			MD5    string `json:"md5"`
 			SHA1   string `json:"sha1"`
@@ -72,6 +71,6 @@ func (f *SandboxSubmissionStatusFunc) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/tasks/%s", f.id)
 }
 
-func (f *SandboxSubmissionStatusFunc) ResponseStruct() any {
+func (f *SandboxSubmissionStatusFunc) responseStruct() any {
 	return &f.Response
 }

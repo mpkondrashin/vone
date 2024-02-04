@@ -25,10 +25,10 @@ type (
 			Code    string `json:"code"`
 			Message string `json:"message"`
 		} `json:"error"`
-		CreatedDateTime    time.Time `json:"createdDateTime"`
-		LastActionDateTime time.Time `json:"lastActionDateTime"`
-		ResourceLocation   string    `json:"resourceLocation"`
-		IsCached           bool      `json:"isCached"`
+		CreatedDateTime    VisionOneTime `json:"createdDateTime"`
+		LastActionDateTime VisionOneTime `json:"lastActionDateTime"`
+		ResourceLocation   string        `json:"resourceLocation"`
+		IsCached           bool          `json:"isCached"`
 		Digest             struct {
 			MD5    string `json:"md5"`
 			SHA1   string `json:"sha1"`
@@ -126,7 +126,7 @@ func (f *SandboxSubmissionsFunc) uri() string {
 	return f.Response.NextLink
 }
 
-func (f *SandboxSubmissionsFunc) ResponseStruct() any {
+func (f *SandboxSubmissionsFunc) responseStruct() any {
 	return &f.Response
 }
 

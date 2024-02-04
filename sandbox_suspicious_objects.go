@@ -12,16 +12,15 @@ package vone
 import (
 	"context"
 	"fmt"
-	"time"
 )
 
 type SandboxSuspiciousObjectsResponse struct {
 	Items []struct {
-		RiskLevel                  RiskLevel `json:"riskLevel"`
-		AnalysisCompletionDateTime time.Time `json:"analysisCompletionDateTime"`
-		ExpiredDateTime            time.Time `json:"expiredDateTime"`
-		RootSHA1                   string    `json:"rootSha1"`
-		IP                         string    `json:"ip"`
+		RiskLevel                  RiskLevel     `json:"riskLevel"`
+		AnalysisCompletionDateTime VisionOneTime `json:"analysisCompletionDateTime"`
+		ExpiredDateTime            VisionOneTime `json:"expiredDateTime"`
+		RootSHA1                   string        `json:"rootSha1"`
+		IP                         string        `json:"ip"`
 	} `json:"items"`
 }
 

@@ -126,6 +126,8 @@ func (c *baseCommand) Init(args []string) error {
 		viper.GetString(flagAddress),
 		viper.GetString(flagToken),
 	)
+	rateLimiter := vone.NewAdaptiveRateLimiter(vone.VOneRateLimitSurpassedError, nil)
+	c.visionOne.SetRateLimiter(rateLimiter)
 	//	c.ctx = context.Background()
 	//	if viper.GetBool(flagDryRun) {
 	//		c.ctx = ddan.DryRunContext(context.Background(), func(line string) {

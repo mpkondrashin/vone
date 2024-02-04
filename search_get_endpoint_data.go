@@ -12,27 +12,26 @@ package vone
 import (
 	"context"
 	"net/http"
-	"time"
 )
 
 // SearchEndPointDataResponseItem - get endpoint data response for each endpoint
 type SearchEndPointDataResponseItem struct {
 	AgentGUID    string `json:"agentGuid"`
 	LoginAccount struct {
-		Value           []string  `json:"value"`
-		UpdatedDateTime time.Time `json:"updatedDateTime"`
+		Value           []string      `json:"value"`
+		UpdatedDateTime VisionOneTime `json:"updatedDateTime"`
 	} `json:"loginAccount"`
 	EndpointName struct {
-		Value           string    `json:"value"`
-		UpdatedDateTime time.Time `json:"updatedDateTime"`
+		Value           string        `json:"value"`
+		UpdatedDateTime VisionOneTime `json:"updatedDateTime"`
 	} `json:"endpointName"`
 	MacAddress struct {
-		Value           []string  `json:"value"`
-		UpdatedDateTime time.Time `json:"updatedDateTime"`
+		Value           []string      `json:"value"`
+		UpdatedDateTime VisionOneTime `json:"updatedDateTime"`
 	} `json:"macAddress"`
 	IP struct {
-		Value           []string  `json:"value"`
-		UpdatedDateTime time.Time `json:"updatedDateTime"`
+		Value           []string      `json:"value"`
+		UpdatedDateTime VisionOneTime `json:"updatedDateTime"`
 	} `json:"ip"`
 	OsName                string   `json:"osName"`
 	OsVersion             string   `json:"osVersion"`

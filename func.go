@@ -23,7 +23,7 @@ type vOneFunc interface {
 	contentType() string        // application/json by default
 	responseStruct() any        // Pointer to struct/slice to parse JSON
 	responseHeader() any        // Return struct to populate with response headers
-	responseBody(io.ReadCloser) // process body - is called only if ResponseStruct returns any
+	responseBody(io.ReadCloser) // process body - is called only if responseStruct returns any
 }
 
 var _ vOneFunc = &baseFunc{}
@@ -55,7 +55,7 @@ func (f *baseFunc) contentType() string {
 }
 
 func (f *baseFunc) responseStruct() any {
-	return &Error{}
+	return nil
 }
 
 func (f *baseFunc) responseBody(io.ReadCloser) {
