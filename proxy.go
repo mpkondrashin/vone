@@ -72,7 +72,7 @@ func (a AuthType) MarshalJSON() ([]byte, error) {
 
 type Proxy struct {
 	Type      AuthType
-	URL       url.URL
+	URL       *url.URL
 	Username  string
 	Password  string
 	Domain    string
@@ -80,7 +80,7 @@ type Proxy struct {
 	KeepAlive time.Duration
 }
 
-func NewProxy(URL url.URL) *Proxy {
+func NewProxy(URL *url.URL) *Proxy {
 	return &Proxy{
 		Type: AuthTypeNone,
 		URL:  URL,
@@ -102,9 +102,7 @@ func (p *Proxy) NTLMAuth(Username string, Password string, Domain string) *Proxy
 	return p
 }
 
-type ModifiedTransport func(*http.Transport)
-
-func (p *Proxy) GetModifier() ModifiedTransport {
+func (p *Proxy) GetModifier() TransportModifier {
 	switch p.Type {
 	default:
 		fallthrough
@@ -131,7 +129,7 @@ func (p *Proxy) ChangeTransport(t *http.Transport) {
 }
 
 func (p *Proxy) TransportNoAuth(t *http.Transport) {
-	t.Proxy = http.ProxyURL(&p.URL)
+	t.Proxy = http.ProxyURL(p.URL)
 }
 
 func (p *Proxy) TransportNTLM(t *http.Transport) {
@@ -139,14 +137,14 @@ func (p *Proxy) TransportNTLM(t *http.Transport) {
 		Timeout:   p.Timeout,
 		KeepAlive: p.KeepAlive,
 	}
-	ntlmDialContext := ntlm.NewNTLMProxyDialContext(dialer, p.URL, p.Username, p.Password, p.Domain, nil)
+	ntlmDialContext := ntlm.NewNTLMProxyDialContext(dialer, *p.URL, p.Username, p.Password, p.Domain, nil)
 	t.Proxy = nil
 	t.DialContext = ntlmDialContext
 
 }
 
 func (p *Proxy) TransportBasic(t *http.Transport) {
-	u := p.URL
+	u := *p.URL
 	u.User = url.UserPassword(p.Username, p.Password)
 	t.Proxy = http.ProxyURL(&u)
 }

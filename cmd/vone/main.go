@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -39,17 +40,21 @@ const (
 )
 
 const (
-	flagAddress  = "address"
-	flagToken    = "token"
-	flagLog      = "log"
-	flagFileName = "filename"
-	flagMask     = "mask"
-	flagURL      = "url"
-	flagURLsFile = "urlfile"
-	flagTimeout  = "timeout"
-	flagID       = "id"
-	flagQuery    = "query"
-	flagTop      = "top"
+	flagAddress       = "address"
+	flagToken         = "token"
+	flagLog           = "log"
+	flagFileName      = "filename"
+	flagMask          = "mask"
+	flagURL           = "url"
+	flagURLsFile      = "urlfile"
+	flagTimeout       = "timeout"
+	flagID            = "id"
+	flagQuery         = "query"
+	flagTop           = "top"
+	flagProxy         = "proxy"
+	flagProxyUser     = "proxy_user"
+	flagProxyPassword = "proxy_password"
+	flagProxyDomain   = "proxy_domain"
 )
 
 type command interface {
@@ -73,6 +78,12 @@ func (c *baseCommand) Setup(name, description string) {
 	c.fs.String(flagAddress, "", "Vision One entry point URL")
 	c.fs.String(flagToken, "", "Vision One API Token")
 	c.fs.String(flagLog, "", "Log file path")
+
+	c.fs.String(flagProxy, "", "Proxy URL (scheme://address:port)")
+	c.fs.String(flagProxyUser, "", "Proxy username")
+	c.fs.String(flagProxyPassword, "", "Proxy password")
+	c.fs.String(flagProxyDomain, "", "Proxy domain (for NTLM auth)")
+
 	c.fs.Usage = func() {
 		fmt.Fprintf(os.Stderr, "%s\nAvailable options:\n", c.description)
 		c.fs.PrintDefaults()
@@ -128,6 +139,35 @@ func (c *baseCommand) Init(args []string) error {
 	)
 	rateLimiter := vone.NewAdaptiveRateLimiter(vone.VOneRateLimitSurpassedError, nil)
 	c.visionOne.SetRateLimiter(rateLimiter)
+
+	if viper.GetString(flagProxy) != "" {
+		u, err := url.Parse(viper.GetString(flagProxy))
+		if err != nil {
+			log.Fatal(err)
+		}
+		proxy := vone.NewProxy(u)
+		log.Println("Use proxy")
+		if viper.GetString(flagProxyUser) != "" {
+			if viper.GetString(flagProxyPassword) == "" {
+				log.Fatal("missing proxy password")
+			}
+			if viper.GetString(flagProxyDomain) != "" {
+				log.Println("Use NTLM proxy auth")
+				proxy.NTLMAuth(
+					viper.GetString(flagProxyUser),
+					viper.GetString(flagProxyPassword),
+					viper.GetString(flagProxyDomain),
+				)
+			} else {
+				log.Println("Use basic proxy auth")
+				proxy.BasicAuth(
+					viper.GetString(flagProxyUser),
+					viper.GetString(flagProxyPassword),
+				)
+			}
+		}
+		c.visionOne.AddTransportModifier(proxy.GetModifier())
+	}
 	//	c.ctx = context.Background()
 	//	if viper.GetBool(flagDryRun) {
 	//		c.ctx = ddan.DryRunContext(context.Background(), func(line string) {
