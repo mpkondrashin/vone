@@ -21,6 +21,9 @@ type SandboxSuspiciousObjectsResponse struct {
 		ExpiredDateTime            VisionOneTime `json:"expiredDateTime"`
 		RootSHA1                   string        `json:"rootSha1"`
 		IP                         string        `json:"ip"`
+		URL                        string        `json:"url"`
+		FileSHA1                   string        `json:"fileSha1"`
+		Domain                     string        `json:"domain"`
 	} `json:"items"`
 }
 

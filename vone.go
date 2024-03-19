@@ -84,10 +84,13 @@ func (vot VisionOneTime) String() string {
 	return time.Time(vot).Format(timeFormat)
 }
 
+type TransportModifier func(*http.Transport)
+
 type VOne struct {
-	Domain      string
-	Token       string
-	rateLimiter RateLimiter
+	Domain            string
+	Token             string
+	transportModifier TransportModifier
+	rateLimiter       RateLimiter
 }
 
 func NewVOne(domain string, token string) *VOne {
@@ -100,6 +103,10 @@ func NewVOne(domain string, token string) *VOne {
 func (v *VOne) SetRateLimiter(rateLimiter RateLimiter) *VOne {
 	v.rateLimiter = rateLimiter
 	return v
+}
+
+func (v *VOne) AddTransportModifier(transportModifier TransportModifier) {
+	AddTransportModifier(&v.transportModifier, transportModifier)
 }
 
 const HTTPResponseTooManyRequests = 429
@@ -176,6 +183,11 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 	}
 	f.populate(req)
 	client := &http.Client{}
+	if v.transportModifier != nil {
+		transport := &http.Transport{}
+		v.transportModifier(transport)
+		client.Transport = transport
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("HTTP request: %w", err)
