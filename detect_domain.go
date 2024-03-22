@@ -30,7 +30,7 @@ func DetectVisionOneDomain(ctx context.Context, token string, modifier func(*htt
 		go func(d string) {
 			defer wg.Done()
 			vOne := NewVOne(d, token)
-			if modifier == nil {
+			if modifier != nil {
 				vOne.AddTransportModifier(modifier)
 			}
 			_, err := vOne.CheckConnection().Do(ctx)
