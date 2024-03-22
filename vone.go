@@ -87,7 +87,7 @@ func (vot VisionOneTime) String() string {
 type VOne struct {
 	Domain            string
 	Token             string
-	transportModifier TransportModifier
+	transportModifier func(*http.Transport)
 	rateLimiter       RateLimiter
 }
 
@@ -103,7 +103,7 @@ func (v *VOne) SetRateLimiter(rateLimiter RateLimiter) *VOne {
 	return v
 }
 
-func (v *VOne) AddTransportModifier(transportModifier TransportModifier) {
+func (v *VOne) AddTransportModifier(transportModifier func(*http.Transport)) {
 	AddTransportModifier(&v.transportModifier, transportModifier)
 }
 
