@@ -13,9 +13,7 @@ import (
 	"github.com/launchdarkly/go-ntlm-proxy-auth"
 )
 
-type TransportModifier func(*http.Transport)
-
-func AddTransportModifier(pModifier *TransportModifier, modifier TransportModifier) {
+func AddTransportModifier(pModifier *func(*http.Transport), modifier func(*http.Transport)) {
 	if *pModifier == nil {
 		*pModifier = modifier
 		return
@@ -102,7 +100,7 @@ func (p *Proxy) NTLMAuth(Username string, Password string, Domain string) *Proxy
 	return p
 }
 
-func (p *Proxy) GetModifier() TransportModifier {
+func (p *Proxy) GetModifier() func(*http.Transport) {
 	switch p.Type {
 	default:
 		fallthrough
