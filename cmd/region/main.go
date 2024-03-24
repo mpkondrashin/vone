@@ -21,7 +21,11 @@ func main() {
 		io.Copy(&sb, os.Stdin)
 		token = strings.TrimSpace(sb.String())
 	}
-	d := vone.DetectVisionOneDomain(context.TODO(), token)
+	d, err := vone.DetectVisionOneDomain(context.TODO(), token, nil)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(2)
+	}
 	if d == "" {
 		fmt.Println("Domain not detected (wrong token?)")
 		os.Exit(1)

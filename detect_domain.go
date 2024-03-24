@@ -2,6 +2,7 @@ package vone
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"sync"
 )
@@ -21,7 +22,7 @@ var RegionalDomains = []RegionalDomain{
 }
 
 // DetectVisionOneDomain return correct domain for given token or empty string
-func DetectVisionOneDomain(ctx context.Context, token string, modifier func(*http.Transport)) (result string) {
+func DetectVisionOneDomain(ctx context.Context, token string, modifier func(*http.Transport)) (result string, returnError error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	var wg sync.WaitGroup
@@ -35,6 +36,10 @@ func DetectVisionOneDomain(ctx context.Context, token string, modifier func(*htt
 			}
 			_, err := vOne.CheckConnection().Do(ctx)
 			if err != nil {
+				var e *Error
+				if !errors.As(err, &e) {
+					returnError = err
+				}
 				return
 			}
 			cancel()
@@ -42,5 +47,8 @@ func DetectVisionOneDomain(ctx context.Context, token string, modifier func(*htt
 		}(rd.Domain)
 	}
 	wg.Wait()
+	if result != "" {
+		returnError = nil
+	}
 	return
 }
