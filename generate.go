@@ -9,7 +9,7 @@
 
 package vone
 
-//go:generate enum -package=vone -type=RiskLevel -values=high,medium,low,noRisk
-//go:generate enum -package=vone -type=Action -values=analyzeFile,analyzeUrl
-//go:generate enum -package=vone -type=Status -values=succeeded,running,failed
-//go:generate enum -package=vone -type=ErrorCode -values=AccessDenied,BadRequest,ConditionNotMet,InternalServerError,InvalidCredentials,NotFound,ParameterNotAccepted,RequestEntityTooLarge,TooManyRequests,Unsupported
+//go:generate enum -package=vone -type=RiskLevel -names=high,medium,low,noRisk
+//go:generate enum -package=vone -type=Action -names=analyzeFile,analyzeUrl
+//go:generate enum -package=vone -type=Status -names=succeeded,running,failed
+//go:generate enum -package=vone -type=ErrorCode -names=AccessDenied,BadRequest,ConditionNotMet,InternalServerError,InvalidCredentials,NotFound,ParameterNotAccepted,RequestEntityTooLarge,TooManyRequests,Unsupported
