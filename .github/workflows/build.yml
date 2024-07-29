@@ -19,9 +19,9 @@ jobs:
       - name: Check Go version
         run: go version
       - name: Get enum
-        run: go get github.com/mpkondrashin/enum
+        run: go get github.com/mpkondrashin/enum@v0.0.2
       - name: Install enum
-        run: go install github.com/mpkondrashin/enum
+        run: go install github.com/mpkondrashin/enum@v0.0.2
       - name: Build
         run: |
           export PATH=${PATH}:`go env GOPATH`/bin
