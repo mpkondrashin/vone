@@ -30,7 +30,7 @@ func (c *commandGetEndpointData) Execute() error {
 	search := c.visionOne.SearchEndPointData()
 	query := viper.GetString(flagQuery)
 	if query == "" {
-		log.Fatalf("%s parameter can not be empty", flagQuery)
+		log.Fatalf("--%s parameter can not be empty", flagQuery)
 	}
 	search.Query(query)
 	topAmount := viper.GetInt(flagTop)

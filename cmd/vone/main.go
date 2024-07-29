@@ -37,6 +37,7 @@ const (
 	cmdPDF             = "pdf"
 	cmdGetEndpointData = "endpoint"
 	cmdPing            = "ping"
+	cmdAddEception     = "it_exception"
 )
 
 const (
@@ -55,6 +56,9 @@ const (
 	flagProxyUser     = "proxy_user"
 	flagProxyPassword = "proxy_password"
 	flagProxyDomain   = "proxy_domain"
+	flagSOType        = "so_type"
+	flagSO            = "so"
+	flagDescription   = "description"
 )
 
 type command interface {
@@ -191,6 +195,7 @@ var commands = []command{
 	newCommandQuota(),
 	newCommandPDF(),
 	newCommandGetEndpointData(),
+	newCommandAddIT(),
 }
 
 func usage() {
