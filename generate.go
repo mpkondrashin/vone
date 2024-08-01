@@ -13,3 +13,4 @@ package vone
 //go:generate enum -package=vone -type=Action -names=analyzeFile,analyzeUrl
 //go:generate enum -package=vone -type=Status -names=succeeded,running,failed
 //go:generate enum -package=vone -type=ErrorCode -names=AccessDenied,BadRequest,ConditionNotMet,InternalServerError,InvalidCredentials,NotFound,ParameterNotAccepted,RequestEntityTooLarge,TooManyRequests,Unsupported
+//go:generate enum -package=vone -type=SO -names=Domain,IP,SenderMailAddress,FileSha1,FileSha256
