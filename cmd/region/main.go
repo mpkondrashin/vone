@@ -24,10 +24,10 @@ func main() {
 	d, err := vone.DetectVisionOneDomain(context.TODO(), token, nil)
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(2)
+		os.Exit(3)
 	}
 	if d == "" {
-		fmt.Println("Domain not detected (wrong token?)")
+		fmt.Println("Domain not detected (invalid token?)")
 		os.Exit(1)
 	}
 	fmt.Printf("Domain: %s\n", d)

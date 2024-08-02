@@ -20,12 +20,16 @@ const (
 )
 
 
+
+// MapActionToString - map Action to string
+var MapActionToString = map[Action]string {
+    ActionAnalyzeFile: "analyzeFile",
+    ActionAnalyzeUrl:  "analyzeUrl",
+}
+
 // String - return string representation for Action value
 func (v Action)String() string {
-    s, ok := map[Action]string {
-         ActionAnalyzeFile: "analyzeFile",
-         ActionAnalyzeUrl:  "analyzeUrl",
-    }[v]
+    s, ok := MapActionToString[v]
     if ok {
         return s
     }
@@ -36,8 +40,8 @@ func (v Action)String() string {
 // containing unrecognized value.
 var ErrUnknownAction = errors.New("unknown Action")
 
-
-var mapActionFromString = map[string]Action{
+ // MapActionFromString - map string to Action value
+var MapActionFromString = map[string]Action{
     "analyzefile":    ActionAnalyzeFile,
     "analyzeurl":    ActionAnalyzeUrl,
 }
@@ -48,7 +52,7 @@ func (s *Action) UnmarshalJSON(data []byte) error {
     if err := json.Unmarshal(data, &v); err != nil {
         return err
     }
-    result, ok := mapActionFromString[strings.ToLower(v)]
+    result, ok := MapActionFromString[strings.ToLower(v)]
     if !ok {
         return fmt.Errorf("%w: %s", ErrUnknownAction, v)
     }
@@ -67,7 +71,7 @@ func (s *Action) UnmarshalYAML(unmarshal func(interface{}) error) error {
     if err := unmarshal(&v); err != nil {
         return err
     }
-    result, ok := mapActionFromString[strings.ToLower(v)]  
+    result, ok := MapActionFromString[strings.ToLower(v)]  
     if !ok {
         return fmt.Errorf("%w: %s", ErrUnknownAction, v)
     }

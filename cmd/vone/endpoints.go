@@ -71,22 +71,4 @@ func (c *commandGetEndpointData) Execute() error {
 	}
 	fmt.Println("\n]")
 	return nil
-	/*
-		for {
-			response, err := search.Do(context.TODO())
-			if err != nil {
-				return err
-			}
-			for _, item := range response.Items {
-			}
-			if topAmount != 0 {
-				// If used did not provided "top" parameter limiting amount of data we will stop here
-				break
-			}
-			if response.NextLink == "" {
-				break
-			}
-		}
-		fmt.Println("\n]")
-		return nil*/
 }

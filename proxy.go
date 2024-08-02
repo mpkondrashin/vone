@@ -43,6 +43,7 @@ func (r AuthType) String() string {
 	return AuthTypeString[r]
 }
 
+// ErrUnknownAuthType - unknown authentication type error
 var ErrUnknownAuthType = errors.New("unknown auth type")
 
 // UnmarshalJSON implements the Unmarshaler interface of the json package for AuthType.

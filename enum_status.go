@@ -21,13 +21,17 @@ const (
 )
 
 
+
+// MapStatusToString - map Status to string
+var MapStatusToString = map[Status]string {
+    StatusSucceeded: "succeeded",
+    StatusRunning:   "running",
+    StatusFailed:    "failed",
+}
+
 // String - return string representation for Status value
 func (v Status)String() string {
-    s, ok := map[Status]string {
-         StatusSucceeded: "succeeded",
-         StatusRunning:   "running",
-         StatusFailed:    "failed",
-    }[v]
+    s, ok := MapStatusToString[v]
     if ok {
         return s
     }
@@ -38,8 +42,8 @@ func (v Status)String() string {
 // containing unrecognized value.
 var ErrUnknownStatus = errors.New("unknown Status")
 
-
-var mapStatusFromString = map[string]Status{
+ // MapStatusFromString - map string to Status value
+var MapStatusFromString = map[string]Status{
     "succeeded":    StatusSucceeded,
     "running":    StatusRunning,
     "failed":    StatusFailed,
@@ -51,7 +55,7 @@ func (s *Status) UnmarshalJSON(data []byte) error {
     if err := json.Unmarshal(data, &v); err != nil {
         return err
     }
-    result, ok := mapStatusFromString[strings.ToLower(v)]
+    result, ok := MapStatusFromString[strings.ToLower(v)]
     if !ok {
         return fmt.Errorf("%w: %s", ErrUnknownStatus, v)
     }
@@ -70,7 +74,7 @@ func (s *Status) UnmarshalYAML(unmarshal func(interface{}) error) error {
     if err := unmarshal(&v); err != nil {
         return err
     }
-    result, ok := mapStatusFromString[strings.ToLower(v)]  
+    result, ok := MapStatusFromString[strings.ToLower(v)]  
     if !ok {
         return fmt.Errorf("%w: %s", ErrUnknownStatus, v)
     }

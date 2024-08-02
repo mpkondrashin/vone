@@ -84,6 +84,7 @@ func (vot VisionOneTime) String() string {
 	return time.Time(vot).Format(timeFormat)
 }
 
+// VOne - Vision One API struct
 type VOne struct {
 	Domain            string
 	Token             string
@@ -91,6 +92,7 @@ type VOne struct {
 	rateLimiter       RateLimiter
 }
 
+// NewVOne - create VOne struct
 func NewVOne(domain string, token string) *VOne {
 	return &VOne{
 		Domain: domain,
@@ -110,12 +112,10 @@ func (v *VOne) AddTransportModifier(transportModifier func(*http.Transport)) {
 const HTTPResponseTooManyRequests = 429
 
 var VOneRateLimitSurpassedError RateLimitSurpassed = func(err error) bool {
-	//log.Printf("RateLimitSurpassed(%v)", err)
 	var vOneErr *Error
 	if !errors.As(err, &vOneErr) {
 		return false
 	}
-	//log.Printf("RateLimitSurpassed(%v): vOneErr.ErrorData.Code = %d ", err, vOneErr.ErrorData.Code)
 	return vOneErr.ErrorData.Code == HTTPResponseTooManyRequests
 }
 
@@ -170,7 +170,6 @@ func (v *VOne) call(ctx context.Context, f vOneFunc) error {
 }
 
 func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
-	//log.Println("Call ", f.method(), " ", uri)
 	req, err := http.NewRequestWithContext(ctx, f.method(), uri, f.requestBody())
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
@@ -217,28 +216,18 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 }
 
 func (v *VOne) DecodeBody(f vOneFunc, body io.ReadCloser) error {
-	//log.Printf("%v (%T)", f, f)
-	//log.Printf("%v (%T)", f.responseStruct(), f.responseStruct())
 	defer body.Close()
 
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {
 		return fmt.Errorf("read body : %w", err)
 	}
-	//log.Println("Body: ", string(bodyBytes))
 	r := f.responseStruct()
 	err = json.Unmarshal(bodyBytes, r)
-	//log.Printf("response err: %v, %v (%T)", err, r, r)
 	if err != nil {
 		return fmt.Errorf("response parse error: %w [%s]", err, string(bodyBytes))
 	}
 	return nil
-	/*err := json.NewDecoder(body).Decode(f.responseStruct())
-	if err != nil && !errors.Is(err, io.EOF) {
-		return fmt.Errorf("response parse error: %w", err)
-		//		return fmt.Errorf("response parse error: %w [%s]", err, string(bodyBytes))
-	}
-	return nil*/
 }
 
 var ErrUnsupportedType = errors.New("unsupported type")

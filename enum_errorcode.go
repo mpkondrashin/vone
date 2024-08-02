@@ -28,20 +28,24 @@ const (
 )
 
 
+
+// MapErrorCodeToString - map ErrorCode to string
+var MapErrorCodeToString = map[ErrorCode]string {
+    ErrorCodeAccessDenied:          "AccessDenied",
+    ErrorCodeBadRequest:            "BadRequest",
+    ErrorCodeConditionNotMet:       "ConditionNotMet",
+    ErrorCodeInternalServerError:   "InternalServerError",
+    ErrorCodeInvalidCredentials:    "InvalidCredentials",
+    ErrorCodeNotFound:              "NotFound",
+    ErrorCodeParameterNotAccepted:  "ParameterNotAccepted",
+    ErrorCodeRequestEntityTooLarge: "RequestEntityTooLarge",
+    ErrorCodeTooManyRequests:       "TooManyRequests",
+    ErrorCodeUnsupported:           "Unsupported",
+}
+
 // String - return string representation for ErrorCode value
 func (v ErrorCode)String() string {
-    s, ok := map[ErrorCode]string {
-         ErrorCodeAccessDenied:          "AccessDenied",
-         ErrorCodeBadRequest:            "BadRequest",
-         ErrorCodeConditionNotMet:       "ConditionNotMet",
-         ErrorCodeInternalServerError:   "InternalServerError",
-         ErrorCodeInvalidCredentials:    "InvalidCredentials",
-         ErrorCodeNotFound:              "NotFound",
-         ErrorCodeParameterNotAccepted:  "ParameterNotAccepted",
-         ErrorCodeRequestEntityTooLarge: "RequestEntityTooLarge",
-         ErrorCodeTooManyRequests:       "TooManyRequests",
-         ErrorCodeUnsupported:           "Unsupported",
-    }[v]
+    s, ok := MapErrorCodeToString[v]
     if ok {
         return s
     }
@@ -52,8 +56,8 @@ func (v ErrorCode)String() string {
 // containing unrecognized value.
 var ErrUnknownErrorCode = errors.New("unknown ErrorCode")
 
-
-var mapErrorCodeFromString = map[string]ErrorCode{
+ // MapErrorCodeFromString - map string to ErrorCode value
+var MapErrorCodeFromString = map[string]ErrorCode{
     "accessdenied":    ErrorCodeAccessDenied,
     "badrequest":    ErrorCodeBadRequest,
     "conditionnotmet":    ErrorCodeConditionNotMet,
@@ -72,7 +76,7 @@ func (s *ErrorCode) UnmarshalJSON(data []byte) error {
     if err := json.Unmarshal(data, &v); err != nil {
         return err
     }
-    result, ok := mapErrorCodeFromString[strings.ToLower(v)]
+    result, ok := MapErrorCodeFromString[strings.ToLower(v)]
     if !ok {
         return fmt.Errorf("%w: %s", ErrUnknownErrorCode, v)
     }
@@ -91,7 +95,7 @@ func (s *ErrorCode) UnmarshalYAML(unmarshal func(interface{}) error) error {
     if err := unmarshal(&v); err != nil {
         return err
     }
-    result, ok := mapErrorCodeFromString[strings.ToLower(v)]  
+    result, ok := MapErrorCodeFromString[strings.ToLower(v)]  
     if !ok {
         return fmt.Errorf("%w: %s", ErrUnknownErrorCode, v)
     }

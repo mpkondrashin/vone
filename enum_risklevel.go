@@ -22,14 +22,18 @@ const (
 )
 
 
+
+// MapRiskLevelToString - map RiskLevel to string
+var MapRiskLevelToString = map[RiskLevel]string {
+    RiskLevelHigh:   "high",
+    RiskLevelMedium: "medium",
+    RiskLevelLow:    "low",
+    RiskLevelNoRisk: "noRisk",
+}
+
 // String - return string representation for RiskLevel value
 func (v RiskLevel)String() string {
-    s, ok := map[RiskLevel]string {
-         RiskLevelHigh:   "high",
-         RiskLevelMedium: "medium",
-         RiskLevelLow:    "low",
-         RiskLevelNoRisk: "noRisk",
-    }[v]
+    s, ok := MapRiskLevelToString[v]
     if ok {
         return s
     }
@@ -40,8 +44,8 @@ func (v RiskLevel)String() string {
 // containing unrecognized value.
 var ErrUnknownRiskLevel = errors.New("unknown RiskLevel")
 
-
-var mapRiskLevelFromString = map[string]RiskLevel{
+ // MapRiskLevelFromString - map string to RiskLevel value
+var MapRiskLevelFromString = map[string]RiskLevel{
     "high":    RiskLevelHigh,
     "medium":    RiskLevelMedium,
     "low":    RiskLevelLow,
@@ -54,7 +58,7 @@ func (s *RiskLevel) UnmarshalJSON(data []byte) error {
     if err := json.Unmarshal(data, &v); err != nil {
         return err
     }
-    result, ok := mapRiskLevelFromString[strings.ToLower(v)]
+    result, ok := MapRiskLevelFromString[strings.ToLower(v)]
     if !ok {
         return fmt.Errorf("%w: %s", ErrUnknownRiskLevel, v)
     }
@@ -73,7 +77,7 @@ func (s *RiskLevel) UnmarshalYAML(unmarshal func(interface{}) error) error {
     if err := unmarshal(&v); err != nil {
         return err
     }
-    result, ok := mapRiskLevelFromString[strings.ToLower(v)]  
+    result, ok := MapRiskLevelFromString[strings.ToLower(v)]  
     if !ok {
         return fmt.Errorf("%w: %s", ErrUnknownRiskLevel, v)
     }

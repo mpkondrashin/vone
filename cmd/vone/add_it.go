@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/mpkondrashin/vone"
 	"github.com/spf13/viper"
 )
 
@@ -31,23 +32,27 @@ func (c *commandTIAddException) Execute() error {
 	}
 	addException := c.visionOne.AddExceptions()
 	description := viper.GetString(flagDescription)
-	soType := viper.GetString(flagSOType)
-	switch soType {
-	case "url":
-		addException.AddURL(so, description)
-	case "domain":
-		addException.AddDomain(so, description)
-	case "ip":
-		addException.AddIP(so, description)
-	case "senderMailAddress":
-		addException.AddSenderMailAddress(so, description)
-	case "fileSha1":
-		addException.AddFileSHA1(so, description)
-	case "fileSha256":
-		addException.AddFileSHA256(so, description)
-	default:
-		log.Fatalf("--%s parameter has wrong value: '%s'. It should one of: url, domain, ip, senderMailAddress, fileSha1, fileSha256", flagSO, soType)
+	soType, ok := vone.MapSOFromString[viper.GetString(flagSOType)]
+	if !ok {
+		log.Fatalf("--%s parameter has wrong value: '%s'. It should one of: url, domain, ip, senderMailAddress, fileSha1, fileSha256", flagSOType, viper.GetString(flagSOType))
 	}
+	addException.AddSO(soType, so, description)
+	/*	switch soType {
+		case "url":
+			addException.AddURL(so, description)
+		case "domain":
+			addException.AddDomain(so, description)
+		case "ip":
+			addException.AddIP(so, description)
+		case "senderMailAddress":
+			addException.AddSenderMailAddress(so, description)
+		case "fileSha1":
+			addException.AddFileSHA1(so, description)
+		case "fileSha256":
+			addException.AddFileSHA256(so, description)
+		default:
+			log.Fatalf("--%s parameter has wrong value: '%s'. It should one of: url, domain, ip, senderMailAddress, fileSha1, fileSha256", flagSO, soType)
+		}*/
 
 	response, err := addException.Do(context.TODO())
 	if err != nil {
