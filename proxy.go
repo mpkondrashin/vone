@@ -33,7 +33,7 @@ const (
 	AuthTypeNTLM
 )
 
-var AuthTypeString = [...]string{
+var AuthTypeString = []string{
 	"None",
 	"Basic",
 	"NTLM",

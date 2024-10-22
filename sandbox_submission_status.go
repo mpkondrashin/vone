@@ -15,6 +15,11 @@ import (
 	"fmt"
 )
 
+const (
+	InternalServerError = "InternalServerError"
+	Unsupported         = "Unsupported"
+)
+
 type (
 	SandboxSubmissionStatusResponse struct {
 		ID     string `json:"id"`
