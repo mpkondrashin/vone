@@ -84,3 +84,9 @@ func (s *RiskLevel) UnmarshalYAML(unmarshal func(interface{}) error) error {
     *s = result
     return nil
 }
+
+
+// MarshalYAML implements the Marshaler interface of the yaml.v3 package for RiskLevel.
+func (s RiskLevel) MarshalYAML() (interface{}, error) {
+    return s.String(), nil
+}

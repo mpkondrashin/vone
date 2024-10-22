@@ -78,3 +78,9 @@ func (s *Action) UnmarshalYAML(unmarshal func(interface{}) error) error {
     *s = result
     return nil
 }
+
+
+// MarshalYAML implements the Marshaler interface of the yaml.v3 package for Action.
+func (s Action) MarshalYAML() (interface{}, error) {
+    return s.String(), nil
+}
