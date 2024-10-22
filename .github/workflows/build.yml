@@ -18,14 +18,9 @@ jobs:
           go-version: '1.21'
       - name: Check Go version
         run: go version
-      - name: Get enum
-        run: go get github.com/mpkondrashin/enum #@v0.0.2
-      - name: Install enum
-        run: go install github.com/mpkondrashin/enum #@v0.0.2
       - name: Build
         run: |
           export PATH=${PATH}:`go env GOPATH`/bin
-          # go generate
           GOOS=linux GOARCH=amd64 go build ./cmd/vone
           GOOS=linux GOARCH=amd64 go build ./cmd/region
           tar cfvz vone_linux_amd64.tgz vone region
