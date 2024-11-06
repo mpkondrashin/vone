@@ -185,7 +185,6 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 		v.transportModifier(transport)
 		client.Transport = transport
 	}
-
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("HTTP request: %w", err)

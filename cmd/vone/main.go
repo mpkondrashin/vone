@@ -31,13 +31,14 @@ const (
 )
 
 const (
-	cmdCheck           = "check"
-	cmdSubmit          = "submit"
-	cmdQuota           = "quota"
-	cmdPDF             = "pdf"
-	cmdGetEndpointData = "endpoint"
-	cmdPing            = "ping"
-	cmdAddEception     = "it_exception"
+	cmdCheck            = "check"
+	cmdSubmit           = "submit"
+	cmdQuota            = "quota"
+	cmdPDF              = "pdf"
+	cmdGetEndpointData  = "endpoint"
+	cmdListGetEndpoints = "list"
+	cmdPing             = "ping"
+	cmdAddEception      = "it_exception"
 )
 
 const (
@@ -51,6 +52,8 @@ const (
 	flagTimeout       = "timeout"
 	flagID            = "id"
 	flagQuery         = "query"
+	flagFilter        = "filter"
+	flagOrderBy       = "order_by"
 	flagTop           = "top"
 	flagProxy         = "proxy"
 	flagProxyUser     = "proxy_user"
@@ -195,6 +198,7 @@ var commands = []command{
 	newCommandQuota(),
 	newCommandPDF(),
 	newCommandGetEndpointData(),
+	newCommandListEndpoints(),
 	newCommandAddIT(),
 }
 

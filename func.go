@@ -81,7 +81,7 @@ func (f *baseFunc) populate(req *http.Request) {
 		q.Add(key, value)
 	}
 	req.URL.RawQuery = q.Encode()
-	for key, value := range f.parameters {
+	for key, value := range f.headers {
 		req.Header.Add(key, value)
 	}
 }

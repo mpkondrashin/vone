@@ -11,7 +11,6 @@ package vone
 
 import (
 	"context"
-	"net/http"
 )
 
 // SearchEndPointDataResponseItem - get endpoint data response for each endpoint
@@ -92,10 +91,11 @@ func (v *VOne) SearchEndPointData() *SearchEndPointDataFunc {
 
 // Query - set search query
 func (f *SearchEndPointDataFunc) Query(query string) *SearchEndPointDataFunc {
-	if f.query != query {
-		f.query = query
-		f.Response.NextLink = ""
-	}
+	f.setHeader("TMV1-Query", query)
+	//	if f.query != query {
+	//		f.query = query
+	f.Response.NextLink = ""
+	//	}
 	return f
 }
 
@@ -112,10 +112,10 @@ func (s *SearchEndPointDataFunc) url() string {
 	return "/v3.0/eiqs/endpoints"
 }
 
-func (s *SearchEndPointDataFunc) populate(req *http.Request) {
-	s.baseFunc.populate(req)
-	req.Header.Set("TMV1-Query", s.query)
-}
+//func (s *SearchEndPointDataFunc) populate(req *http.Request) {
+//	s.baseFunc.populate(req)
+//	req.Header.Set("TMV1-Query", s.query)
+//}
 
 func (f *SearchEndPointDataFunc) responseStruct() any {
 	return &f.Response
