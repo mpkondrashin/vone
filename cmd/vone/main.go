@@ -37,8 +37,10 @@ const (
 	cmdPDF              = "pdf"
 	cmdGetEndpointData  = "endpoint"
 	cmdListGetEndpoints = "list"
+	cmdHighRiskDevices  = "high_risk_devices"
 	cmdPing             = "ping"
 	cmdAddEception      = "it_exception"
+	cmdGetOATEvents     = "oat"
 )
 
 const (
@@ -62,6 +64,10 @@ const (
 	flagSOType        = "so_type"
 	flagSO            = "so"
 	flagDescription   = "description"
+	flagDetectedStart = "detected_start"
+	flagDetectedEnd   = "detected_end"
+	flagIngestedStart = "ingested_start"
+	flagIngestedEnd   = "ingested_end"
 )
 
 type command interface {
@@ -199,7 +205,9 @@ var commands = []command{
 	newCommandPDF(),
 	newCommandGetEndpointData(),
 	newCommandListEndpoints(),
+	newCommandHighRiskDevices(),
 	newCommandAddIT(),
+	newCommandGetOATEvents(),
 }
 
 func usage() {

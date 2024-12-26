@@ -12,6 +12,7 @@ package vone
 import (
 	"io"
 	"net/http"
+	"strings"
 )
 
 type vOneFunc interface {
@@ -80,7 +81,7 @@ func (f *baseFunc) populate(req *http.Request) {
 	for key, value := range f.parameters {
 		q.Add(key, value)
 	}
-	req.URL.RawQuery = q.Encode()
+	req.URL.RawQuery = strings.ReplaceAll(q.Encode(), "%3A", ":")
 	for key, value := range f.headers {
 		req.Header.Add(key, value)
 	}

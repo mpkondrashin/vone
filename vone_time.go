@@ -8,7 +8,10 @@ import (
 
 type VOneTime time.Time
 
-const layout = `2006-01-02T15:04:05`
+const (
+	layout  = `2006-01-02T15:04:05`
+	layoutZ = layout + "Z"
+)
 
 // UnmarshalJSON for VOneTime with a custom layout
 func (ct *VOneTime) UnmarshalJSON(data []byte) error {
@@ -21,7 +24,10 @@ func (ct *VOneTime) UnmarshalJSON(data []byte) error {
 	}
 	parsedTime, err := time.Parse(layout, s)
 	if err != nil {
-		return err
+		parsedTime, err = time.Parse(layoutZ, s)
+		if err != nil {
+			return err
+		}
 	}
 	*ct = VOneTime(parsedTime)
 	return nil

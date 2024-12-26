@@ -12,6 +12,7 @@ package vone
 import (
 	"context"
 	"io"
+	"iter"
 	"strings"
 	"time"
 )
@@ -149,6 +150,26 @@ func (f *SandboxSubmissionsFunc) IterateListSubmissions(ctx context.Context, cal
 		}
 		if f.Response.NextLink == "" {
 			return nil
+		}
+	}
+}
+
+// Range - iterator for all submissions (go 1.23 and later)
+func (f *SandboxSubmissionsFunc) Range(ctx context.Context) iter.Seq2[*ListSubmissionsItem, error] {
+	return func(yield func(*ListSubmissionsItem, error) bool) {
+		for {
+			if err := f.vone.call(ctx, f); err != nil {
+				yield(nil, err)
+				return
+			}
+			for i := range f.Response.Items {
+				if !yield(&f.Response.Items[i], nil) {
+					return
+				}
+			}
+			if f.Response.NextLink == "" {
+				return
+			}
 		}
 	}
 }

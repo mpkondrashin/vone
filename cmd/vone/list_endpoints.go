@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"encoding/csv"
+	"os"
 
+	"github.com/dnlo/struct2csv"
 	"github.com/mpkondrashin/vone"
 	"github.com/spf13/viper"
 )
@@ -39,9 +41,32 @@ func (c *commandListEndpoints) Execute() error {
 		}
 		list.Top(t)
 	}
-	list.Iterate(context.TODO(), func(item *vone.EndpointListItem) error {
-		fmt.Println(item.EndpointName)
-		return nil
-	})
+
+	w := csv.NewWriter(os.Stdout)
+
+	data := vone.EndpointListItem{}
+	enc := struct2csv.New()
+	// get the column names first
+	colhdrs, err := enc.GetColNames(data)
+	if err != nil {
+		return err
+	}
+	if err := w.Write(colhdrs); err != nil {
+		return err
+	}
+
+	for item, err := range list.Range(context.TODO()) {
+		if err != nil {
+			return err
+		}
+		row, err := enc.GetRow(*item)
+		if err != nil {
+			return err
+		}
+		if err := w.Write(row); err != nil {
+			return err
+		}
+	}
+	w.Flush()
 	return nil
 }

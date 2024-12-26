@@ -4,14 +4,14 @@
 
 	Sandbox API capabilities
 
-	search_get_endpoint_data.go - get endpoint data
+	get_endpoint_list.go - get endpoint data
 */
 
 package vone
 
 import (
 	"context"
-	"fmt"
+	"iter"
 )
 
 type (
@@ -112,7 +112,7 @@ func (f *GetEndPointListFunc) Iterate(ctx context.Context,
 	callback func(item *EndpointListItem) error) error {
 	for {
 		response, err := f.Do(ctx)
-		fmt.Println("XXXXXXXXXXXXXXXXXXXXXXXXXXX:", err, response.Count, response.TotalCount) ////, /response, err)
+		//fmt.Println("XXXXXXXXXXXXXXXXXXXXXXXXXXX:", err, response.Count, response.TotalCount) ////, /response, err)
 		if err != nil {
 			return err
 		}
@@ -131,6 +131,30 @@ func (f *GetEndPointListFunc) Iterate(ctx context.Context,
 		}
 	}
 	return nil
+}
+
+// Range - iterator for all endpoints matching query (go 1.23 and later)
+func (f *GetEndPointListFunc) Range(ctx context.Context) iter.Seq2[*EndpointListItem, error] {
+	return func(yield func(*EndpointListItem, error) bool) {
+		for {
+			response, err := f.Do(ctx)
+			if err != nil {
+				yield(nil, err)
+				return
+			}
+			for n := range response.Items {
+				if !yield(&response.Items[n], nil) {
+					return
+				}
+			}
+			if response.NextLink == "" {
+				break
+			}
+			if response.Count != f.top {
+				break
+			}
+		}
+	}
 }
 
 // SearchEndPointData - get new search for endpoint data function

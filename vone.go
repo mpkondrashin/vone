@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -221,6 +222,9 @@ func (v *VOne) DecodeBody(f vOneFunc, body io.ReadCloser) error {
 	if err != nil {
 		return fmt.Errorf("read body : %w", err)
 	}
+	w, _ := os.Create("body.json")
+	w.Write(bodyBytes)
+	w.Close()
 	r := f.responseStruct()
 	err = json.Unmarshal(bodyBytes, r)
 	if err != nil {
