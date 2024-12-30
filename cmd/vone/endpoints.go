@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 
+	"github.com/gocarina/gocsv"
 	"github.com/mpkondrashin/vone"
 	"github.com/spf13/viper"
 )
@@ -32,7 +35,7 @@ func (c *commandGetEndpointData) Execute() error {
 	if query == "" {
 		log.Fatalf("--%s parameter can not be empty", flagQuery)
 	}
-	search.Query(query)
+	search.QueryString(query)
 	topAmount := viper.GetInt(flagTop)
 	if topAmount != 0 {
 		top, err := vone.TopFromInt(topAmount)
@@ -51,24 +54,20 @@ func (c *commandGetEndpointData) Execute() error {
 		fmt.Println(string(s))
 		return nil
 	}
-	first := true
-	fmt.Println("[")
-	err := search.Iterate(context.TODO(), func(item *vone.SearchEndPointDataResponseItem) error {
-		s, err := json.MarshalIndent(item, "    ", "    ")
-		if err != nil {
-			log.Fatal(err)
+	writer := csv.NewWriter(os.Stdout)
+	dataCh := make(chan interface{})
+	go func() {
+		for row, err := range search.Range(context.TODO()) {
+			if err != nil {
+				panic(err)
+			}
+			dataCh <- row
 		}
-		if first {
-			fmt.Printf("    %s", string(s))
-			first = false
-		} else {
-			fmt.Printf(",\n    %s", string(s))
-		}
-		return nil
-	})
+		close(dataCh)
+	}()
+	err := gocsv.MarshalChan(dataCh, writer)
 	if err != nil {
-		return err
+		return fmt.Errorf("gocsv: %v", err)
 	}
-	fmt.Println("\n]")
 	return nil
 }

@@ -11,6 +11,7 @@ package vone
 
 import (
 	"context"
+	"iter"
 )
 
 // SearchEndPointDataResponseItem - get endpoint data response for each endpoint
@@ -49,7 +50,7 @@ type SearchEndPointDataResponse struct {
 type SearchEndPointDataFunc struct {
 	baseFunc
 	Response SearchEndPointDataResponse
-	query    string
+	//query    string
 }
 
 // Do - run request
@@ -81,6 +82,27 @@ func (f *SearchEndPointDataFunc) Iterate(ctx context.Context,
 	return nil
 }
 
+// Range - iterator for all endpoints matching query (go 1.23 and later)
+func (f *SearchEndPointDataFunc) Range(ctx context.Context) iter.Seq2[*SearchEndPointDataResponseItem, error] {
+	return func(yield func(*SearchEndPointDataResponseItem, error) bool) {
+		for {
+			response, err := f.Do(ctx)
+			if err != nil {
+				yield(nil, err)
+				return
+			}
+			for n := range response.Items {
+				if !yield(&response.Items[n], nil) {
+					return
+				}
+			}
+			if response.NextLink == "" {
+				break
+			}
+		}
+	}
+}
+
 // SearchEndPointData - get new search for endpoint data function
 func (v *VOne) SearchEndPointData() *SearchEndPointDataFunc {
 	f := &SearchEndPointDataFunc{}
@@ -90,7 +112,17 @@ func (v *VOne) SearchEndPointData() *SearchEndPointDataFunc {
 }
 
 // Query - set search query
-func (f *SearchEndPointDataFunc) Query(query string) *SearchEndPointDataFunc {
+func (f *SearchEndPointDataFunc) Query(filter Filter) *SearchEndPointDataFunc {
+	f.setHeader("TMV1-Query", filter.Build())
+	//	if f.query != query {
+	//		f.query = query
+	f.Response.NextLink = ""
+	//	}
+	return f
+}
+
+// Query - set search query
+func (f *SearchEndPointDataFunc) QueryString(query string) *SearchEndPointDataFunc {
 	f.setHeader("TMV1-Query", query)
 	//	if f.query != query {
 	//		f.query = query

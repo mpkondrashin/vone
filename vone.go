@@ -78,11 +78,16 @@ func (vot *VisionOneTime) UnmarshalJSON(b []byte) error {
 
 // Implement Unmarshaler interface
 func (vot VisionOneTime) MarshalJSON() ([]byte, error) {
-	return []byte(vot.String()), nil
+	return []byte("\"" + vot.String() + "\""), nil
 }
 
 func (vot VisionOneTime) String() string {
 	return time.Time(vot).Format(timeFormat)
+}
+
+// Convert the internal date as CSV string
+func (vot VisionOneTime) MarshalCSV() (string, error) {
+	return vot.String(), nil
 }
 
 // VOne - Vision One API struct

@@ -11,8 +11,8 @@ require (
 )
 
 require (
-	github.com/dnlo/struct2csv v0.0.0-20190928115744-2f584471b24e // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/gocarina/gocsv v0.0.0-20240520201108-78e41c74b4b1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/launchdarkly/go-ntlmssp v1.0.1 // indirect

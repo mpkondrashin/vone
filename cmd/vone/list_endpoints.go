@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"encoding/csv"
+	"fmt"
 	"os"
 
-	"github.com/dnlo/struct2csv"
+	"github.com/gocarina/gocsv"
 	"github.com/mpkondrashin/vone"
 	"github.com/spf13/viper"
 )
@@ -42,31 +43,20 @@ func (c *commandListEndpoints) Execute() error {
 		list.Top(t)
 	}
 
-	w := csv.NewWriter(os.Stdout)
+	writer := csv.NewWriter(os.Stdout)
+	dataCh := make(chan interface{})
+	go func() {
+		for row, err := range list.Range(context.TODO()) {
+			if err != nil {
+				panic(err)
+			}
+			dataCh <- row
+		}
+		close(dataCh)
+	}()
 
-	data := vone.EndpointListItem{}
-	enc := struct2csv.New()
-	// get the column names first
-	colhdrs, err := enc.GetColNames(data)
-	if err != nil {
-		return err
+	if err := gocsv.MarshalChan(dataCh, writer); err != nil {
+		return fmt.Errorf("gocsv: %v", err)
 	}
-	if err := w.Write(colhdrs); err != nil {
-		return err
-	}
-
-	for item, err := range list.Range(context.TODO()) {
-		if err != nil {
-			return err
-		}
-		row, err := enc.GetRow(*item)
-		if err != nil {
-			return err
-		}
-		if err := w.Write(row); err != nil {
-			return err
-		}
-	}
-	w.Flush()
 	return nil
 }
