@@ -12,6 +12,7 @@ package vone
 import (
 	"context"
 	"iter"
+	"strings"
 )
 
 type (
@@ -35,38 +36,53 @@ type (
 		CPUArchitecture       string        `json:"cpuArchitecture"`
 		LastLoggedOnUser      string        `json:"lastLoggedOnUser"`
 		IsolationStatus       string        `json:"isolationStatus"`
-		IPAddresses           []string      `json:"ipAddresses"`
+		IPAddresses           StringsSlice  `json:"ipAddresses"`
 		SerialNumber          string        `json:"serialNumber"`
 		EppAgent              EppAgentData  `json:"eppAgent"`
 		EdrSensor             EdrSensorData `json:"edrSensor"`
 	}
+
+	PatternData struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	}
+
+	Patterns     []PatternData
 	EppAgentData struct {
 		EndpointGroup         string        `json:"endpointGroup"`
 		ProtectionManager     string        `json:"protectionManager"`
 		PolicyName            string        `json:"policyName"`
 		Status                string        `json:"status"`
-		LastConnectedDateTime VOneTime      `json:"lastConnectedDateTime"`
+		LastConnectedDateTime VisionOneTime `json:"lastConnectedDateTime"`
 		Version               string        `json:"version"`
-		LastScannedDateTime   VOneTime      `json:"lastScannedDateTime"`
+		LastScannedDateTime   VisionOneTime `json:"lastScannedDateTime"`
 		ComponentVersion      string        `json:"componentVersion"`
 		ComponentUpdatePolicy string        `json:"componentUpdatePolicy"`
 		ComponentUpdateStatus string        `json:"componentUpdateStatus"`
-		InstalledComponentIds []string      `json:"installedComponentIds"`
-		Patterns              []PatternData `json:"patterns"`
-	}
-	PatternData struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
+		InstalledComponentIds StringsSlice  `json:"installedComponentIds"`
+		Patterns              Patterns      `json:"patterns"`
 	}
 	EdrSensorData struct {
-		EndpointGroup               string   `json:"endpointGroup"`
-		Connectivity                string   `json:"connectivity"`
-		Version                     string   `json:"version"`
-		LastConnectedDateTime       VOneTime `json:"lastConnectedDateTime"`
-		Status                      string   `json:"status"`
-		AdvancedRiskTelemetryStatus string   `json:"advancedRiskTelemetryStatus"`
+		EndpointGroup               string        `json:"endpointGroup"`
+		Connectivity                string        `json:"connectivity"`
+		Version                     string        `json:"version"`
+		LastConnectedDateTime       VisionOneTime `json:"lastConnectedDateTime"`
+		Status                      string        `json:"status"`
+		AdvancedRiskTelemetryStatus string        `json:"advancedRiskTelemetryStatus"`
 	}
 )
+
+// Convert Patterns the internal date as CSV string
+func (p Patterns) MarshalCSV() (string, error) {
+	var sb strings.Builder
+	for _, pattern := range p {
+		sb.WriteString(pattern.ID)
+		sb.WriteString(",")
+		sb.WriteString(pattern.Name)
+		sb.WriteString("|")
+	}
+	return sb.String(), nil
+}
 
 // SearchEndPointDataFunc - search for endpoints
 type GetEndPointListFunc struct {

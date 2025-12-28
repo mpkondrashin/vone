@@ -14,15 +14,17 @@ import (
 	"fmt"
 )
 
+type Digest struct {
+	MD5    string `json:"md5"`
+	SHA1   string `json:"sha1"`
+	SHA256 string `json:"sha256"`
+}
+
 // SandboxAnalysisResultsResponse - structure of VisionOne sandbox analysis results JSON
 type SandboxAnalysisResultsResponse struct {
-	ID     string `json:"id"`
-	Type   string `json:"type"`
-	Digest struct {
-		MD5    string `json:"md5"`
-		SHA1   string `json:"sha1"`
-		SHA256 string `json:"sha256"`
-	} `json:"digest"`
+	ID                         string        `json:"id"`
+	Type                       string        `json:"type"`
+	Digest                     Digest        `json:"digest"`
 	Arguments                  string        `json:"arguments"`
 	AnalysisCompletionDateTime VisionOneTime `json:"analysisCompletionDateTime"`
 	RiskLevel                  RiskLevel     `json:"riskLevel"`

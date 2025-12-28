@@ -35,11 +35,11 @@ func newCommandGetOATEvents() *commandGetOATEvents {
 	return c
 }
 
-func VOneTimeFromString(s string) (vone.VOneTime, error) {
-	var v vone.VOneTime
+func VOneTimeFromString(s string) (vone.VisionOneTime, error) {
+	var v vone.VisionOneTime
 	err := (&v).UnmarshalJSON([]byte(s))
 	if err != nil {
-		return vone.VOneTime{}, err
+		return vone.VisionOneTime{}, err
 	}
 	return v, nil
 }
@@ -113,7 +113,7 @@ func (c *commandGetOATEvents) Execute() error {
 	go func() {
 		for row, err := range events.Range(context.TODO()) {
 			if err != nil {
-				panic(err)
+				log.Fatalln(err)
 			}
 			dataCh <- row
 		}

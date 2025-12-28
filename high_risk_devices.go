@@ -22,12 +22,12 @@ type (
 		NextLink   string                `json:"nextLink"`
 	}
 	HighRiskDevicesItem struct {
-		ID            string   `json:"id"`
-		DeviceName    string   `json:"deviceName"`
-		Os            string   `json:"os"`
-		RiskScore     int      `json:"riskScore"`
-		LastLogonUser string   `json:"lastLogonUser"`
-		IP            []string `json:"ip"`
+		ID            string       `json:"id"`
+		DeviceName    string       `json:"deviceName"`
+		Os            string       `json:"os"`
+		RiskScore     int          `json:"riskScore"`
+		LastLogonUser string       `json:"lastLogonUser"`
+		IP            StringsSlice `json:"ip"`
 	}
 )
 

@@ -30,7 +30,7 @@ const (
 
 	applicationJSON = "application/json"
 
-	timeFormat = "2006-01-02T15:04:05Z"
+	//timeFormat = "2006-01-02T15:04:05Z"
 )
 
 type Error struct {
@@ -61,15 +61,27 @@ func (e *Error) Error() string {
 
 type VisionOneTime time.Time
 
+const (
+	timeFormat  = `2006-01-02T15:04:05`
+	timeFormatZ = layout + "Z"
+)
+
 var _ json.Unmarshaler = (*VisionOneTime)(nil)
 
 // Implement Marshaler interface
 func (vot *VisionOneTime) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), "\"")
+	if len(s) == 0 {
+		*vot = VisionOneTime(time.Time{})
+		return nil
+	}
 	//log.Println("UnmarshalJSON s ", s)
 	t, err := time.Parse(timeFormat, s)
 	if err != nil {
-		return err
+		t, err = time.Parse(timeFormatZ, s)
+		if err != nil {
+			return err
+		}
 	}
 	//log.Println("UnmarshalJSON  t ", t)
 	*vot = VisionOneTime(t)
@@ -82,7 +94,7 @@ func (vot VisionOneTime) MarshalJSON() ([]byte, error) {
 }
 
 func (vot VisionOneTime) String() string {
-	return time.Time(vot).Format(timeFormat)
+	return time.Time(vot).Format(timeFormatZ)
 }
 
 // Convert the internal date as CSV string
