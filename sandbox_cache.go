@@ -155,7 +155,7 @@ func (c *Cache) Query(sha1 string) (*SandboxAnalysisResultsResponse, time.Time, 
 		return nil, time.Time{}, c.error("Query", rows.Err())
 	}
 	if !rows.Next() {
-		return nil, time.Time{}, fmt.Errorf("Query %s: %w", sha1, ErrNotFound)
+		return nil, time.Time{}, nil // fmt.Errorf("Query %s: %w", sha1, ErrNotFound)
 	}
 	return c.ScanSandboxAnalysisResultsResponse(rows)
 }

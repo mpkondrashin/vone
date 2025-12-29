@@ -52,7 +52,6 @@ type SandboxSubmissionsFunc struct {
 func (v *VOne) SandboxListSubmissions() *SandboxSubmissionsFunc {
 	f := &SandboxSubmissionsFunc{}
 	f.baseFunc.init(v)
-	//log.Println("AAA", f)
 	return f
 }
 
