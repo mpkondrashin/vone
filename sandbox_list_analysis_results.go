@@ -18,8 +18,8 @@ import (
 
 type (
 	SandboxListAnalysisResultResponse struct {
-		Items    []ListSubmissionsItem `json:"items"`
-		NextLink string                `json:"nextLink"`
+		Items    []SandboxAnalysisResultsResponse `json:"items"`
+		NextLink string                           `json:"nextLink"`
 	}
 )
 
@@ -89,7 +89,7 @@ func (f *SandboxListAnalysisResultsFunc) Next(ctx context.Context) (*SandboxList
 	return f.Do(ctx)
 }
 
-func (f *SandboxListAnalysisResultsFunc) IterateListSubmissions(ctx context.Context, callback func(*ListSubmissionsItem) error) error {
+func (f *SandboxListAnalysisResultsFunc) IterateListSubmissions(ctx context.Context, callback func(*SandboxAnalysisResultsResponse) error) error {
 	for {
 		if err := f.vone.call(ctx, f); err != nil {
 			return err
@@ -106,8 +106,8 @@ func (f *SandboxListAnalysisResultsFunc) IterateListSubmissions(ctx context.Cont
 }
 
 // Range - iterator for all submissions (go 1.23 and later)
-func (f *SandboxListAnalysisResultsFunc) Range(ctx context.Context) iter.Seq2[*ListSubmissionsItem, error] {
-	return func(yield func(*ListSubmissionsItem, error) bool) {
+func (f *SandboxListAnalysisResultsFunc) Range(ctx context.Context) iter.Seq2[*SandboxAnalysisResultsResponse, error] {
+	return func(yield func(*SandboxAnalysisResultsResponse, error) bool) {
 		for {
 			if err := f.vone.call(ctx, f); err != nil {
 				yield(nil, err)
