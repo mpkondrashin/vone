@@ -326,7 +326,7 @@ func (c *commandSubmit) PDFReport(id string) error {
 			if !errors.As(err, &vOneErr) {
 				return err
 			}
-			if vOneErr.ErrorData.Code == vone.ErrorCodeNotFound {
+			if vOneErr.Code == vone.ErrorCodeNotFound {
 				continue
 			}
 			return err
