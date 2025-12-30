@@ -22,30 +22,23 @@ const (
 
 type (
 	SandboxSubmissionStatusResponse struct {
-		ID     string `json:"id"`
-		Action Action `json:"action"`
-		Status Status `json:"status"`
-		Error  struct {
-			Code    string `json:"code"`
-			Message string `json:"message"`
-		} `json:"error"`
+		ID                 string        `json:"id"`
+		Action             Action        `json:"action"`
+		Status             Status        `json:"status"`
+		Error              Error         `json:"error"`
 		CreatedDateTime    VisionOneTime `json:"createdDateTime"`
 		LastActionDateTime VisionOneTime `json:"lastActionDateTime"`
 		ResourceLocation   string        `json:"resourceLocation"`
 		IsCached           bool          `json:"isCached"`
-		Digest             struct {
-			MD5    string `json:"md5"`
-			SHA1   string `json:"sha1"`
-			SHA256 string `json:"sha256"`
-		} `json:"digest"`
-		Arguments string `json:"arguments"`
+		Digest             Digest        `json:"digest"`
+		Arguments          string        `json:"arguments"`
 	}
 )
 
 var ErrSubmission = errors.New("submission error")
 
 func (s *SandboxSubmissionStatusResponse) GetError() error {
-	if s.Error.Code == "" {
+	if s.Error.Code == ErrorCodeNoError {
 		return nil
 	}
 	return fmt.Errorf("%w: %v: %s", ErrSubmission, s.Error.Code, s.Error.Message)

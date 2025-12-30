@@ -34,26 +34,24 @@ const (
 )
 
 type Error struct {
-	ErrorData struct {
-		Message    string    `json:"message"`
-		Code       ErrorCode `json:"code"`
-		Innererror struct {
-			Service string `json:"service"`
-			Code    string `json:"code"`
-		} `json:"innererror"`
-	} `json:"error"`
+	Message    string    `json:"message"`
+	Code       ErrorCode `json:"code"`
+	Innererror struct {
+		Service string `json:"service"`
+		Code    string `json:"code"`
+	} `json:"innererror"`
 }
 
 func (e *Error) Error() string {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "%d (%v): %s",
-		e.ErrorData.Code,
-		e.ErrorData.Code,
-		e.ErrorData.Message)
-	if e.ErrorData.Innererror.Code != "" {
+		e.Code,
+		e.Code,
+		e.Message)
+	if e.Innererror.Code != "" {
 		fmt.Fprintf(&sb, " (%s: %s)",
-			e.ErrorData.Innererror.Service,
-			e.ErrorData.Innererror.Code,
+			e.Innererror.Service,
+			e.Innererror.Code,
 		)
 	}
 	return sb.String()
@@ -134,7 +132,7 @@ var VOneRateLimitSurpassedError RateLimitSurpassed = func(err error) bool {
 	if !errors.As(err, &vOneErr) {
 		return false
 	}
-	return vOneErr.ErrorData.Code == HTTPResponseTooManyRequests
+	return vOneErr.Code == HTTPResponseTooManyRequests
 }
 
 func (v *VOne) callWithoutLimiter(ctx context.Context, f vOneFunc) error {
@@ -217,7 +215,7 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
 			return fmt.Errorf("parse error: %w", err)
 		}
-		//vOneErr.ErrorData.Message += strconv.Itoa(resp.StatusCode)
+		//vOneErr.Message += strconv.Itoa(resp.StatusCode)
 		return fmt.Errorf("request error: %w", vOneErr)
 	}
 

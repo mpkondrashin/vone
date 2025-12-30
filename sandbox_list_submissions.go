@@ -19,23 +19,16 @@ import (
 
 type (
 	ListSubmissionsItem struct {
-		ID     string `json:"id"`
-		Action Action `json:"action"`
-		Status Status `json:"status"`
-		Error  struct {
-			Code    string `json:"code"`
-			Message string `json:"message"`
-		} `json:"error"`
+		ID                 string        `json:"id"`
+		Action             Action        `json:"action"`
+		Status             Status        `json:"status"`
+		Error              Error         `json:"error"`
 		CreatedDateTime    VisionOneTime `json:"createdDateTime"`
 		LastActionDateTime VisionOneTime `json:"lastActionDateTime"`
 		ResourceLocation   string        `json:"resourceLocation"`
 		IsCached           bool          `json:"isCached"`
-		Digest             struct {
-			MD5    string `json:"md5"`
-			SHA1   string `json:"sha1"`
-			SHA256 string `json:"sha256"`
-		} `json:"digest"`
-		Arguments string `json:"arguments"`
+		Digest             Digest        `json:"digest"`
+		Arguments          string        `json:"arguments"`
 	}
 
 	SandboxSubmissionsResponse struct {
