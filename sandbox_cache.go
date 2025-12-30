@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-const layout = "2006-01-02T15:04:05Z"
+//const layout = "2006-01-02T15:04:05Z"
 
 // Cache - database to cache Analyzer check results
 type Cache struct {
@@ -177,7 +177,7 @@ func (c *Cache) ScanSandboxAnalysisResultsResponse(rows *sql.Rows) (*SandboxAnal
 	}
 	data.DetectionNames = strings.Split(detectionNames, ",")
 	data.ThreatTypes = strings.Split(threatTypes, ",")
-	date, err := time.Parse(layout, updated)
+	date, err := time.Parse(timeFormatZ, updated)
 	if err != nil {
 		return nil, time.Time{}, c.error("IterateCache time.Parse", err)
 	}

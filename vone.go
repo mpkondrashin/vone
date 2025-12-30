@@ -63,7 +63,7 @@ type VisionOneTime time.Time
 
 const (
 	timeFormat  = `2006-01-02T15:04:05`
-	timeFormatZ = layout + "Z"
+	timeFormatZ = timeFormat + "Z"
 )
 
 var _ json.Unmarshaler = (*VisionOneTime)(nil)
@@ -203,6 +203,7 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 		v.transportModifier(transport)
 		client.Transport = transport
 	}
+	//fmt.Println(req)
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("HTTP request: %w", err)

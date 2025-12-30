@@ -35,12 +35,12 @@ func (v *VOne) SandboxListAnalysisResults() *SandboxListAnalysisResultsFunc {
 }
 
 func (f *SandboxListAnalysisResultsFunc) StartDateTime(t time.Time) *SandboxListAnalysisResultsFunc {
-	f.setParameter("startDateTime", t.Format(timeFormat))
+	f.setParameter("startDateTime", t.Format(timeFormatZ))
 	return f
 }
 
 func (f *SandboxListAnalysisResultsFunc) EndDateTime(t time.Time) *SandboxListAnalysisResultsFunc {
-	f.setParameter("endDateTime", t.Format(timeFormat))
+	f.setParameter("endDateTime", t.Format(timeFormatZ))
 	return f
 }
 
