@@ -42,7 +42,7 @@ type Error struct {
 	} `json:"innererror"`
 }
 
-func (e *Error) Error() string {
+func (e Error) Error() string {
 	var sb strings.Builder
 	fmt.Fprintf(&sb, "%d (%v): %s",
 		e.Code,
