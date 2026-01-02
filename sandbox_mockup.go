@@ -75,7 +75,7 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 		Digest:    digest,
 		Arguments: "",
 	}
-
+	sm.logger.Printf("SubmitFile (%s): response created", id)
 	headers := SandboxSubmitFileResponseHeaders{
 		OperationLocation:        "",
 		SubmissionReserveCount:   100,
@@ -83,14 +83,18 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 		SubmissionCount:          1,
 		SubmissionExemptionCount: 1,
 	}
+	sm.logger.Printf("SubmitFile (%s): headers created", id)
 
 	sub := &submission{}
 	sm.submissions[id] = sub
+	sm.logger.Printf("SubmitFile (%s): submission tracked", id)
 
 	err = json.Unmarshal(data, &sub.submissionStatus)
 	if err != nil {
+		sm.logger.Printf("SubmitFile (%s): unmarshal submissionStatus failed: %v", id, err)
 		return nil, nil, fmt.Errorf("unmarshal: %w", err)
 	}
+	sm.logger.Printf("SubmitFile (%s): submissionStatus unmarshaled: %v", id, sub.submissionStatus.Status)
 	if sub.submissionStatus.Status == StatusFailed {
 		sm.logger.Printf("SubmitFile (%s): failed", id)
 		sub.submissionStatus.ID = id
@@ -104,6 +108,7 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 
 	err = json.Unmarshal(data, &sub.analysisResult)
 	if err != nil {
+		sm.logger.Printf("SubmitFile (%s): unmarshal analysisResult failed: %v", id, err)
 		return nil, nil, fmt.Errorf("unmarshal: %w", err)
 	}
 	sm.logger.Printf("SubmitFile (%s): success", id)
