@@ -90,12 +90,12 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 	sm.logger.Printf("SubmitFile (%s): submission tracked", id)
 
 	err = json.Unmarshal(data, &sub.submissionStatus)
-	if err != nil {
-		sm.logger.Printf("SubmitFile (%s): unmarshal submissionStatus failed: %v", id, err)
-		return nil, nil, fmt.Errorf("unmarshal: %w", err)
-	}
-	sm.logger.Printf("SubmitFile (%s): submissionStatus unmarshaled: %v", id, sub.submissionStatus.Status)
-	if sub.submissionStatus.Status == StatusFailed {
+	//if err != nil {
+	//	sm.logger.Printf("SubmitFile (%s): unmarshal submissionStatus failed: %v", id, err)
+	//	return nil, nil, fmt.Errorf("unmarshal: %w", err)
+	//}
+	sm.logger.Printf("SubmitFile (%s): submissionStatus unmarshal err: %v", id, err)
+	if err == nil && sub.submissionStatus.Status == StatusFailed {
 		sm.logger.Printf("SubmitFile (%s): failed", id)
 		sub.submissionStatus.ID = id
 		sub.submissionStatus.Action = ActionAnalyzeFile
