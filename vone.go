@@ -106,6 +106,7 @@ type VOne struct {
 	Token             string
 	transportModifier func(*http.Transport)
 	rateLimiter       RateLimiter
+	mockup            *SandboxMockup
 }
 
 // NewVOne - create VOne struct
@@ -123,6 +124,11 @@ func (v *VOne) SetRateLimiter(rateLimiter RateLimiter) *VOne {
 
 func (v *VOne) AddTransportModifier(transportModifier func(*http.Transport)) {
 	AddTransportModifier(&v.transportModifier, transportModifier)
+}
+
+func (v *VOne) SetMockup(mockup *SandboxMockup) *VOne {
+	v.mockup = mockup
+	return v
 }
 
 const HTTPResponseTooManyRequests = 429

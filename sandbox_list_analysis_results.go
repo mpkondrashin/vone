@@ -60,6 +60,9 @@ func (f *SandboxListAnalysisResultsFunc) Top(t Top) *SandboxListAnalysisResultsF
 }
 
 func (f *SandboxListAnalysisResultsFunc) Do(ctx context.Context) (*SandboxListAnalysisResultResponse, error) {
+	if f.vone.mockup != nil {
+		return f.vone.mockup.ListAnalysisResults(f)
+	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}

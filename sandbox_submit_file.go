@@ -104,6 +104,9 @@ func (s *SandboxSubmitFileToSandboxFunc) SetArguments(arguments string) *Sandbox
 }
 
 func (f *SandboxSubmitFileToSandboxFunc) Do(ctx context.Context) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
+	if f.vone.mockup != nil {
+		return f.vone.mockup.SubmitFile(f)
+	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, nil, err
 	}

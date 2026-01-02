@@ -50,6 +50,9 @@ func (v *VOne) SandboxAnalysisResults(id string) *SandboxAnalysisResultsFunc {
 
 // Do - get sanbox analysis results
 func (f *SandboxAnalysisResultsFunc) Do(ctx context.Context) (*SandboxAnalysisResultsResponse, error) {
+	if f.vone.mockup != nil {
+		return f.vone.mockup.AnalysisResults(f)
+	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}

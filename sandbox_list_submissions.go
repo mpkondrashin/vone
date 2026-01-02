@@ -18,22 +18,9 @@ import (
 )
 
 type (
-	ListSubmissionsItem struct {
-		ID                 string        `json:"id"`
-		Action             Action        `json:"action"`
-		Status             Status        `json:"status"`
-		Error              Error         `json:"error"`
-		CreatedDateTime    VisionOneTime `json:"createdDateTime"`
-		LastActionDateTime VisionOneTime `json:"lastActionDateTime"`
-		ResourceLocation   string        `json:"resourceLocation"`
-		IsCached           bool          `json:"isCached"`
-		Digest             Digest        `json:"digest"`
-		Arguments          string        `json:"arguments"`
-	}
-
 	SandboxSubmissionsResponse struct {
-		Items    []ListSubmissionsItem `json:"items"`
-		NextLink string                `json:"nextLink"`
+		Items    []SandboxSubmissionStatusResponse `json:"items"`
+		NextLink string                            `json:"nextLink"`
 	}
 )
 
@@ -101,6 +88,9 @@ func (f *SandboxSubmissionsFunc) Top(t Top) *SandboxSubmissionsFunc {
 }
 
 func (f *SandboxSubmissionsFunc) Do(ctx context.Context) (*SandboxSubmissionsResponse, error) {
+	if f.vone.mockup != nil {
+		return f.vone.mockup.ListSubmissions(f)
+	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
@@ -130,7 +120,7 @@ func (f *SandboxSubmissionsFunc) Next(ctx context.Context) (*SandboxSubmissionsR
 	return f.Do(ctx)
 }
 
-func (f *SandboxSubmissionsFunc) IterateListSubmissions(ctx context.Context, callback func(*ListSubmissionsItem) error) error {
+func (f *SandboxSubmissionsFunc) IterateListSubmissions(ctx context.Context, callback func(*SandboxSubmissionStatusResponse) error) error {
 	for {
 		if err := f.vone.call(ctx, f); err != nil {
 			return err
@@ -147,8 +137,8 @@ func (f *SandboxSubmissionsFunc) IterateListSubmissions(ctx context.Context, cal
 }
 
 // Range - iterator for all submissions (go 1.23 and later)
-func (f *SandboxSubmissionsFunc) Range(ctx context.Context) iter.Seq2[*ListSubmissionsItem, error] {
-	return func(yield func(*ListSubmissionsItem, error) bool) {
+func (f *SandboxSubmissionsFunc) Range(ctx context.Context) iter.Seq2[*SandboxSubmissionStatusResponse, error] {
+	return func(yield func(*SandboxSubmissionStatusResponse, error) bool) {
 		for {
 			if err := f.vone.call(ctx, f); err != nil {
 				yield(nil, err)

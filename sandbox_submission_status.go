@@ -59,6 +59,9 @@ func (v *VOne) SandboxSubmissionStatus(id string) *SandboxSubmissionStatusFunc {
 }
 
 func (f *SandboxSubmissionStatusFunc) Do(ctx context.Context) (*SandboxSubmissionStatusResponse, error) {
+	if f.vone.mockup != nil {
+		return f.vone.mockup.SubmissionStatus(f)
+	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
