@@ -1,15 +1,18 @@
 package vone
 
 import (
+	"bytes"
 	"crypto/md5"
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
+	"mime"
+	"mime/multipart"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 
@@ -55,15 +58,51 @@ func (s *SandboxMockup) EnableFileLogging(path string) error {
 	return nil
 }
 
+func extractJSONFromMultipartBytes(body []byte, contentType string) ([]byte, error) {
+	_, params, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		return nil, err
+	}
+
+	boundary := params["boundary"]
+	if boundary == "" {
+		return nil, errors.New("no boundary")
+	}
+
+	reader := multipart.NewReader(bytes.NewReader(body), boundary)
+
+	for {
+		part, err := reader.NextPart()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		if part.Header.Get("Content-Type") == "application/json" {
+			return io.ReadAll(part)
+		}
+	}
+
+	return nil, errors.New("json part not found")
+}
+
 func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
 	sm.logger.Println("SubmitFile")
 	data, err := io.ReadAll(f.Request)
 	if err != nil {
 		return nil, nil, err
 	}
-	re := regexp.MustCompile(`\s+`)
-	strippedData := re.ReplaceAllString(string(data), "")
-	sm.logger.Printf("Got data %s", strippedData)
+	jsonData, err := extractJSONFromMultipartBytes(data, "application/octet-stream")
+	if err != nil {
+		sm.logger.Printf("Error extracting JSON: %v", err)
+	} else {
+		sm.logger.Printf("Extracted JSON: %s", string(jsonData))
+	}
+	//re := regexp.MustCompile(`\s+`)
+	//strippedData := re.ReplaceAllString(string(data), "")
+	//sm.logger.Printf("Got data %s", strippedData)
 
 	md5Hash := md5.Sum(data)
 	sha1Hash := sha1.Sum(data)
