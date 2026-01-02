@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -60,6 +61,10 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 	if err != nil {
 		return nil, nil, err
 	}
+	re := regexp.MustCompile(`\s+`)
+	strippedData := re.ReplaceAllString(string(data), "")
+	sm.logger.Printf("Got data %s", strippedData)
+
 	md5Hash := md5.Sum(data)
 	sha1Hash := sha1.Sum(data)
 	sha256Hash := sha256.Sum256(data)

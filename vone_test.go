@@ -39,3 +39,26 @@ func TestUnmarshalSandboxAnalysisResultsResponse(t *testing.T) {
 		t.Fatalf("expected trueFileType exe, got %s", response.TrueFileType)
 	}
 }
+
+func TestSandboxSubmissionStatusResponse_NullDates(t *testing.T) {
+	data := []byte(`
+{
+  "id": "123",
+  "action": "analyzeFile",
+  "status": "running",
+  "error": {},
+  "createdDateTime": null,
+  "lastActionDateTime": null,
+  "resourceLocation": "/tmp/file.exe",
+  "isCached": false,
+  "digest": {},
+  "arguments": ""
+}
+`)
+
+	var resp SandboxSubmissionStatusResponse
+
+	if err := json.Unmarshal(data, &resp); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
