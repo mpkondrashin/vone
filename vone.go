@@ -68,12 +68,21 @@ var _ json.Unmarshaler = (*VisionOneTime)(nil)
 
 // Implement Marshaler interface
 func (vot *VisionOneTime) UnmarshalJSON(b []byte) error {
-	s := strings.Trim(string(b), "\"")
-	if len(s) == 0 {
+	if string(b) == "null" {
 		*vot = VisionOneTime(time.Time{})
 		return nil
 	}
-	//log.Println("UnmarshalJSON s ", s)
+
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+
+	if s == "" {
+		*vot = VisionOneTime(time.Time{})
+		return nil
+	}
+
 	t, err := time.Parse(timeFormat, s)
 	if err != nil {
 		t, err = time.Parse(timeFormatZ, s)
@@ -81,7 +90,7 @@ func (vot *VisionOneTime) UnmarshalJSON(b []byte) error {
 			return err
 		}
 	}
-	//log.Println("UnmarshalJSON  t ", t)
+
 	*vot = VisionOneTime(t)
 	return nil
 }
