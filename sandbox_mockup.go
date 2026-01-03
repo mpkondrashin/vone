@@ -13,6 +13,7 @@ import (
 	"mime"
 	"mime/multipart"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -100,13 +101,13 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 	} else {
 		sm.logger.Printf("Extracted JSON: %s", string(jsonData))
 	}
-	//re := regexp.MustCompile(`\s+`)
-	//strippedData := re.ReplaceAllString(string(data), "")
-	//sm.logger.Printf("Got data %s", strippedData)
+	re := regexp.MustCompile(`\s+`)
+	strippedData := re.ReplaceAllString(string(jsonData), "")
+	sm.logger.Printf("Got data %s", strippedData)
 
-	md5Hash := md5.Sum(data)
-	sha1Hash := sha1.Sum(data)
-	sha256Hash := sha256.Sum256(data)
+	md5Hash := md5.Sum(jsonData)
+	sha1Hash := sha1.Sum(jsonData)
+	sha256Hash := sha256.Sum256(jsonData)
 	digest := Digest{
 		MD5:    fmt.Sprintf("%x", md5Hash),
 		SHA1:   fmt.Sprintf("%x", sha1Hash),
@@ -133,7 +134,7 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 	sm.submissions[id] = sub
 	sm.logger.Printf("SubmitFile (%s): submission tracked", id)
 
-	err = json.Unmarshal(data, &sub.submissionStatus)
+	err = json.Unmarshal(jsonData, &sub.submissionStatus)
 	//if err != nil {
 	//	sm.logger.Printf("SubmitFile (%s): unmarshal submissionStatus failed: %v", id, err)
 	//	return nil, nil, fmt.Errorf("unmarshal: %w", err)
@@ -150,7 +151,7 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 		return &response, &headers, nil
 	}
 
-	err = json.Unmarshal(data, &sub.analysisResult)
+	err = json.Unmarshal(jsonData, &sub.analysisResult)
 	if err != nil {
 		sm.logger.Printf("SubmitFile (%s): unmarshal analysisResult failed: %v", id, err)
 		return nil, nil, fmt.Errorf("unmarshal: %w", err)
