@@ -94,7 +94,7 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 	if err != nil {
 		return nil, nil, err
 	}
-	jsonData, err := extractJSONFromMultipartBytes(data, "application/octet-stream")
+	jsonData, err := extractJSONFromMultipartBytes(data, f.formDataContentType)
 	if err != nil {
 		sm.logger.Printf("Error extracting JSON: %v", err)
 	} else {
