@@ -59,6 +59,7 @@ func (s *SandboxMockup) EnableFileLogging(path string) error {
 	return nil
 }
 
+/*2026-01-03 11:53:46.237799 ERROR G0068 HTTP request: Get "https://vone_domain/v3.0/sandbox/tasks?filter=%!i(MISSING)d+eq+258025fe-eae7-4fcb-96d8-0f7800505f3e": dial tcp: lookup vone_domain: no such host dispatcher.(*VOneSandboxDispatcher).PullResult[113]<dispatcher.Go.func1[480]*/
 func (sm *SandboxMockup) extractFirstPart(body []byte, contentType string) ([]byte, error) {
 	_, params, err := mime.ParseMediaType(contentType)
 	if err != nil {
@@ -207,6 +208,7 @@ func (sm *SandboxMockup) ListSubmissions(f *SandboxSubmissionsFunc) (*SandboxSub
 	for id, s := range sm.submissions {
 		if strings.Contains(f.parameters["filter"], id) {
 			response.Items = append(response.Items, s.submissionStatus)
+			sm.logger.Printf("ListSubmissions: id=%s, status=%v", id, s.submissionStatus.Status)
 			s.submissionStatus.Status += 1
 		}
 	}
@@ -228,6 +230,7 @@ func (sm *SandboxMockup) ListAnalysisResults(f *SandboxListAnalysisResultsFunc) 
 			continue
 		}
 		results.Items = append(results.Items, s.analysisResult)
+		sm.logger.Printf("ListAnalysisResults: id=%s, riskLevel=%v", id, s.analysisResult.RiskLevel)
 	}
 	sm.logger.Printf("ListAnalysisResults: %d items", len(results.Items))
 	return &results, nil
