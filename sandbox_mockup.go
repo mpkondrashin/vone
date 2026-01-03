@@ -209,7 +209,7 @@ func (sm *SandboxMockup) ListSubmissions(f *SandboxSubmissionsFunc) (*SandboxSub
 		if strings.Contains(f.parameters["filter"], id) {
 			response.Items = append(response.Items, s.submissionStatus)
 			sm.logger.Printf("ListSubmissions: id=%s, status=%v", id, s.submissionStatus.Status)
-			s.submissionStatus.Status += 1
+			s.submissionStatus.Status = StatusSucceeded
 		}
 	}
 	sm.logger.Printf("ListSubmissions: %d items", len(response.Items))
