@@ -93,6 +93,18 @@ func (f *SandboxListAnalysisResultsFunc) Next(ctx context.Context) (*SandboxList
 }
 
 func (f *SandboxListAnalysisResultsFunc) IterateListSubmissions(ctx context.Context, callback func(*SandboxAnalysisResultsResponse) error) error {
+	if f.vone.mockup != nil {
+		response, err := f.vone.mockup.ListAnalysisResults(f)
+		if err != nil {
+			return err
+		}
+		for i := range response.Items {
+			if err := callback(&response.Items[i]); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
 	for {
 		if err := f.vone.call(ctx, f); err != nil {
 			return err
@@ -111,6 +123,19 @@ func (f *SandboxListAnalysisResultsFunc) IterateListSubmissions(ctx context.Cont
 // Range - iterator for all submissions (go 1.23 and later)
 func (f *SandboxListAnalysisResultsFunc) Range(ctx context.Context) iter.Seq2[*SandboxAnalysisResultsResponse, error] {
 	return func(yield func(*SandboxAnalysisResultsResponse, error) bool) {
+		if f.vone.mockup != nil {
+			response, err := f.vone.mockup.ListAnalysisResults(f)
+			if err != nil {
+				yield(nil, err)
+				return
+			}
+			for i := range response.Items {
+				if !yield(&response.Items[i], nil) {
+					return
+				}
+			}
+			return
+		}
 		for {
 			if err := f.vone.call(ctx, f); err != nil {
 				yield(nil, err)
