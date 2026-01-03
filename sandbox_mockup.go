@@ -59,7 +59,7 @@ func (s *SandboxMockup) EnableFileLogging(path string) error {
 	return nil
 }
 
-func extractJSONFromMultipartBytes(body []byte, contentType string) ([]byte, error) {
+func (sm *SandboxMockup) extractFirstPart(body []byte, contentType string) ([]byte, error) {
 	_, params, err := mime.ParseMediaType(contentType)
 	if err != nil {
 		return nil, err
@@ -71,22 +71,15 @@ func extractJSONFromMultipartBytes(body []byte, contentType string) ([]byte, err
 	}
 
 	reader := multipart.NewReader(bytes.NewReader(body), boundary)
-
-	for {
-		part, err := reader.NextPart()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-
-		if part.Header.Get("Content-Type") == "application/json" {
-			return io.ReadAll(part)
-		}
+	part, err := reader.NextPart()
+	sm.logger.Printf("extractFirstPart: part=%v, err=%v", part, err)
+	if err == io.EOF {
+		return nil, errors.New("file content not found")
 	}
-
-	return nil, errors.New("json part not found")
+	if err != nil {
+		return nil, err
+	}
+	return io.ReadAll(part)
 }
 
 func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
@@ -97,7 +90,7 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 	}
 	sm.logger.Printf("ContentType: %s", f.formDataContentType)
 	sm.logger.Printf("Data: %s", string(data))
-	jsonData, err := extractJSONFromMultipartBytes(data, f.formDataContentType)
+	jsonData, err := sm.extractFirstPart(data, f.formDataContentType)
 	if err != nil {
 		sm.logger.Printf("Error extracting JSON: %v", err)
 	} else {
