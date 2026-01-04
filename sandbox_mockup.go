@@ -185,7 +185,8 @@ func (sm *SandboxMockup) AnalysisResults(f *SandboxAnalysisResultsFunc) (*Sandbo
 		return nil, fmt.Errorf("submission %s not found", f.id)
 	}
 	if submission.submissionStatus.Status != StatusSucceeded {
-		return nil, fmt.Errorf("submission %s status is not succeed", f.id)
+		// Question is, how actual VOneSandbox API behaves?...
+		return nil, nil
 	}
 	sm.logger.Printf("AnalysisResults (%s): returning risk level %v", f.id, submission.analysisResult.RiskLevel)
 	return &submission.analysisResult, nil
