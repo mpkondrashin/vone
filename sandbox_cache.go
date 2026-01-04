@@ -173,13 +173,14 @@ func (c *Cache) ScanSandboxAnalysisResultsResponse(rows *sql.Rows) (*SandboxAnal
 	}
 	err = (&data.AnalysisCompletionDateTime).UnmarshalJSON([]byte(analysisCompletionDateTime))
 	if err != nil {
-		return nil, time.Time{}, fmt.Errorf("ScanSandboxAnalysisResults UnmarshalJSON: %w", err)
+		return nil, time.Time{}, fmt.Errorf("ScanSandboxAnalysisResults UnmarshalJSON \"%s\": %w",
+			analysisCompletionDateTime, err)
 	}
 	data.DetectionNames = strings.Split(detectionNames, ",")
 	data.ThreatTypes = strings.Split(threatTypes, ",")
 	date, err := time.Parse(timeFormatZ, updated)
 	if err != nil {
-		return nil, time.Time{}, c.error("IterateCache time.Parse", err)
+		return nil, time.Time{}, c.error("IterateCache time.Parse \"%s\"", updated, err)
 	}
 	return &data, date, nil
 }
