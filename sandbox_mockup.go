@@ -85,13 +85,16 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 	if err != nil {
 		return nil, nil, err
 	}
+	re := regexp.MustCompile(`\s+`)
+	strippedData := re.ReplaceAllString(string(data), "")
+	sm.logger.Printf("Got data \"%s\"", strippedData)
+
 	jsonData, err := sm.extractFirstPart(data, f.formDataContentType)
 	if err != nil {
-		sm.logger.Printf("Error extracting JSON: %v", err)
+		return nil, nil, fmt.Errorf("Error extracting JSON: %v", err)
 	}
-	re := regexp.MustCompile(`\s+`)
-	strippedData := re.ReplaceAllString(string(jsonData), "")
-	sm.logger.Printf("Got data %s", strippedData)
+	strippedJsonData := re.ReplaceAllString(string(jsonData), "")
+	sm.logger.Printf("Got JSON data \"%s\"", strippedJsonData)
 
 	md5Hash := md5.Sum(jsonData)
 	sha1Hash := sha1.Sum(jsonData)

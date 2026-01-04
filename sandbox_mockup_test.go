@@ -29,7 +29,7 @@ func TestSandboxMockup(t *testing.T) {
 }`))
 	response, headers, err := submitFile.Do(context.Background())
 	if err != nil {
-		t.Errorf("Submit File Error: %v", err)
+		t.Fatalf("Submit File Error: %v", err)
 	}
 	id := response.ID
 	t.Logf("response: ID=%v", id)
@@ -38,7 +38,7 @@ func TestSandboxMockup(t *testing.T) {
 	submisionStatus := v1.SandboxSubmissionStatus(id)
 	status, err := submisionStatus.Do(context.Background())
 	if err != nil {
-		t.Errorf("Submission Status Error: %v", err)
+		t.Fatalf("Submission Status Error: %v", err)
 	}
 	t.Logf("status: %v", status.Status)
 	t.Logf("Test Submit Malicious File")
@@ -55,7 +55,7 @@ func TestSandboxMockup(t *testing.T) {
 }`))
 	response, headers, err = submitFile.Do(context.Background())
 	if err != nil {
-		t.Errorf("Submit Malicious File Error: %v", err)
+		t.Fatalf("Submit Malicious File Error: %v", err)
 	}
 	id = response.ID
 	t.Logf("response: ID assigned %v", id)
@@ -65,7 +65,7 @@ func TestSandboxMockup(t *testing.T) {
 	analysisResult := v1.SandboxAnalysisResults(id)
 	result, err := analysisResult.Do(context.Background())
 	if err != nil {
-		t.Errorf("Analysis Results Error: %v", err)
+		t.Fatalf("Analysis Results Error: %v", err)
 	}
 	if result != nil {
 		t.Fatalf("No ready result is returned!: %v", result)
@@ -74,24 +74,24 @@ func TestSandboxMockup(t *testing.T) {
 	submisionStatus = v1.SandboxSubmissionStatus(id)
 	status, err = submisionStatus.Do(context.Background())
 	if err != nil {
-		t.Errorf("Submission Malicious FileStatus Error: %v", err)
+		t.Fatalf("Submission Malicious FileStatus Error: %v", err)
 	}
 	t.Logf("status: %v", status.Status)
 	t.Logf("Get Second Submission Status for Malicious File")
 	submisionStatus = v1.SandboxSubmissionStatus(id)
 	status, err = submisionStatus.Do(context.Background())
 	if err != nil {
-		t.Errorf("Submission Malicious FileStatus Error: %v", err)
+		t.Fatalf("Submission Malicious FileStatus Error: %v", err)
 	}
 	t.Logf("status: %v", status.Status)
 	if err != nil {
-		t.Errorf("Submission Malicious FileStatus Error: %v", err)
+		t.Fatalf("Submission Malicious FileStatus Error: %v", err)
 	}
 	t.Logf("Get Analysis Result For Malicious File")
 	analysisResult = v1.SandboxAnalysisResults(id)
 	result, err = analysisResult.Do(context.Background())
 	if err != nil {
-		t.Errorf("Analysis Results Error: %v", err)
+		t.Fatalf("Analysis Results Error: %v", err)
 	}
 	t.Logf("result: RiskLevel=%v, DetectionNames=%v, ThreatTypes=%v", result.RiskLevel, result.DetectionNames, result.ThreatTypes)
 	t.Logf("Test Complete")
