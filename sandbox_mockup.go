@@ -59,21 +59,17 @@ func (s *SandboxMockup) EnableFileLogging(path string) error {
 	return nil
 }
 
-/*2026-01-03 11:53:46.237799 ERROR G0068 HTTP request: Get "https://vone_domain/v3.0/sandbox/tasks?filter=%!i(MISSING)d+eq+258025fe-eae7-4fcb-96d8-0f7800505f3e": dial tcp: lookup vone_domain: no such host dispatcher.(*VOneSandboxDispatcher).PullResult[113]<dispatcher.Go.func1[480]*/
 func (sm *SandboxMockup) extractFirstPart(body []byte, contentType string) ([]byte, error) {
 	_, params, err := mime.ParseMediaType(contentType)
 	if err != nil {
 		return nil, err
 	}
-
 	boundary := params["boundary"]
 	if boundary == "" {
 		return nil, errors.New("no boundary")
 	}
-
 	reader := multipart.NewReader(bytes.NewReader(body), boundary)
 	part, err := reader.NextPart()
-	sm.logger.Printf("extractFirstPart: part=%v, err=%v", part, err)
 	if err == io.EOF {
 		return nil, errors.New("file content not found")
 	}
@@ -89,13 +85,9 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 	if err != nil {
 		return nil, nil, err
 	}
-	sm.logger.Printf("ContentType: %s", f.formDataContentType)
-	sm.logger.Printf("Data: %s", string(data))
 	jsonData, err := sm.extractFirstPart(data, f.formDataContentType)
 	if err != nil {
 		sm.logger.Printf("Error extracting JSON: %v", err)
-	} else {
-		sm.logger.Printf("Extracted JSON: %s", string(jsonData))
 	}
 	re := regexp.MustCompile(`\s+`)
 	strippedData := re.ReplaceAllString(string(jsonData), "")
@@ -116,7 +108,6 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 		Digest:    digest,
 		Arguments: "",
 	}
-	sm.logger.Printf("SubmitFile (%s): response created", id)
 	headers := SandboxSubmitFileResponseHeaders{
 		OperationLocation:        "",
 		SubmissionReserveCount:   100,
@@ -124,11 +115,9 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 		SubmissionCount:          1,
 		SubmissionExemptionCount: 1,
 	}
-	sm.logger.Printf("SubmitFile (%s): headers created", id)
 
 	sub := &submission{}
 	sm.submissions[id] = sub
-	sm.logger.Printf("SubmitFile (%s): submission tracked", id)
 
 	err = json.Unmarshal(jsonData, &sub.submissionStatus)
 	//if err != nil {
@@ -152,7 +141,7 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 		sm.logger.Printf("SubmitFile (%s): unmarshal analysisResult failed: %v", id, err)
 		return nil, nil, fmt.Errorf("unmarshal: %w", err)
 	}
-	sm.logger.Printf("SubmitFile (%s): success", id)
+	sm.logger.Printf("SubmitFile (%s): unmarshaled analysisResult", id)
 	sub.analysisResult.ID = id
 	sub.analysisResult.Type = "file"
 	sub.analysisResult.Digest = digest

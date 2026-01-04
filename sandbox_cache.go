@@ -173,7 +173,7 @@ func (c *Cache) ScanSandboxAnalysisResultsResponse(rows *sql.Rows) (*SandboxAnal
 	}
 	err = (&data.AnalysisCompletionDateTime).UnmarshalJSON([]byte(analysisCompletionDateTime))
 	if err != nil {
-		return nil, time.Time{}, err
+		return nil, time.Time{}, fmt.Errorf("ScanSandboxAnalysisResults UnmarshalJSON: %w", err)
 	}
 	data.DetectionNames = strings.Split(detectionNames, ",")
 	data.ThreatTypes = strings.Split(threatTypes, ",")
@@ -241,6 +241,9 @@ func (c *Cache) IterateCache(f func(data *SandboxAnalysisResultsResponse, update
 	}
 	for rows.Next() {
 		data, updated, err := c.ScanSandboxAnalysisResultsResponse(rows)
+		if err != nil {
+			return c.error("IterateCache", err)
+		}
 		err = f(data, updated)
 		if err != nil {
 			return c.error("IterateCache callback", err)
