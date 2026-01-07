@@ -57,35 +57,35 @@ func (v *VOne) SandboxSubmitFile() *SandboxSubmitFileToSandboxFunc {
 	return f
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) SetFilePath(filePath string) (*SandboxSubmitFileToSandboxFunc, error) {
+func (f *SandboxSubmitFileToSandboxFunc) SetFilePath(filePath string) error {
 	return f.SetFilePathAndName(filePath, filepath.Base(filePath))
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) SetFilePathAndName(filePath, fileName string) (*SandboxSubmitFileToSandboxFunc, error) {
+func (f *SandboxSubmitFileToSandboxFunc) SetFilePathAndName(filePath, fileName string) error {
 	reader, err := os.Open(filePath)
 	if err != nil {
-		return f, err
+		return err
 	}
 	defer reader.Close()
 	return f.SetReader(reader, fileName)
 }
 
-func (f *SandboxSubmitFileToSandboxFunc) SetReader(reader io.Reader, fileName string) (*SandboxSubmitFileToSandboxFunc, error) {
+func (f *SandboxSubmitFileToSandboxFunc) SetReader(reader io.Reader, fileName string) error {
 	var data bytes.Buffer
 	writer := multipart.NewWriter(&data)
 	w, err := writer.CreateFormFile("file", fileName)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if _, err := io.Copy(w, reader); err != nil {
-		return nil, err
+		return err
 	}
 	if err := writer.Close(); err != nil {
-		return nil, err
+		return err
 	}
 	f.Request = &data
 	f.formDataContentType = writer.FormDataContentType()
-	return f, nil
+	return nil
 }
 
 func (s *SandboxSubmitFileToSandboxFunc) SetDocumentPassword(documentPassword string) *SandboxSubmitFileToSandboxFunc {
