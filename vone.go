@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"reflect"
@@ -221,6 +222,8 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 	if err != nil {
 		return fmt.Errorf("HTTP request: %w", err)
 	}
+	log.Printf("HTTP request: %v", resp)
+
 	if GetHTTPCodeRange(resp.StatusCode) != HTTPCodeSuccessRange {
 		var data bytes.Buffer
 		if _, err := io.Copy(&data, resp.Body); err != nil {
