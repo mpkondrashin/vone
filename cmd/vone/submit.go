@@ -131,8 +131,8 @@ func (c *commandSubmit) SubmitFile(filePath string) error {
 		return err
 	}
 	*/
-
-	f, err := c.visionOne.SandboxSubmitFile().SetFilePath(filePath)
+	f := c.visionOne.SandboxSubmitFile()
+	err := f.SetFilePath(filePath)
 	if err != nil {
 		return err
 	}

@@ -40,7 +40,7 @@ func (f *ConnectivityFunc) url() string {
 }
 
 func (f *ConnectivityFunc) responseStruct() any {
-	return &Error{}
+	return &ErrorData{}
 }
 
 func (f *ConnectivityFunc) responseBody(b io.ReadCloser) {

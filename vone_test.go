@@ -1,6 +1,7 @@
 package vone
 
 import (
+	"bytes"
 	"encoding/json"
 	"testing"
 	"time"
@@ -60,5 +61,23 @@ func TestSandboxSubmissionStatusResponse_NullDates(t *testing.T) {
 
 	if err := json.Unmarshal(data, &resp); err != nil {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestParseError(t *testing.T) {
+	data := []byte(`{"error":{"code":"AccessDenied","message":"No permission to access this resource"}}`)
+
+	vOneErr, err := ErrorFromReader(bytes.NewReader(data))
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if vOneErr.Code != ErrorCodeAccessDenied {
+		t.Errorf("expected code AccessDenied, got %s", vOneErr.Code)
+	}
+
+	if vOneErr.Message != "No permission to access this resource" {
+		t.Errorf("expected message No permission to access this resource, got %s", vOneErr.Message)
 	}
 }

@@ -10,7 +10,6 @@
 package vone
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -34,13 +33,31 @@ const (
 	//timeFormat = "2006-01-02T15:04:05Z"
 )
 
-type Error struct {
-	Message    string    `json:"message"`
-	Code       ErrorCode `json:"code"`
+type (
 	Innererror struct {
 		Service string `json:"service"`
 		Code    string `json:"code"`
-	} `json:"innererror"`
+	}
+
+	Error struct {
+		Message    string     `json:"message"`
+		Code       ErrorCode  `json:"code"`
+		Innererror Innererror `json:"innererror"`
+	}
+
+	ErrorData struct {
+		Error Error `json:"error"`
+	}
+)
+
+func ErrorFromReader(reader io.Reader) (Error, error) {
+	dec := json.NewDecoder(reader)
+	var data ErrorData
+	err := dec.Decode(&data)
+	if err != nil {
+		return Error{}, err
+	}
+	return data.Error, nil
 }
 
 func (e Error) Error() string {
@@ -225,16 +242,10 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 	log.Printf("HTTP response: %v", resp)
 	log.Printf("HTTP response status: %v", resp.Status)
 	if GetHTTPCodeRange(resp.StatusCode) != HTTPCodeSuccessRange {
-		var data bytes.Buffer
-		if _, err := io.Copy(&data, resp.Body); err != nil {
-			return fmt.Errorf("download error: %w", err)
-		}
-		log.Printf("HTTP response body: %s", data.String())
-		vOneErr := new(Error)
-		if err := json.Unmarshal(data.Bytes(), vOneErr); err != nil {
+		vOneErr, err := ErrorFromReader(resp.Body)
+		if err != nil {
 			return fmt.Errorf("parse error: %w", err)
 		}
-		//vOneErr.Message += strconv.Itoa(resp.StatusCode)
 		return fmt.Errorf("request error: %w", vOneErr)
 	}
 
