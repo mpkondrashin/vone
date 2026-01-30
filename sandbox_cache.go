@@ -10,6 +10,7 @@
 package vone
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -51,7 +52,7 @@ func NewCache(db *sql.DB, dbPath string) (*Cache, error) {
 }
 
 // Add - add Analyzer check result to cache database
-func (c *Cache) Add(data *SandboxAnalysisResultsResponse) error {
+func (c *Cache) Add(ctx context.Context, data *SandboxAnalysisResultsResponse) error {
 	stmt := `INSERT OR REPLACE INTO hashes (
 		type,
 		md5,
@@ -65,7 +66,7 @@ func (c *Cache) Add(data *SandboxAnalysisResultsResponse) error {
 		TrueFileType 
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
 
-	_, err := c.DB.Exec(stmt,
+	_, err := c.DB.ExecContext(ctx, stmt,
 		data.Type,
 		strings.ToUpper(data.Digest.MD5),
 		strings.ToUpper(data.Digest.SHA1),
@@ -121,11 +122,11 @@ func (c *Cache) Delete(sha1 string) error {
 
 // Cleanup - remove data from cache that was put there before
 // time provided
-func (c *Cache) Cleanup(date time.Time) error {
+func (c *Cache) Cleanup(ctx context.Context, date time.Time) error {
 	//	stmt := "DELETE FROM hashes where strftime('%s', updated) < $1"
 	//	_, err := c.DB.Exec(stmt, fmt.Sprint(date.Unix()))
 	stmt := "DELETE FROM hashes where updated < $1"
-	if _, err := c.DB.Exec(stmt, date); err != nil {
+	if _, err := c.DB.ExecContext(ctx, stmt, date); err != nil {
 		return c.error("Cleanup hashes", err)
 	}
 	return nil
@@ -134,7 +135,7 @@ func (c *Cache) Cleanup(date time.Time) error {
 var ErrNotFound = errors.New("not found")
 
 // Query - get cached Analyzer check result for SHA1 of file
-func (c *Cache) Query(sha1 string) (*SandboxAnalysisResultsResponse, time.Time, error) {
+func (c *Cache) Query(ctx context.Context, sha1 string) (*SandboxAnalysisResultsResponse, time.Time, error) {
 	stmt := `SELECT type,
 		md5,
 		sha1,
@@ -191,12 +192,12 @@ func (c *Cache) ScanSandboxAnalysisResultsResponse(rows *sql.Rows) (*SandboxAnal
 }
 
 // Count - return number of entities in cache database
-func (c *Cache) Count() (int, error) {
-	return c.countEntities("hashes")
+func (c *Cache) Count(ctx context.Context) (int, error) {
+	return c.countEntities(ctx, "hashes")
 }
 
 // сountEntities - count entities in given table
-func (c *Cache) countEntities(table string) (int, error) {
+func (c *Cache) countEntities(ctx context.Context, table string) (int, error) {
 	Select := fmt.Sprintf("SELECT COUNT(*) FROM %s", table)
 	rows, err := c.DB.Query(Select)
 	if err != nil {
@@ -223,7 +224,7 @@ func (c *Cache) Close() error {
 }
 
 // IterateCache - perform provided function fo each database entity
-func (c *Cache) IterateCache(f func(data *SandboxAnalysisResultsResponse, updated time.Time) error) error {
+func (c *Cache) IterateCache(ctx context.Context, f func(data *SandboxAnalysisResultsResponse, updated time.Time) error) error {
 	Select := `SELECT
 	    type,
 		md5,
@@ -237,7 +238,7 @@ func (c *Cache) IterateCache(f func(data *SandboxAnalysisResultsResponse, update
 		TrueFileType,
 		updated
 		FROM hashes`
-	rows, err := c.DB.Query(Select)
+	rows, err := c.DB.QueryContext(ctx, Select)
 	if err != nil {
 		return c.error("IterateCache Query", err)
 	}

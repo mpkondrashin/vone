@@ -1,6 +1,7 @@
 package vone
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -48,7 +49,7 @@ func TestAddTwice(t *testing.T) {
 		t.Fatal(fmt.Errorf("%s: %w", dbPath, err))
 	}
 	cache, err := NewCache(db, dbPath)
-	err = cache.Add(data1)
+	err = cache.Add(context.Background(), data1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,11 +68,11 @@ func TestAddTwice(t *testing.T) {
 		ThreatTypes:                []string{"Malware"},
 		TrueFileType:               "PE-EXE",
 	}
-	err = cache.Add(data2)
+	err = cache.Add(context.Background(), data2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	count, err := cache.Count()
+	count, err := cache.Count(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +115,7 @@ func TestAddTwo(t *testing.T) {
 		t.Fatal(fmt.Errorf("%s: %w", dbPath, err))
 	}
 	cache, err := NewCache(db, dbPath)
-	err = cache.Add(data1)
+	err = cache.Add(context.Background(), data1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,11 +134,11 @@ func TestAddTwo(t *testing.T) {
 		ThreatTypes:                []string{"Malware"},
 		TrueFileType:               "PE-EXE",
 	}
-	err = cache.Add(data2)
+	err = cache.Add(context.Background(), data2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	count, err := cache.Count()
+	count, err := cache.Count(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -180,11 +181,11 @@ func TestAddAndQuery(t *testing.T) {
 		t.Fatal(fmt.Errorf("%s: %w", dbPath, err))
 	}
 	cache, err := NewCache(db, dbPath)
-	err = cache.Add(data1)
+	err = cache.Add(context.Background(), data1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	data2, updated, err := cache.Query(sha1)
+	data2, updated, err := cache.Query(context.Background(), sha1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -228,12 +229,12 @@ func TestAddAndIterate(t *testing.T) {
 		t.Fatal(fmt.Errorf("%s: %w", dbPath, err))
 	}
 	cache, err := NewCache(db, dbPath)
-	err = cache.Add(data1)
+	err = cache.Add(context.Background(), data1)
 	if err != nil {
 		t.Fatal(err)
 	}
 	count := 0
-	err = cache.IterateCache(func(data *SandboxAnalysisResultsResponse, updated time.Time) error {
+	err = cache.IterateCache(context.Background(), func(data *SandboxAnalysisResultsResponse, updated time.Time) error {
 		count += 1
 		if !strings.EqualFold(data.Digest.SHA1, sha1) {
 			t.Errorf("Expected count %s, but got %s", sha1, data.Digest.SHA1)

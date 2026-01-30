@@ -233,7 +233,19 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 		v.transportModifier(transport)
 		client.Transport = transport
 	}
-	//fmt.Println(req)
+	fmt.Printf("Method: %v\n", req.Method)
+	fmt.Printf("URL: %v\n", req.URL)
+	fmt.Printf("Proto: %v\n", req.Proto)
+	fmt.Printf("ContentLength: %v\n", req.ContentLength)
+	fmt.Printf("TransferEncoding: %v\n", req.TransferEncoding)
+	fmt.Printf("Host: %v\n", req.Host)
+	fmt.Printf("Form: %v\n", req.Form)
+	fmt.Printf("PostForm: %v\n", req.PostForm)
+	fmt.Printf("MultipartForm: %v\n", req.MultipartForm)
+	fmt.Printf("Trailer: %v\n", req.Trailer)
+	fmt.Printf("RemoteAddr: %v\n", req.RemoteAddr)
+	fmt.Printf("ContentLength: %v\n", req.ContentLength)
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("HTTP request: %w", err)
