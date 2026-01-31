@@ -43,7 +43,7 @@ func (v *VOne) SandboxSuspiciousObjects(id string) *sandboxSuspiciousObjectsRequ
 
 func (f *sandboxSuspiciousObjectsRequest) Do(ctx context.Context) (*SandboxSuspiciousObjectsResponse, error) {
 	if err := f.checkUsed(); err != nil {
-		return nil, nil, fmt.Errorf("syspicious objects: %w", err)
+		return nil, fmt.Errorf("suspicious objects: %w", err)
 	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
