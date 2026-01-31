@@ -9,45 +9,53 @@
 
 package vone
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
-type SandboxDailyReserveResponse struct {
-	SubmissionReserveCount   int `json:"submissionReserveCount"`
-	SubmissionRemainingCount int `json:"submissionRemainingCount"`
-	SubmissionCount          int `json:"submissionCount"`
-	SubmissionExemptionCount int `json:"submissionExemptionCount"`
-	SubmissionCountDetail    struct {
-		FileCount          int `json:"fileCount"`
-		FileExemptionCount int `json:"fileExemptionCount"`
-		URLCount           int `json:"urlCount"`
-		URLExemptionCount  int `json:"urlExemptionCount"`
-	} `json:"submissionCountDetail"`
+type SubmissionCountDetail struct {
+	FileCount          int `json:"fileCount"`
+	FileExemptionCount int `json:"fileExemptionCount"`
+	URLCount           int `json:"urlCount"`
+	URLExemptionCount  int `json:"urlExemptionCount"`
 }
 
-type sanboxDailyReserveRequest struct {
-	baseFunc
+type SandboxDailyReserveResponse struct {
+	SubmissionReserveCount   int                   `json:"submissionReserveCount"`
+	SubmissionRemainingCount int                   `json:"submissionRemainingCount"`
+	SubmissionCount          int                   `json:"submissionCount"`
+	SubmissionExemptionCount int                   `json:"submissionExemptionCount"`
+	SubmissionCountDetail    SubmissionCountDetail `json:"submissionCountDetail"`
+}
+
+type sandboxDailyReserveRequest struct {
+	baseRequest
 	response SandboxDailyReserveResponse
 }
 
-var _ vOneFunc = &sanboxDailyReserveRequest{}
+var _ vOneRequest = &sandboxDailyReserveRequest{}
 
-func (f *sanboxDailyReserveRequest) Do(ctx context.Context) (*SandboxDailyReserveResponse, error) {
+func (f *sandboxDailyReserveRequest) Do(ctx context.Context) (*SandboxDailyReserveResponse, error) {
+	if err := f.checkUsed(); err != nil {
+		return nil, fmt.Errorf("daily reserve: %w", err)
+	}
 	if err := f.vone.call(ctx, f); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("daily reserve: %w", err)
 	}
 	return &f.response, nil
 }
 
-func (v *VOne) SandboxDailyReserve() *sanboxDailyReserveRequest {
-	f := &sanboxDailyReserveRequest{}
-	f.baseFunc.init(v)
+func (v *VOne) SandboxDailyReserve() *sandboxDailyReserveRequest {
+	f := &sandboxDailyReserveRequest{}
+	f.baseRequest.init(v)
 	return f
 }
 
-func (s *sanboxDailyReserveRequest) url() string {
+func (s *sandboxDailyReserveRequest) url() string {
 	return "/v3.0/sandbox/submissionUsage"
 }
 
-func (f *sanboxDailyReserveRequest) responseStruct() any {
+func (f *sandboxDailyReserveRequest) responseStruct() any {
 	return &f.response
 }

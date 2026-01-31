@@ -11,34 +11,35 @@ package vone
 
 import "context"
 
+// CheckConnectionResponse represents connection status.
 type CheckConnectionResponse struct {
 	Status string `json:"status"`
 }
 
-type sanboxCheckConnectionRequest struct {
-	baseFunc
+type sandboxCheckConnectionRequest struct {
+	baseRequest
 	response CheckConnectionResponse
 }
 
-var _ vOneFunc = &sanboxCheckConnectionRequest{}
+var _ vOneRequest = &sandboxCheckConnectionRequest{}
 
-func (f *sanboxCheckConnectionRequest) Do(ctx context.Context) (*CheckConnectionResponse, error) {
+func (f *sandboxCheckConnectionRequest) Do(ctx context.Context) (*CheckConnectionResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.response, nil
 }
 
-func (v *VOne) CheckConnection() *sanboxCheckConnectionRequest {
-	f := &sanboxCheckConnectionRequest{}
-	f.baseFunc.init(v)
+func (v *VOne) CheckConnection() *sandboxCheckConnectionRequest {
+	f := &sandboxCheckConnectionRequest{}
+	f.baseRequest.init(v)
 	return f
 }
 
-func (s *sanboxCheckConnectionRequest) url() string {
+func (s *sandboxCheckConnectionRequest) url() string {
 	return "/v3.0/healthcheck/connectivity"
 }
 
-func (f *sanboxCheckConnectionRequest) responseStruct() any {
+func (f *sandboxCheckConnectionRequest) responseStruct() any {
 	return &f.response
 }

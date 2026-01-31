@@ -10,12 +10,15 @@
 package vone
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"strings"
 )
 
-type vOneFunc interface {
+var ErrAlreadyCalled = errors.New("Do() or Store() already called")
+
+type vOneRequest interface {
 	method() string             // GET, POST, ...
 	url() string                // last part of URI
 	uri() string                // full URI (with https://xdr...)
@@ -27,56 +30,57 @@ type vOneFunc interface {
 	responseBody(io.ReadCloser) // process body - is called only if responseStruct returns any
 }
 
-var _ vOneFunc = &baseFunc{}
+var _ vOneRequest = &baseRequest{}
 
-type baseFunc struct {
+type baseRequest struct {
 	vone       *VOne
 	parameters map[string]string
 	headers    map[string]string
+	used       bool
 }
 
-func (f *baseFunc) method() string {
+func (f *baseRequest) method() string {
 	return methodGet
 }
 
-func (f *baseFunc) url() string {
+func (f *baseRequest) url() string {
 	return ""
 }
 
-func (f *baseFunc) uri() string {
+func (f *baseRequest) uri() string {
 	return ""
 }
 
-func (f *baseFunc) requestBody() io.Reader {
+func (f *baseRequest) requestBody() io.Reader {
 	return nil
 }
 
-func (f *baseFunc) contentType() string {
+func (f *baseRequest) contentType() string {
 	return applicationJSON
 }
 
-func (f *baseFunc) responseStruct() any {
+func (f *baseRequest) responseStruct() any {
 	return nil
 }
 
-func (f *baseFunc) responseBody(io.ReadCloser) {
+func (f *baseRequest) responseBody(io.ReadCloser) {
 }
 
-func (f *baseFunc) init(vone *VOne) {
+func (f *baseRequest) init(vone *VOne) {
 	f.vone = vone
 	f.parameters = make(map[string]string)
 	f.headers = make(map[string]string)
 }
 
-func (f *baseFunc) setHeader(name, value string) {
+func (f *baseRequest) setHeader(name, value string) {
 	f.headers[name] = value
 }
 
-func (f *baseFunc) setParameter(name, value string) {
+func (f *baseRequest) setParameter(name, value string) {
 	f.parameters[name] = value
 }
 
-func (f *baseFunc) populate(req *http.Request) {
+func (f *baseRequest) populate(req *http.Request) {
 	q := req.URL.Query()
 	for key, value := range f.parameters {
 		q.Add(key, value)
@@ -87,6 +91,14 @@ func (f *baseFunc) populate(req *http.Request) {
 	}
 }
 
-func (f *baseFunc) responseHeader() any {
+func (f *baseRequest) responseHeader() any {
+	return nil
+}
+
+func (f *baseRequest) checkUsed() error {
+	if f.used {
+		return ErrAlreadyCalled
+	}
+	f.used = true
 	return nil
 }

@@ -48,7 +48,7 @@ type SearchEndPointDataResponse struct {
 
 // searchEndPointDataRequest - search for endpoints
 type searchEndPointDataRequest struct {
-	baseFunc
+	baseRequest
 	response SearchEndPointDataResponse
 	//query    string
 }
@@ -106,7 +106,7 @@ func (f *searchEndPointDataRequest) Range(ctx context.Context) iter.Seq2[*Search
 // SearchEndPointData - get new search for endpoint data function
 func (v *VOne) SearchEndPointData() *searchEndPointDataRequest {
 	f := &searchEndPointDataRequest{}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 
 }

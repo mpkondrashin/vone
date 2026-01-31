@@ -45,17 +45,17 @@ type (
 
 // tiAddExceptionRequest - function to add exceptions
 type tiAddExceptionRequest struct {
-	baseFunc
+	baseRequest
 	request  TIAddException
 	response TIAddExceptionResponse
 }
 
-var _ vOneFunc = &tiAddExceptionRequest{}
+var _ vOneRequest = &tiAddExceptionRequest{}
 
 // AddExceptions - return new TIAddExceptionFunc struct
 func (v *VOne) AddExceptions() *tiAddExceptionRequest {
 	f := &tiAddExceptionRequest{}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 }
 

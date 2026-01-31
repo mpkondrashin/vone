@@ -17,48 +17,53 @@ import (
 )
 
 type sandboxDownloadResultsRequest struct {
-	baseFunc
+	baseRequest
 	id       string
 	response io.ReadCloser
 }
 
-var _ vOneFunc = &sandboxDownloadResultsRequest{}
+var _ vOneRequest = &sandboxDownloadResultsRequest{}
 
 func (v *VOne) SandboxDownloadResults(id string) *sandboxDownloadResultsRequest {
 	f := &sandboxDownloadResultsRequest{id: id}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 }
 
+// Do performs the request and returns a ReadCloser.
+// Only call Do() or Store() once; the returned stream must be consumed immediately.
 func (f *sandboxDownloadResultsRequest) Do(ctx context.Context) (io.ReadCloser, error) {
+	if err := f.checkUsed(); err != nil {
+		return nil, fmt.Errorf("download results: %w", err)
+	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return f.response, nil
 }
 
+// Store writes result to given filename
+// Only call Do() or Store() once; the returned stream must be consumed immediately.
 func (f *sandboxDownloadResultsRequest) Store(ctx context.Context, filePath string) error {
 	if _, err := f.Do(ctx); err != nil {
-		return nil
+		return err
 	}
-	defer f.response.Close()
+	if f.response != nil {
+		defer f.response.Close()
+	}
 	output, err := os.Create(filePath)
 	if err != nil {
-		return nil
+		return err
 	}
 	defer output.Close()
 	_, err = io.Copy(output, f.response)
 	return err
 }
 
-func (s *sandboxDownloadResultsRequest) url() string {
-	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s/report", s.id)
+func (f *sandboxDownloadResultsRequest) url() string {
+	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s/report", f.id)
 }
 
-func (f *sandboxDownloadResultsRequest) responseStruct() any {
-	return nil
-}
-
-func (s *sandboxDownloadResultsRequest) responseBody(body io.ReadCloser) {
-	s.response = body
+func (f *sandboxDownloadResultsRequest) responseBody(body io.ReadCloser) {
+	f.response = body
 }

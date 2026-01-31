@@ -144,7 +144,7 @@ type VOne struct {
 	Token       string
 	client      *http.Client
 	rateLimiter RateLimiter
-	mockup      *SandboxMockup
+	mockup      SandboxMockup
 }
 
 //transportModifier func(*http.Transport)
@@ -174,7 +174,7 @@ func (v *VOne) AddTransportModifier(transportModifier func(*http.Transport)) {
 	v.client.Transport = tr
 }
 
-func (v *VOne) SetMockup(mockup *SandboxMockup) *VOne {
+func (v *VOne) SetMockup(mockup SandboxMockup) *VOne {
 	v.mockup = mockup
 	return v
 }
@@ -189,7 +189,7 @@ var VOneRateLimitSurpassedError RateLimitSurpassed = func(err error) bool {
 	return vOneErr.Code == HTTPResponseTooManyRequests
 }
 
-func (v *VOne) callWithoutLimiter(ctx context.Context, f vOneFunc) error {
+func (v *VOne) callWithoutLimiter(ctx context.Context, f vOneRequest) error {
 	uri := f.uri()
 	if uri == "" {
 		uri = "https://" + v.Domain + f.url()
@@ -197,7 +197,7 @@ func (v *VOne) callWithoutLimiter(ctx context.Context, f vOneFunc) error {
 	return v.callURL(ctx, f, uri)
 }
 
-func (v *VOne) callWithLimiter(ctx context.Context, f vOneFunc) error {
+func (v *VOne) callWithLimiter(ctx context.Context, f vOneRequest) error {
 	for {
 		if v.rateLimiter.ShouldAbort() {
 			return ErrStop
@@ -226,14 +226,14 @@ func (v *VOne) callWithLimiter(ctx context.Context, f vOneFunc) error {
 		}
 	}
 */
-func (v *VOne) call(ctx context.Context, f vOneFunc) error {
+func (v *VOne) call(ctx context.Context, f vOneRequest) error {
 	if v.rateLimiter != nil {
 		return v.callWithLimiter(ctx, f)
 	}
 	return v.callWithoutLimiter(ctx, f)
 }
 
-func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
+func (v *VOne) callURL(ctx context.Context, f vOneRequest, uri string) error {
 	req, err := http.NewRequestWithContext(ctx, f.method(), uri, f.requestBody())
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
@@ -286,7 +286,7 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 	return v.DecodeBody(f, resp.Body)
 }
 
-func (v *VOne) DecodeBody(f vOneFunc, body io.ReadCloser) error {
+func (v *VOne) DecodeBody(f vOneRequest, body io.ReadCloser) error {
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {
 		return fmt.Errorf("read body : %w", err)

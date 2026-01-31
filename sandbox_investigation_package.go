@@ -10,39 +10,15 @@
 package vone
 
 import (
-	"context"
 	"fmt"
-	"io"
-	"os"
 )
 
 type sandboxInvestigationPackageRequest struct {
-	sandboxDownloadResultsRequest
+	*sandboxDownloadResultsRequest
 }
 
 func (v *VOne) SandboxInvestigationPackage(id string) *sandboxInvestigationPackageRequest {
-	return &sandboxInvestigationPackageRequest{*v.SandboxDownloadResults(id)}
-}
-
-func (f *sandboxInvestigationPackageRequest) Do(ctx context.Context) (io.ReadCloser, error) {
-	if err := f.vone.call(ctx, f); err != nil {
-		return nil, err
-	}
-	return f.response, nil
-}
-
-func (f *sandboxInvestigationPackageRequest) Store(ctx context.Context, filePath string) error {
-	if _, err := f.Do(ctx); err != nil {
-		return nil
-	}
-	defer f.response.Close()
-	output, err := os.Create(filePath)
-	if err != nil {
-		return nil
-	}
-	defer output.Close()
-	_, err = io.Copy(output, f.response)
-	return err
+	return &sandboxInvestigationPackageRequest{v.SandboxDownloadResults(id)}
 }
 
 func (s *sandboxInvestigationPackageRequest) url() string {

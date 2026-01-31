@@ -11,6 +11,7 @@ package vone
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"iter"
 	"strings"
@@ -25,23 +26,23 @@ type (
 )
 
 type sandboxSubmissionsRequest struct {
-	baseFunc
+	baseRequest
 	response SandboxSubmissionsResponse
 }
 
 func (v *VOne) SandboxListSubmissions() *sandboxSubmissionsRequest {
 	f := &sandboxSubmissionsRequest{}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 }
 
 func (f *sandboxSubmissionsRequest) StartDateTime(t time.Time) *sandboxSubmissionsRequest {
-	f.setParameter("startDateTime", t.Format(timeFormat))
+	f.setParameter("startDateTime", t.Format(timeFormatZ))
 	return f
 }
 
 func (f *sandboxSubmissionsRequest) EndDateTime(t time.Time) *sandboxSubmissionsRequest {
-	f.setParameter("endDateTime", t.Format(timeFormat))
+	f.setParameter("endDateTime", t.Format(timeFormatZ))
 	return f
 }
 
@@ -57,7 +58,7 @@ func (t DateTimeTarget) String() string {
 }
 
 func (f *sandboxSubmissionsRequest) DateTimeTarget(t DateTimeTarget) *sandboxSubmissionsRequest {
-	f.setParameter("sateTimeTarget", t.String())
+	f.setParameter("dateTimeTarget", t.String())
 	return f
 }
 
@@ -97,10 +98,6 @@ func (f *sandboxSubmissionsRequest) Do(ctx context.Context) (*SandboxSubmissions
 	return &f.response, nil
 }
 
-func (f *sandboxSubmissionsRequest) Method() string {
-	return methodGet
-}
-
 func (*sandboxSubmissionsRequest) url() string {
 	return "/v3.0/sandbox/tasks"
 }
@@ -120,37 +117,13 @@ func (f *sandboxSubmissionsRequest) Next(ctx context.Context) (*SandboxSubmissio
 	return f.Do(ctx)
 }
 
-func (f *sandboxSubmissionsRequest) IterateListSubmissions(ctx context.Context, callback func(*SandboxSubmissionStatusResponse) error) error {
-	if f.vone.mockup != nil {
-		response, err := f.vone.mockup.ListSubmissions(f)
-		if err != nil {
-			return err
-		}
-		for i := range response.Items {
-			if err := callback(&response.Items[i]); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-	for {
-		if err := f.vone.call(ctx, f); err != nil {
-			return err
-		}
-		for i := range f.response.Items {
-			if err := callback(&f.response.Items[i]); err != nil {
-				return err
-			}
-		}
-		if f.response.NextLink == "" {
-			return nil
-		}
-	}
-}
-
 // Range - iterator for all submissions (go 1.23 and later)
 func (f *sandboxSubmissionsRequest) Range(ctx context.Context) iter.Seq2[*SandboxSubmissionStatusResponse, error] {
 	return func(yield func(*SandboxSubmissionStatusResponse, error) bool) {
+		if err := f.checkUsed(); err != nil {
+			yield(nil, fmt.Errorf("submissions: %w", err))
+			return
+		}
 		if f.vone.mockup != nil {
 			response, err := f.vone.mockup.ListSubmissions(f)
 			if err != nil {

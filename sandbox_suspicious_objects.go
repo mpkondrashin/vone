@@ -28,14 +28,14 @@ type SandboxSuspiciousObjectsResponse struct {
 }
 
 type sandboxSuspiciousObjectsRequest struct {
-	baseFunc
+	baseRequest
 	id       string
 	response SandboxSuspiciousObjectsResponse
 }
 
 func (v *VOne) SandboxSuspiciousObjects(id string) *sandboxSuspiciousObjectsRequest {
 	f := &sandboxSuspiciousObjectsRequest{id: id}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 }
 

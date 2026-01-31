@@ -13,6 +13,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 )
 
@@ -24,17 +25,10 @@ type (
 	SubmitURLsToSandboxRequest []SubmitURLsToSandboxURL
 
 	BodyStruct struct {
-		URL    string `json:"url"`
-		ID     string `json:"id"`
-		Digest struct {
-			MD5    string `json:"md5"`
-			SHA1   string `json:"sha1"`
-			SHA256 string `json:"sha256"`
-		} `json:"digest"`
-		Error struct {
-			Code    string `json:"code"`
-			Message string `json:"message"`
-		} `json:"error"`
+		URL    string     `json:"url"`
+		ID     string     `json:"id"`
+		Digest Digest     `json:"digest"`
+		Error  Innererror `json:"error"`
 	}
 
 	SubmitURLsToSandboxStruct struct {
@@ -50,7 +44,7 @@ type (
 )
 
 type sandboxSubmitURLsRequest struct {
-	baseFunc
+	baseRequest
 	request         SubmitURLsToSandboxRequest
 	response        SandboxSubmitURLsToSandboxResponse
 	responseHeaders SandboxSubmitFileResponseHeaders
@@ -58,7 +52,7 @@ type sandboxSubmitURLsRequest struct {
 
 func (v *VOne) SandboxSubmitURLs() *sandboxSubmitURLsRequest {
 	f := &sandboxSubmitURLsRequest{}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 }
 
@@ -75,6 +69,9 @@ func (f *sandboxSubmitURLsRequest) AddURLs(urls []string) *sandboxSubmitURLsRequ
 }
 
 func (f *sandboxSubmitURLsRequest) Do(ctx context.Context) (SandboxSubmitURLsToSandboxResponse, *SandboxSubmitFileResponseHeaders, error) {
+	if err := f.checkUsed(); err != nil {
+		return nil, nil, fmt.Errorf("submit URLs: %w", err)
+	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, nil, err
 	}

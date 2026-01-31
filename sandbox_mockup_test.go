@@ -62,7 +62,7 @@ func TestSandboxMockup(t *testing.T) {
 	id = response.ID
 	t.Logf("response: ID assigned %v", id)
 	t.Logf("headers: SubmissionCount=%v, SubmissionRemainingCount=%v", headers.SubmissionCount, headers.SubmissionRemainingCount)
-	t.Logf("Submission: %v", v1.mockup.submissions[id].submissionStatus.Status)
+	//t.Logf("Submission: %v", v1.mockup.submissions[id].submissionStatus.Status)
 	t.Logf("Get Analysis Result For Not ready result")
 	analysisResult := v1.SandboxAnalysisResults(id)
 	result, err := analysisResult.Do(context.Background())

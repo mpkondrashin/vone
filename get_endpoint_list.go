@@ -86,7 +86,7 @@ func (p Patterns) MarshalCSV() (string, error) {
 
 // SearchEndPointDataFunc - search for endpoints
 type getEndPointListRequest struct {
-	baseFunc
+	baseRequest
 	response EndpointListResponse
 	top      int
 }
@@ -178,7 +178,7 @@ func (v *VOne) EndPointList() *getEndPointListRequest {
 	f := &getEndPointListRequest{
 		top: 100,
 	}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 
 }

@@ -46,19 +46,19 @@ type SandboxSubmitFileResponseHeaders struct {
 
 // sandboxSubmitFileRequest - function to submit file to sandbox
 type sandboxSubmitFileRequest struct {
-	baseFunc
+	baseRequest
 	request             io.Reader
 	formDataContentType string
 	response            SandboxSubmitFileResponse
 	responseHeaders     SandboxSubmitFileResponseHeaders
 }
 
-var _ vOneFunc = &sandboxSubmitFileRequest{}
+var _ vOneRequest = &sandboxSubmitFileRequest{}
 
 // SandboxSubmitFile - return new submit to sandbox file
 func (v *VOne) SandboxSubmitFile() *sandboxSubmitFileRequest {
 	f := &sandboxSubmitFileRequest{}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 }
 
@@ -161,9 +161,13 @@ func (s *sandboxSubmitFileRequest) SetArguments(arguments string) *sandboxSubmit
 }
 
 func (f *sandboxSubmitFileRequest) Do(ctx context.Context) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
+	if err := f.checkUsed(); err != nil {
+		return nil, nil, fmt.Errorf("submit file: %w", err)
+	}
 	if f.request == nil {
 		return nil, nil, fmt.Errorf("submit file: %w", ErrFileNotSet)
 	}
+
 	if f.vone.mockup != nil {
 		return f.vone.mockup.SubmitFile(f)
 	}

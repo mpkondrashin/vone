@@ -34,17 +34,17 @@ type SandboxAnalysisResultsResponse struct {
 }
 
 type sandboxAnalysisResultsRequest struct {
-	baseFunc
+	baseRequest
 	id       string
 	response SandboxAnalysisResultsResponse
 }
 
-var _ vOneFunc = &sandboxAnalysisResultsRequest{}
+var _ vOneRequest = &sandboxAnalysisResultsRequest{}
 
 // SandboxAnalysisResults - get function that downloads sanbox analysis results
 func (v *VOne) SandboxAnalysisResults(id string) *sandboxAnalysisResultsRequest {
 	f := &sandboxAnalysisResultsRequest{id: id}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 }
 
@@ -54,7 +54,7 @@ func (f *sandboxAnalysisResultsRequest) Do(ctx context.Context) (*SandboxAnalysi
 		return f.vone.mockup.AnalysisResults(f)
 	}
 	if err := f.vone.call(ctx, f); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("SandboxAnalysisResults: %w", err)
 	}
 	return &f.response, nil
 }

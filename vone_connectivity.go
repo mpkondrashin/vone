@@ -17,14 +17,14 @@ import (
 
 // connectivityRequest - check Vision One connectivity
 type connectivityRequest struct {
-	baseFunc
+	baseRequest
 }
 
-var _ vOneFunc = &connectivityRequest{}
+var _ vOneRequest = &connectivityRequest{}
 
 func (v *VOne) Connectivity() *connectivityRequest {
 	f := &connectivityRequest{}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 }
 

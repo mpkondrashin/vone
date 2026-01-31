@@ -11,6 +11,7 @@ package vone
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"iter"
 	"time"
@@ -24,13 +25,13 @@ type (
 )
 
 type sandboxListAnalysisResultsRequest struct {
-	baseFunc
+	baseRequest
 	response SandboxListAnalysisResultResponse
 }
 
 func (v *VOne) SandboxListAnalysisResults() *sandboxListAnalysisResultsRequest {
 	f := &sandboxListAnalysisResultsRequest{}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 }
 
@@ -69,10 +70,6 @@ func (f *sandboxListAnalysisResultsRequest) Do(ctx context.Context) (*SandboxLis
 	return &f.response, nil
 }
 
-func (f *sandboxListAnalysisResultsRequest) Method() string {
-	return methodGet
-}
-
 func (*sandboxListAnalysisResultsRequest) url() string {
 	return "/v3.0/sandbox/analysisResults"
 }
@@ -92,37 +89,13 @@ func (f *sandboxListAnalysisResultsRequest) Next(ctx context.Context) (*SandboxL
 	return f.Do(ctx)
 }
 
-func (f *sandboxListAnalysisResultsRequest) IterateListSubmissions(ctx context.Context, callback func(*SandboxAnalysisResultsResponse) error) error {
-	if f.vone.mockup != nil {
-		response, err := f.vone.mockup.ListAnalysisResults(f)
-		if err != nil {
-			return err
-		}
-		for i := range response.Items {
-			if err := callback(&response.Items[i]); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-	for {
-		if err := f.vone.call(ctx, f); err != nil {
-			return err
-		}
-		for i := range f.response.Items {
-			if err := callback(&f.response.Items[i]); err != nil {
-				return err
-			}
-		}
-		if f.response.NextLink == "" {
-			return nil
-		}
-	}
-}
-
 // Range - iterator for all submissions (go 1.23 and later)
 func (f *sandboxListAnalysisResultsRequest) Range(ctx context.Context) iter.Seq2[*SandboxAnalysisResultsResponse, error] {
 	return func(yield func(*SandboxAnalysisResultsResponse, error) bool) {
+		if err := f.checkUsed(); err != nil {
+			yield(nil, fmt.Errorf("list analysis results: %w", err))
+			return
+		}
 		if f.vone.mockup != nil {
 			response, err := f.vone.mockup.ListAnalysisResults(f)
 			if err != nil {

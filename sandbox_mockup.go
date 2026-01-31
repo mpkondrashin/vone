@@ -20,6 +20,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type SandboxMockup interface {
+	SubmitFile(f *sandboxSubmitFileRequest) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error)
+	SubmissionStatus(f *sandboxSubmissionStatusRequest) (*SandboxSubmissionStatusResponse, error)
+	AnalysisResults(f *sandboxAnalysisResultsRequest) (*SandboxAnalysisResultsResponse, error)
+	ListSubmissions(f *sandboxSubmissionsRequest) (*SandboxSubmissionsResponse, error)
+	ListAnalysisResults(f *sandboxListAnalysisResultsRequest) (*SandboxListAnalysisResultResponse, error)
+}
+
 type SubmissionState int
 
 const (
@@ -33,20 +41,20 @@ type (
 		submissionStatus SandboxSubmissionStatusResponse
 	}
 
-	SandboxMockup struct {
+	SandboxMockupRAM struct {
 		submissions map[string]*submission
 		logger      *log.Logger
 	}
 )
 
-func NewSandboxMockup() *SandboxMockup {
-	return &SandboxMockup{
+func NewSandboxMockup() *SandboxMockupRAM {
+	return &SandboxMockupRAM{
 		submissions: make(map[string]*submission),
 		logger:      log.New(io.Discard, "", 0),
 	}
 }
 
-func (s *SandboxMockup) EnableFileLogging(path string) error {
+func (s *SandboxMockupRAM) EnableFileLogging(path string) error {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
@@ -59,7 +67,7 @@ func (s *SandboxMockup) EnableFileLogging(path string) error {
 	return nil
 }
 
-func (sm *SandboxMockup) extractFirstPart(body []byte, contentType string) ([]byte, error) {
+func (sm *SandboxMockupRAM) extractFirstPart(body []byte, contentType string) ([]byte, error) {
 	_, params, err := mime.ParseMediaType(contentType)
 	if err != nil {
 		return nil, err
@@ -79,7 +87,7 @@ func (sm *SandboxMockup) extractFirstPart(body []byte, contentType string) ([]by
 	return io.ReadAll(part)
 }
 
-func (sm *SandboxMockup) SubmitFile(f *sandboxSubmitFileRequest) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
+func (sm *SandboxMockupRAM) SubmitFile(f *sandboxSubmitFileRequest) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
 	sm.logger.Println("SubmitFile")
 	data, err := io.ReadAll(f.request)
 	if err != nil {
@@ -166,7 +174,7 @@ func (sm *SandboxMockup) SubmitFile(f *sandboxSubmitFileRequest) (*SandboxSubmit
 	return &response, &headers, nil
 }
 
-func (sm *SandboxMockup) SubmissionStatus(f *sandboxSubmissionStatusRequest) (*SandboxSubmissionStatusResponse, error) {
+func (sm *SandboxMockupRAM) SubmissionStatus(f *sandboxSubmissionStatusRequest) (*SandboxSubmissionStatusResponse, error) {
 	sm.logger.Printf("SubmissionStatus (%s)", f.id)
 	submission, ok := sm.submissions[f.id]
 	if !ok {
@@ -177,7 +185,7 @@ func (sm *SandboxMockup) SubmissionStatus(f *sandboxSubmissionStatusRequest) (*S
 	return &result, nil
 }
 
-func (sm *SandboxMockup) AnalysisResults(f *sandboxAnalysisResultsRequest) (*SandboxAnalysisResultsResponse, error) {
+func (sm *SandboxMockupRAM) AnalysisResults(f *sandboxAnalysisResultsRequest) (*SandboxAnalysisResultsResponse, error) {
 	sm.logger.Printf("AnalysisResults (%s)", f.id)
 	submission, ok := sm.submissions[f.id]
 	sm.logger.Printf("AnalysisResults (%s): Submission found: %v", f.id, ok)
@@ -192,7 +200,7 @@ func (sm *SandboxMockup) AnalysisResults(f *sandboxAnalysisResultsRequest) (*San
 	return &submission.analysisResult, nil
 }
 
-func (sm *SandboxMockup) ListSubmissions(f *sandboxSubmissionsRequest) (*SandboxSubmissionsResponse, error) {
+func (sm *SandboxMockupRAM) ListSubmissions(f *sandboxSubmissionsRequest) (*SandboxSubmissionsResponse, error) {
 	sm.logger.Printf("ListSubmissions")
 	response := SandboxSubmissionsResponse{
 		Items:    nil,
@@ -209,7 +217,7 @@ func (sm *SandboxMockup) ListSubmissions(f *sandboxSubmissionsRequest) (*Sandbox
 	return &response, nil
 }
 
-func (sm *SandboxMockup) ListAnalysisResults(f *sandboxListAnalysisResultsRequest) (*SandboxListAnalysisResultResponse, error) {
+func (sm *SandboxMockupRAM) ListAnalysisResults(f *sandboxListAnalysisResultsRequest) (*SandboxListAnalysisResultResponse, error) {
 	sm.logger.Printf("ListAnalysisResults")
 	results := SandboxListAnalysisResultResponse{
 		Items:    nil,

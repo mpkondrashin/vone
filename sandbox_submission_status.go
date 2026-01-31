@@ -45,27 +45,30 @@ func (s *SandboxSubmissionStatusResponse) GetError() error {
 }
 
 type sandboxSubmissionStatusRequest struct {
-	baseFunc
+	baseRequest
 	id       string
-	Response SandboxSubmissionStatusResponse
+	response SandboxSubmissionStatusResponse
 }
 
 func (v *VOne) SandboxSubmissionStatus(id string) *sandboxSubmissionStatusRequest {
 	f := &sandboxSubmissionStatusRequest{
 		id: id,
 	}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 }
 
 func (f *sandboxSubmissionStatusRequest) Do(ctx context.Context) (*SandboxSubmissionStatusResponse, error) {
+	if err := f.checkUsed(); err != nil {
+		return nil, fmt.Errorf("submissions status: %w", err)
+	}
 	if f.vone.mockup != nil {
 		return f.vone.mockup.SubmissionStatus(f)
 	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
-	return &f.Response, nil
+	return &f.response, nil
 }
 
 func (f *sandboxSubmissionStatusRequest) url() string {
@@ -73,5 +76,5 @@ func (f *sandboxSubmissionStatusRequest) url() string {
 }
 
 func (f *sandboxSubmissionStatusRequest) responseStruct() any {
-	return &f.Response
+	return &f.response
 }

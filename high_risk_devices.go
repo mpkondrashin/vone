@@ -33,7 +33,7 @@ type (
 
 // SearchEndPointDataFunc - search for endpoints
 type HighRiskDevicesRequest struct {
-	baseFunc
+	baseRequest
 	response HighRiskDevicesResponse
 	top      int
 }
@@ -125,7 +125,7 @@ func (v *VOne) HighRiskDevices() *HighRiskDevicesRequest {
 	f := &HighRiskDevicesRequest{
 		top: 100,
 	}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 
 }

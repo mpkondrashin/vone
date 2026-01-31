@@ -659,16 +659,16 @@ func (s StringsSlice) MarshalCSV() (string, error) {
 }
 
 type GetOATEventsFunc struct {
-	baseFunc
+	baseRequest
 	Response ObservedAttackTechniquesEventsResponse
 	top      int
 }
 
-var _ vOneFunc = &GetOATEventsFunc{}
+var _ vOneRequest = &GetOATEventsFunc{}
 
 func (v *VOne) GetOATEvents() *GetOATEventsFunc {
 	f := &GetOATEventsFunc{}
-	f.baseFunc.init(v)
+	f.baseRequest.init(v)
 	return f
 }
 
