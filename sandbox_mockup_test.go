@@ -27,7 +27,7 @@ func TestSandboxMockup(t *testing.T) {
     "message": "error_message"
   }
 }`
-	submitFile.SetReader(bytes.NewReader([]byte(failedJSON)), "failed.exe")
+	submitFile.SetReader(context.Background(), bytes.NewReader([]byte(failedJSON)), "failed.exe")
 	response, headers, err := submitFile.Do(context.Background())
 	if err != nil {
 		t.Fatalf("Submit File Error: %v", err)
@@ -54,7 +54,7 @@ func TestSandboxMockup(t *testing.T) {
   ],
   "trueFileType": "exe"
 }`
-	submitFile.SetReader(bytes.NewReader([]byte(maliciousJSON)), "malicious.exe")
+	submitFile.SetReader(context.Background(), bytes.NewReader([]byte(maliciousJSON)), "malicious.exe")
 	response, headers, err = submitFile.Do(context.Background())
 	if err != nil {
 		t.Fatalf("Submit Malicious File Error: %v", err)

@@ -19,7 +19,10 @@ import (
 	"path/filepath"
 )
 
-var ErrFileNotSet = errors.New("file not set")
+var (
+	ErrFileNotSet = errors.New("file not set")
+	ErrReaderSet  = errors.New("reader already set")
+)
 
 // SandboxSubmitFileResponse - Submit file to sandbox response JSON format.
 type SandboxSubmitFileResponse struct {
@@ -59,37 +62,81 @@ func (v *VOne) SandboxSubmitFile() *sandboxSubmitFileRequest {
 	return f
 }
 
-func (f *sandboxSubmitFileRequest) SetFilePath(filePath string) error {
-	return f.SetFilePathAndName(filePath, filepath.Base(filePath))
+func (f *sandboxSubmitFileRequest) SetFilePath(
+	ctx context.Context,
+	filePath string,
+) error {
+	return f.SetFilePathAndName(ctx, filePath, filepath.Base(filePath))
 }
 
-func (f *sandboxSubmitFileRequest) SetFilePathAndName(filePath, fileName string) error {
-	reader, err := os.Open(filePath)
+func (f *sandboxSubmitFileRequest) SetFilePathAndName(
+	ctx context.Context,
+	filePath, fileName string,
+) error {
+	file, err := os.Open(filePath)
 	if err != nil {
 		return err
 	}
-	defer reader.Close()
-	return f.SetReader(reader, fileName)
+	return f.SetReader(ctx, file, fileName)
 }
 
-func (f *sandboxSubmitFileRequest) SetReader(reader io.Reader, fileName string) error {
+func (f *sandboxSubmitFileRequest) SetReader(
+	ctx context.Context,
+	reader io.Reader,
+	fileName string,
+) error {
+	if f.request != nil {
+		return errors.New("file already set")
+	}
+
 	pr, pw := io.Pipe()
 	writer := multipart.NewWriter(pw)
 
 	go func() {
+		// Гарантированно закрываем всё
 		defer pw.Close()
 		defer writer.Close()
+
 		if c, ok := reader.(io.Closer); ok {
 			defer c.Close()
 		}
+
+		// Если контекст уже отменён — даже не начинаем
+		select {
+		case <-ctx.Done():
+			pw.CloseWithError(ctx.Err())
+			return
+		default:
+		}
+
 		part, err := writer.CreateFormFile("file", fileName)
 		if err != nil {
 			pw.CloseWithError(err)
 			return
 		}
-		if _, err := io.Copy(part, reader); err != nil {
-			pw.CloseWithError(err)
-			return
+
+		buf := make([]byte, 32*1024)
+		for {
+			select {
+			case <-ctx.Done():
+				pw.CloseWithError(ctx.Err())
+				return
+			default:
+			}
+
+			n, err := reader.Read(buf)
+			if n > 0 {
+				if _, werr := part.Write(buf[:n]); werr != nil {
+					pw.CloseWithError(werr)
+					return
+				}
+			}
+			if err != nil {
+				if err != io.EOF {
+					pw.CloseWithError(err)
+				}
+				return
+			}
 		}
 	}()
 

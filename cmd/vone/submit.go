@@ -126,19 +126,12 @@ func GetReader(filePath string) (io.Reader, error) {
 
 func (c *commandSubmit) SubmitFile(filePath string) error {
 	log.Printf("Uploading %s", filePath)
-	/*reader, err := GetReader(filePath)
-	if err != nil {
-		return err
-	}
-	*/
 	f := c.visionOne.SandboxSubmitFile()
-	err := f.SetFilePath(filePath)
+	err := f.SetFilePath(context.Background(), filePath)
 	if err != nil {
 		return err
 	}
-
-	//log.Printf("SandboxSubmitFile %s", filePath)
-	response, headers, err := f.Do(context.TODO())
+	response, headers, err := f.Do(context.Background())
 	if err != nil {
 		return err
 	}
@@ -152,7 +145,7 @@ func (c *commandSubmit) SubmitURL(url string) error {
 	log.Printf("Uploading URL %s", url)
 	start := time.Now()
 	submit := c.visionOne.SandboxSubmitURLs().AddURL(url)
-	response, headers, err := submit.Do(context.TODO())
+	response, headers, err := submit.Do(context.Background())
 	if err != nil {
 		return fmt.Errorf("%s: %w", url, err)
 	}
