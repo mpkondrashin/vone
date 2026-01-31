@@ -79,9 +79,9 @@ func (sm *SandboxMockup) extractFirstPart(body []byte, contentType string) ([]by
 	return io.ReadAll(part)
 }
 
-func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
+func (sm *SandboxMockup) SubmitFile(f *sandboxSubmitFileFunc) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
 	sm.logger.Println("SubmitFile")
-	data, err := io.ReadAll(f.Request)
+	data, err := io.ReadAll(f.request)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -166,7 +166,7 @@ func (sm *SandboxMockup) SubmitFile(f *SandboxSubmitFileToSandboxFunc) (*Sandbox
 	return &response, &headers, nil
 }
 
-func (sm *SandboxMockup) SubmissionStatus(f *SandboxSubmissionStatusFunc) (*SandboxSubmissionStatusResponse, error) {
+func (sm *SandboxMockup) SubmissionStatus(f *sandboxSubmissionStatusFunc) (*SandboxSubmissionStatusResponse, error) {
 	sm.logger.Printf("SubmissionStatus (%s)", f.id)
 	submission, ok := sm.submissions[f.id]
 	if !ok {
@@ -177,7 +177,7 @@ func (sm *SandboxMockup) SubmissionStatus(f *SandboxSubmissionStatusFunc) (*Sand
 	return &result, nil
 }
 
-func (sm *SandboxMockup) AnalysisResults(f *SandboxAnalysisResultsFunc) (*SandboxAnalysisResultsResponse, error) {
+func (sm *SandboxMockup) AnalysisResults(f *sandboxAnalysisResultsFunc) (*SandboxAnalysisResultsResponse, error) {
 	sm.logger.Printf("AnalysisResults (%s)", f.id)
 	submission, ok := sm.submissions[f.id]
 	sm.logger.Printf("AnalysisResults (%s): Submission found: %v", f.id, ok)
@@ -192,7 +192,7 @@ func (sm *SandboxMockup) AnalysisResults(f *SandboxAnalysisResultsFunc) (*Sandbo
 	return &submission.analysisResult, nil
 }
 
-func (sm *SandboxMockup) ListSubmissions(f *SandboxSubmissionsFunc) (*SandboxSubmissionsResponse, error) {
+func (sm *SandboxMockup) ListSubmissions(f *sandboxSubmissionsFunc) (*SandboxSubmissionsResponse, error) {
 	sm.logger.Printf("ListSubmissions")
 	response := SandboxSubmissionsResponse{
 		Items:    nil,
@@ -209,7 +209,7 @@ func (sm *SandboxMockup) ListSubmissions(f *SandboxSubmissionsFunc) (*SandboxSub
 	return &response, nil
 }
 
-func (sm *SandboxMockup) ListAnalysisResults(f *SandboxListAnalysisResultsFunc) (*SandboxListAnalysisResultResponse, error) {
+func (sm *SandboxMockup) ListAnalysisResults(f *sandboxListAnalysisResultsFunc) (*SandboxListAnalysisResultResponse, error) {
 	sm.logger.Printf("ListAnalysisResults")
 	results := SandboxListAnalysisResultResponse{
 		Items:    nil,

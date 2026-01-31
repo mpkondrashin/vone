@@ -33,40 +33,40 @@ type SandboxAnalysisResultsResponse struct {
 	TrueFileType               string        `json:"trueFileType"`
 }
 
-type SandboxAnalysisResultsFunc struct {
+type sandboxAnalysisResultsFunc struct {
 	baseFunc
 	id       string
-	Response SandboxAnalysisResultsResponse
+	response SandboxAnalysisResultsResponse
 }
 
-var _ vOneFunc = &SandboxAnalysisResultsFunc{}
+var _ vOneFunc = &sandboxAnalysisResultsFunc{}
 
 // SandboxAnalysisResults - get function that downloads sanbox analysis results
-func (v *VOne) SandboxAnalysisResults(id string) *SandboxAnalysisResultsFunc {
-	f := &SandboxAnalysisResultsFunc{id: id}
+func (v *VOne) SandboxAnalysisResults(id string) *sandboxAnalysisResultsFunc {
+	f := &sandboxAnalysisResultsFunc{id: id}
 	f.baseFunc.init(v)
 	return f
 }
 
 // Do - get sanbox analysis results
-func (f *SandboxAnalysisResultsFunc) Do(ctx context.Context) (*SandboxAnalysisResultsResponse, error) {
+func (f *sandboxAnalysisResultsFunc) Do(ctx context.Context) (*SandboxAnalysisResultsResponse, error) {
 	if f.vone.mockup != nil {
 		return f.vone.mockup.AnalysisResults(f)
 	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
-	return &f.Response, nil
+	return &f.response, nil
 }
 
-func (f *SandboxAnalysisResultsFunc) method() string {
+func (f *sandboxAnalysisResultsFunc) method() string {
 	return methodGet
 }
 
-func (s *SandboxAnalysisResultsFunc) url() string {
+func (s *sandboxAnalysisResultsFunc) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s", s.id)
 }
 
-func (f *SandboxAnalysisResultsFunc) responseStruct() any {
-	return &f.Response
+func (f *sandboxAnalysisResultsFunc) responseStruct() any {
+	return &f.response
 }

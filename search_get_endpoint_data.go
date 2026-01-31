@@ -46,24 +46,24 @@ type SearchEndPointDataResponse struct {
 	NextLink string                           `json:"nextLink"`
 }
 
-// SearchEndPointDataFunc - search for endpoints
-type SearchEndPointDataFunc struct {
+// searchEndPointDataFunc - search for endpoints
+type searchEndPointDataFunc struct {
 	baseFunc
-	Response SearchEndPointDataResponse
+	response SearchEndPointDataResponse
 	//query    string
 }
 
 // Do - run request
-func (f *SearchEndPointDataFunc) Do(ctx context.Context) (*SearchEndPointDataResponse, error) {
+func (f *searchEndPointDataFunc) Do(ctx context.Context) (*SearchEndPointDataResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
-	return &f.Response, nil
+	return &f.response, nil
 }
 
 // Iterate - get all endpoints matching query one by one. If callback returns
 // non nil error, iteration is aborted and this error is returned
-func (f *SearchEndPointDataFunc) Iterate(ctx context.Context,
+func (f *searchEndPointDataFunc) Iterate(ctx context.Context,
 	callback func(item *SearchEndPointDataResponseItem) error) error {
 	for {
 		response, err := f.Do(ctx)
@@ -83,7 +83,7 @@ func (f *SearchEndPointDataFunc) Iterate(ctx context.Context,
 }
 
 // Range - iterator for all endpoints matching query (go 1.23 and later)
-func (f *SearchEndPointDataFunc) Range(ctx context.Context) iter.Seq2[*SearchEndPointDataResponseItem, error] {
+func (f *searchEndPointDataFunc) Range(ctx context.Context) iter.Seq2[*SearchEndPointDataResponseItem, error] {
 	return func(yield func(*SearchEndPointDataResponseItem, error) bool) {
 		for {
 			response, err := f.Do(ctx)
@@ -104,42 +104,42 @@ func (f *SearchEndPointDataFunc) Range(ctx context.Context) iter.Seq2[*SearchEnd
 }
 
 // SearchEndPointData - get new search for endpoint data function
-func (v *VOne) SearchEndPointData() *SearchEndPointDataFunc {
-	f := &SearchEndPointDataFunc{}
+func (v *VOne) SearchEndPointData() *searchEndPointDataFunc {
+	f := &searchEndPointDataFunc{}
 	f.baseFunc.init(v)
 	return f
 
 }
 
 // Query - set search query
-func (f *SearchEndPointDataFunc) Query(filter Filter) *SearchEndPointDataFunc {
+func (f *searchEndPointDataFunc) Query(filter Filter) *searchEndPointDataFunc {
 	f.setHeader("TMV1-Query", filter.Build())
 	//	if f.query != query {
 	//		f.query = query
-	f.Response.NextLink = ""
+	f.response.NextLink = ""
 	//	}
 	return f
 }
 
 // Query - set search query
-func (f *SearchEndPointDataFunc) QueryString(query string) *SearchEndPointDataFunc {
+func (f *searchEndPointDataFunc) QueryString(query string) *searchEndPointDataFunc {
 	f.setHeader("TMV1-Query", query)
 	//	if f.query != query {
 	//		f.query = query
-	f.Response.NextLink = ""
+	f.response.NextLink = ""
 	//	}
 	return f
 }
 
 // top - set limit for returned amount of items
-func (f *SearchEndPointDataFunc) Top(t Top) *SearchEndPointDataFunc {
+func (f *searchEndPointDataFunc) Top(t Top) *searchEndPointDataFunc {
 	f.setParameter("top", t.String())
 	return f
 }
 
-func (s *SearchEndPointDataFunc) url() string {
-	if s.Response.NextLink != "" {
-		return s.Response.NextLink
+func (s *searchEndPointDataFunc) url() string {
+	if s.response.NextLink != "" {
+		return s.response.NextLink
 	}
 	return "/v3.0/eiqs/endpoints"
 }
@@ -149,6 +149,6 @@ func (s *SearchEndPointDataFunc) url() string {
 //	req.Header.Set("TMV1-Query", s.query)
 //}
 
-func (f *SearchEndPointDataFunc) responseStruct() any {
-	return &f.Response
+func (f *searchEndPointDataFunc) responseStruct() any {
+	return &f.response
 }

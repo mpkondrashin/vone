@@ -34,7 +34,7 @@ type (
 // SearchEndPointDataFunc - search for endpoints
 type HighRiskDevicesFunc struct {
 	baseFunc
-	Response HighRiskDevicesResponse
+	response HighRiskDevicesResponse
 	top      int
 }
 
@@ -43,7 +43,7 @@ func (f *HighRiskDevicesFunc) Filter(filter string) *HighRiskDevicesFunc {
 	f.setHeader("TMV1-Filter", filter)
 	//	if f.query != query {
 	//		f.query = query
-	f.Response.NextLink = ""
+	f.response.NextLink = ""
 	//	}
 	return f
 }
@@ -66,7 +66,7 @@ func (f *HighRiskDevicesFunc) Do(ctx context.Context) (*HighRiskDevicesResponse,
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
-	return &f.Response, nil
+	return &f.response, nil
 }
 
 // Iterate - get all endpoints matching query one by one. If callback returns
@@ -131,8 +131,8 @@ func (v *VOne) HighRiskDevices() *HighRiskDevicesFunc {
 }
 
 func (s *HighRiskDevicesFunc) uri() string {
-	if s.Response.NextLink != "" {
-		return s.Response.NextLink
+	if s.response.NextLink != "" {
+		return s.response.NextLink
 	}
 	return ""
 }
@@ -142,5 +142,5 @@ func (s *HighRiskDevicesFunc) url() string {
 }
 
 func (f *HighRiskDevicesFunc) responseStruct() any {
-	return &f.Response
+	return &f.response
 }

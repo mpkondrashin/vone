@@ -16,7 +16,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -74,6 +73,19 @@ func (e Error) Error() string {
 	return sb.String()
 }
 
+type HTTPError struct {
+	Status int
+	Err    error
+}
+
+func (e *HTTPError) Error() string {
+	return fmt.Sprintf("http %d: %v", e.Status, e.Err)
+}
+
+func (e *HTTPError) Unwrap() error {
+	return e.Err
+}
+
 type VisionOneTime time.Time
 
 const (
@@ -128,18 +140,23 @@ func (vot VisionOneTime) MarshalCSV() (string, error) {
 
 // VOne - Vision One API struct
 type VOne struct {
-	Domain            string
-	Token             string
-	transportModifier func(*http.Transport)
-	rateLimiter       RateLimiter
-	mockup            *SandboxMockup
+	Domain      string
+	Token       string
+	client      *http.Client
+	rateLimiter RateLimiter
+	mockup      *SandboxMockup
 }
+
+//transportModifier func(*http.Transport)
 
 // NewVOne - create VOne struct
 func NewVOne(domain string, token string) *VOne {
 	return &VOne{
 		Domain: domain,
 		Token:  token,
+		client: &http.Client{
+			Timeout: 30 * time.Second,
+		},
 	}
 }
 
@@ -149,7 +166,12 @@ func (v *VOne) SetRateLimiter(rateLimiter RateLimiter) *VOne {
 }
 
 func (v *VOne) AddTransportModifier(transportModifier func(*http.Transport)) {
-	AddTransportModifier(&v.transportModifier, transportModifier)
+	tr, ok := v.client.Transport.(*http.Transport)
+	if !ok || tr == nil {
+		tr = http.DefaultTransport.(*http.Transport).Clone()
+	}
+	transportModifier(tr)
+	v.client.Transport = tr
 }
 
 func (v *VOne) SetMockup(mockup *SandboxMockup) *VOne {
@@ -178,19 +200,13 @@ func (v *VOne) callWithoutLimiter(ctx context.Context, f vOneFunc) error {
 func (v *VOne) callWithLimiter(ctx context.Context, f vOneFunc) error {
 	for {
 		if v.rateLimiter.ShouldAbort() {
-			//	log.Println("return ErrStop")
 			return ErrStop
 		}
-		//log.Println("no should abort")
 		err := v.callWithoutLimiter(ctx, f)
-		//log.Println("err", err)
 		err = v.rateLimiter.CheckError(err)
-		//log.Println("err after CheckError", err)
 		if err == ErrOnceMore {
-			//log.Println("ErrOnceMore")
 			continue
 		}
-		//log.Println("return", err)
 		return err
 	}
 }
@@ -227,35 +243,35 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 		req.Header.Set("Content-Type", f.contentType())
 	}
 	f.populate(req)
-	client := &http.Client{}
-	if v.transportModifier != nil {
-		transport := &http.Transport{}
-		v.transportModifier(transport)
-		client.Transport = transport
-	}
-	fmt.Printf("Method: %v\n", req.Method)
-	fmt.Printf("URL: %v\n", req.URL)
-	fmt.Printf("Proto: %v\n", req.Proto)
-	fmt.Printf("ContentLength: %v\n", req.ContentLength)
-	fmt.Printf("TransferEncoding: %v\n", req.TransferEncoding)
-	fmt.Printf("Host: %v\n", req.Host)
-	fmt.Printf("Form: %v\n", req.Form)
-	fmt.Printf("PostForm: %v\n", req.PostForm)
-	fmt.Printf("MultipartForm: %v\n", req.MultipartForm)
-	fmt.Printf("Trailer: %v\n", req.Trailer)
-	fmt.Printf("RemoteAddr: %v\n", req.RemoteAddr)
-	fmt.Printf("ContentLength: %v\n", req.ContentLength)
 
-	resp, err := client.Do(req)
+	/*
+		fmt.Printf("Method: %v\n", req.Method)
+		fmt.Printf("URL: %v\n", req.URL)
+		fmt.Printf("Proto: %v\n", req.Proto)
+		fmt.Printf("ContentLength: %v\n", req.ContentLength)
+		fmt.Printf("TransferEncoding: %v\n", req.TransferEncoding)
+		fmt.Printf("Host: %v\n", req.Host)
+		fmt.Printf("Form: %v\n", req.Form)
+		fmt.Printf("PostForm: %v\n", req.PostForm)
+		fmt.Printf("MultipartForm: %v\n", req.MultipartForm)
+		fmt.Printf("Trailer: %v\n", req.Trailer)
+		fmt.Printf("RemoteAddr: %v\n", req.RemoteAddr)
+		fmt.Printf("ContentLength: %v\n", req.ContentLength)
+	*/
+	resp, err := v.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("HTTP request: %w", err)
 	}
+	defer resp.Body.Close()
 	if GetHTTPCodeRange(resp.StatusCode) != HTTPCodeSuccessRange {
 		vOneErr, err := ErrorFromReader(resp.Body)
 		if err != nil {
 			return fmt.Errorf("parse error: %w", err)
 		}
-		return fmt.Errorf("request error: %w", vOneErr)
+		return &HTTPError{
+			Status: resp.StatusCode,
+			Err:    vOneErr,
+		}
 	}
 
 	if err := v.PopulateResponseStruct(f.responseHeader(), resp.Header); err != nil {
@@ -271,15 +287,10 @@ func (v *VOne) callURL(ctx context.Context, f vOneFunc, uri string) error {
 }
 
 func (v *VOne) DecodeBody(f vOneFunc, body io.ReadCloser) error {
-	defer body.Close()
-
 	bodyBytes, err := io.ReadAll(body)
 	if err != nil {
 		return fmt.Errorf("read body : %w", err)
 	}
-	w, _ := os.Create("body.json")
-	w.Write(bodyBytes)
-	w.Close()
 	r := f.responseStruct()
 	err = json.Unmarshal(bodyBytes, r)
 	if err != nil {
@@ -299,6 +310,9 @@ func (v *VOne) PopulateResponseStruct(structPtr any, header http.Header) error {
 	structValueType := structValue.Type()
 	for i := 0; i < structValueType.NumField(); i++ {
 		fieldValue := structValue.Field(i)
+		if !fieldValue.CanSet() {
+			continue
+		}
 		headerName := structValueType.Field(i).Tag.Get("header")
 		headerValue := header.Get(headerName)
 		kind := fieldValue.Kind()

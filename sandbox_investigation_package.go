@@ -16,35 +16,35 @@ import (
 	"os"
 )
 
-type SandboxInvestigationPackageFunc struct {
-	SandboxDownloadResultsFunc
+type sandboxInvestigationPackageFunc struct {
+	sandboxDownloadResultsFunc
 }
 
-func (v *VOne) SandboxInvestigationPackage(id string) *SandboxInvestigationPackageFunc {
-	return &SandboxInvestigationPackageFunc{*v.SandboxDownloadResults(id)}
+func (v *VOne) SandboxInvestigationPackage(id string) *sandboxInvestigationPackageFunc {
+	return &sandboxInvestigationPackageFunc{*v.SandboxDownloadResults(id)}
 }
 
-func (f *SandboxInvestigationPackageFunc) Do(ctx context.Context) (io.ReadCloser, error) {
+func (f *sandboxInvestigationPackageFunc) Do(ctx context.Context) (io.ReadCloser, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
-	return f.Response, nil
+	return f.response, nil
 }
 
-func (f *SandboxInvestigationPackageFunc) Store(ctx context.Context, filePath string) error {
+func (f *sandboxInvestigationPackageFunc) Store(ctx context.Context, filePath string) error {
 	if _, err := f.Do(ctx); err != nil {
 		return nil
 	}
-	defer f.Response.Close()
+	defer f.response.Close()
 	output, err := os.Create(filePath)
 	if err != nil {
 		return nil
 	}
 	defer output.Close()
-	_, err = io.Copy(output, f.Response)
+	_, err = io.Copy(output, f.response)
 	return err
 }
 
-func (s *SandboxInvestigationPackageFunc) url() string {
+func (s *sandboxInvestigationPackageFunc) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s/investigationPackage", s.id)
 }

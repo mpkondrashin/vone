@@ -16,49 +16,49 @@ import (
 	"os"
 )
 
-type SandboxDownloadResultsFunc struct {
+type sandboxDownloadResultsFunc struct {
 	baseFunc
 	id       string
-	Response io.ReadCloser
+	response io.ReadCloser
 }
 
-var _ vOneFunc = &SandboxDownloadResultsFunc{}
+var _ vOneFunc = &sandboxDownloadResultsFunc{}
 
-func (v *VOne) SandboxDownloadResults(id string) *SandboxDownloadResultsFunc {
-	f := &SandboxDownloadResultsFunc{id: id}
+func (v *VOne) SandboxDownloadResults(id string) *sandboxDownloadResultsFunc {
+	f := &sandboxDownloadResultsFunc{id: id}
 	f.baseFunc.init(v)
 	return f
 }
 
-func (f *SandboxDownloadResultsFunc) Do(ctx context.Context) (io.ReadCloser, error) {
+func (f *sandboxDownloadResultsFunc) Do(ctx context.Context) (io.ReadCloser, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
-	return f.Response, nil
+	return f.response, nil
 }
 
-func (f *SandboxDownloadResultsFunc) Store(ctx context.Context, filePath string) error {
+func (f *sandboxDownloadResultsFunc) Store(ctx context.Context, filePath string) error {
 	if _, err := f.Do(ctx); err != nil {
 		return nil
 	}
-	defer f.Response.Close()
+	defer f.response.Close()
 	output, err := os.Create(filePath)
 	if err != nil {
 		return nil
 	}
 	defer output.Close()
-	_, err = io.Copy(output, f.Response)
+	_, err = io.Copy(output, f.response)
 	return err
 }
 
-func (s *SandboxDownloadResultsFunc) url() string {
+func (s *sandboxDownloadResultsFunc) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s/report", s.id)
 }
 
-func (f *SandboxDownloadResultsFunc) responseStruct() any {
+func (f *sandboxDownloadResultsFunc) responseStruct() any {
 	return nil
 }
 
-func (s *SandboxDownloadResultsFunc) responseBody(body io.ReadCloser) {
-	s.Response = body
+func (s *sandboxDownloadResultsFunc) responseBody(body io.ReadCloser) {
+	s.response = body
 }

@@ -43,31 +43,31 @@ type (
 	}
 )
 
-// TIAddExceptionFunc - function to add exceptions
-type TIAddExceptionFunc struct {
+// tiAddExceptionFunc - function to add exceptions
+type tiAddExceptionFunc struct {
 	baseFunc
-	Request  TIAddException
-	Response TIAddExceptionResponse
+	request  TIAddException
+	response TIAddExceptionResponse
 }
 
-var _ vOneFunc = &TIAddExceptionFunc{}
+var _ vOneFunc = &tiAddExceptionFunc{}
 
 // AddExceptions - return new TIAddExceptionFunc struct
-func (v *VOne) AddExceptions() *TIAddExceptionFunc {
-	f := &TIAddExceptionFunc{}
+func (v *VOne) AddExceptions() *tiAddExceptionFunc {
+	f := &tiAddExceptionFunc{}
 	f.baseFunc.init(v)
 	return f
 }
 
 // Add - add new exception
-func (f *TIAddExceptionFunc) Add(exception TIException) *TIAddExceptionFunc {
-	f.Request = append(f.Request, exception)
+func (f *tiAddExceptionFunc) Add(exception TIException) *tiAddExceptionFunc {
+	f.request = append(f.request, exception)
 	return f
 }
 
 // AddSO - add new exception of certain type
 // The method returns a pointer to the TIAddExceptionFunc, allowing for method chaining.
-func (f *TIAddExceptionFunc) AddSO(so SO, value string, description string) *TIAddExceptionFunc {
+func (f *tiAddExceptionFunc) AddSO(so SO, value string, description string) *tiAddExceptionFunc {
 	e := TIException{
 		Description: description,
 	}
@@ -89,7 +89,7 @@ func (f *TIAddExceptionFunc) AddSO(so SO, value string, description string) *TIA
 
 // URL - add new URL exception
 // The method returns a pointer to the TIAddExceptionFunc, allowing for method chaining.
-func (f *TIAddExceptionFunc) URL(url string, description string) *TIAddExceptionFunc {
+func (f *tiAddExceptionFunc) URL(url string, description string) *tiAddExceptionFunc {
 	f.Add(TIException{
 		URL:         url,
 		Description: description,
@@ -99,7 +99,7 @@ func (f *TIAddExceptionFunc) URL(url string, description string) *TIAddException
 
 // Domain - add new Domain exception
 // The method returns a pointer to the TIAddExceptionFunc, allowing for method chaining.
-func (f *TIAddExceptionFunc) Domain(domain string, description string) *TIAddExceptionFunc {
+func (f *tiAddExceptionFunc) Domain(domain string, description string) *tiAddExceptionFunc {
 	f.Add(TIException{
 		Domain:      domain,
 		Description: description,
@@ -109,7 +109,7 @@ func (f *TIAddExceptionFunc) Domain(domain string, description string) *TIAddExc
 
 // IP - add new IP exception
 // The method returns a pointer to the TIAddExceptionFunc, allowing for method chaining.
-func (f *TIAddExceptionFunc) IP(ip string, description string) *TIAddExceptionFunc {
+func (f *tiAddExceptionFunc) IP(ip string, description string) *tiAddExceptionFunc {
 	f.Add(TIException{
 		IP:          ip,
 		Description: description,
@@ -119,7 +119,7 @@ func (f *TIAddExceptionFunc) IP(ip string, description string) *TIAddExceptionFu
 
 // SenderMailAddress - add new SenderMailAddress exception
 // The method returns a pointer to the TIAddExceptionFunc, allowing for method chaining.
-func (f *TIAddExceptionFunc) SenderMailAddress(senderMailAddress string, description string) *TIAddExceptionFunc {
+func (f *tiAddExceptionFunc) SenderMailAddress(senderMailAddress string, description string) *tiAddExceptionFunc {
 	f.Add(TIException{
 		SenderMailAddress: senderMailAddress,
 		Description:       description,
@@ -129,7 +129,7 @@ func (f *TIAddExceptionFunc) SenderMailAddress(senderMailAddress string, descrip
 
 // FileSHA1 - add new SHA1 exception
 // The method returns a pointer to the TIAddExceptionFunc, allowing for method chaining.
-func (f *TIAddExceptionFunc) FileSHA1(fileSHA1 string, description string) *TIAddExceptionFunc {
+func (f *tiAddExceptionFunc) FileSHA1(fileSHA1 string, description string) *tiAddExceptionFunc {
 	f.Add(TIException{
 		FileSha1:    fileSHA1,
 		Description: description,
@@ -139,7 +139,7 @@ func (f *TIAddExceptionFunc) FileSHA1(fileSHA1 string, description string) *TIAd
 
 // FileSHA256 - add new SHA256 exception
 // The method returns a pointer to the TIAddExceptionFunc, allowing for method chaining.
-func (f *TIAddExceptionFunc) FileSHA256(fileSHA256 string, description string) *TIAddExceptionFunc {
+func (f *tiAddExceptionFunc) FileSHA256(fileSHA256 string, description string) *tiAddExceptionFunc {
 	f.Add(TIException{
 		FileSha256:  fileSHA256,
 		Description: description,
@@ -150,29 +150,29 @@ func (f *TIAddExceptionFunc) FileSHA256(fileSHA256 string, description string) *
 // Do - execute the API call. Example:
 //
 // err, response := vone.NewVOne(domain, token).AddExceptions().AddIP("8.8.8.8", "Google DNS").Do(context.TODO())
-func (f *TIAddExceptionFunc) Do(ctx context.Context) (*TIAddExceptionResponse, error) {
+func (f *tiAddExceptionFunc) Do(ctx context.Context) (*TIAddExceptionResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
-	return &f.Response, nil
+	return &f.response, nil
 }
 
-func (f *TIAddExceptionFunc) method() string {
+func (f *tiAddExceptionFunc) method() string {
 	return methodPost
 }
 
-func (s *TIAddExceptionFunc) url() string {
+func (s *tiAddExceptionFunc) url() string {
 	return "/v3.0/threatintel/suspiciousObjectExceptions"
 }
 
-func (f *TIAddExceptionFunc) requestBody() io.Reader {
-	jsonData, err := json.Marshal(f.Request)
+func (f *tiAddExceptionFunc) requestBody() io.Reader {
+	jsonData, err := json.Marshal(f.request)
 	if err != nil {
 		return nil
 	}
 	return bytes.NewReader(jsonData)
 }
 
-func (f *TIAddExceptionFunc) responseStruct() any {
-	return &f.Response
+func (f *tiAddExceptionFunc) responseStruct() any {
+	return &f.response
 }

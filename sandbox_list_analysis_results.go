@@ -23,76 +23,76 @@ type (
 	}
 )
 
-type SandboxListAnalysisResultsFunc struct {
+type sandboxListAnalysisResultsFunc struct {
 	baseFunc
-	Response SandboxListAnalysisResultResponse
+	response SandboxListAnalysisResultResponse
 }
 
-func (v *VOne) SandboxListAnalysisResults() *SandboxListAnalysisResultsFunc {
-	f := &SandboxListAnalysisResultsFunc{}
+func (v *VOne) SandboxListAnalysisResults() *sandboxListAnalysisResultsFunc {
+	f := &sandboxListAnalysisResultsFunc{}
 	f.baseFunc.init(v)
 	return f
 }
 
-func (f *SandboxListAnalysisResultsFunc) StartDateTime(t time.Time) *SandboxListAnalysisResultsFunc {
+func (f *sandboxListAnalysisResultsFunc) StartDateTime(t time.Time) *sandboxListAnalysisResultsFunc {
 	f.setParameter("startDateTime", t.Format(timeFormatZ))
 	return f
 }
 
-func (f *SandboxListAnalysisResultsFunc) EndDateTime(t time.Time) *SandboxListAnalysisResultsFunc {
+func (f *sandboxListAnalysisResultsFunc) EndDateTime(t time.Time) *sandboxListAnalysisResultsFunc {
 	f.setParameter("endDateTime", t.Format(timeFormatZ))
 	return f
 }
 
-func (f *SandboxListAnalysisResultsFunc) OrderBy(orderBy string) *SandboxListAnalysisResultsFunc {
+func (f *sandboxListAnalysisResultsFunc) OrderBy(orderBy string) *sandboxListAnalysisResultsFunc {
 	f.setParameter("orderBy", orderBy)
 	return f
 }
 
-func (f *SandboxListAnalysisResultsFunc) Filter(s string) *SandboxListAnalysisResultsFunc {
+func (f *sandboxListAnalysisResultsFunc) Filter(s string) *sandboxListAnalysisResultsFunc {
 	f.setParameter("filter", s)
 	return f
 }
 
-func (f *SandboxListAnalysisResultsFunc) Top(t Top) *SandboxListAnalysisResultsFunc {
+func (f *sandboxListAnalysisResultsFunc) Top(t Top) *sandboxListAnalysisResultsFunc {
 	f.setParameter("top", t.String())
 	return f
 }
 
-func (f *SandboxListAnalysisResultsFunc) Do(ctx context.Context) (*SandboxListAnalysisResultResponse, error) {
+func (f *sandboxListAnalysisResultsFunc) Do(ctx context.Context) (*SandboxListAnalysisResultResponse, error) {
 	if f.vone.mockup != nil {
 		return f.vone.mockup.ListAnalysisResults(f)
 	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
-	return &f.Response, nil
+	return &f.response, nil
 }
 
-func (f *SandboxListAnalysisResultsFunc) Method() string {
+func (f *sandboxListAnalysisResultsFunc) Method() string {
 	return methodGet
 }
 
-func (*SandboxListAnalysisResultsFunc) url() string {
+func (*sandboxListAnalysisResultsFunc) url() string {
 	return "/v3.0/sandbox/analysisResults"
 }
 
-func (f *SandboxListAnalysisResultsFunc) uri() string {
-	return f.Response.NextLink
+func (f *sandboxListAnalysisResultsFunc) uri() string {
+	return f.response.NextLink
 }
 
-func (f *SandboxListAnalysisResultsFunc) responseStruct() any {
-	return &f.Response
+func (f *sandboxListAnalysisResultsFunc) responseStruct() any {
+	return &f.response
 }
 
-func (f *SandboxListAnalysisResultsFunc) Next(ctx context.Context) (*SandboxListAnalysisResultResponse, error) {
-	if f.Response.NextLink == "" {
+func (f *sandboxListAnalysisResultsFunc) Next(ctx context.Context) (*SandboxListAnalysisResultResponse, error) {
+	if f.response.NextLink == "" {
 		return nil, io.EOF
 	}
 	return f.Do(ctx)
 }
 
-func (f *SandboxListAnalysisResultsFunc) IterateListSubmissions(ctx context.Context, callback func(*SandboxAnalysisResultsResponse) error) error {
+func (f *sandboxListAnalysisResultsFunc) IterateListSubmissions(ctx context.Context, callback func(*SandboxAnalysisResultsResponse) error) error {
 	if f.vone.mockup != nil {
 		response, err := f.vone.mockup.ListAnalysisResults(f)
 		if err != nil {
@@ -109,19 +109,19 @@ func (f *SandboxListAnalysisResultsFunc) IterateListSubmissions(ctx context.Cont
 		if err := f.vone.call(ctx, f); err != nil {
 			return err
 		}
-		for i := range f.Response.Items {
-			if err := callback(&f.Response.Items[i]); err != nil {
+		for i := range f.response.Items {
+			if err := callback(&f.response.Items[i]); err != nil {
 				return err
 			}
 		}
-		if f.Response.NextLink == "" {
+		if f.response.NextLink == "" {
 			return nil
 		}
 	}
 }
 
 // Range - iterator for all submissions (go 1.23 and later)
-func (f *SandboxListAnalysisResultsFunc) Range(ctx context.Context) iter.Seq2[*SandboxAnalysisResultsResponse, error] {
+func (f *sandboxListAnalysisResultsFunc) Range(ctx context.Context) iter.Seq2[*SandboxAnalysisResultsResponse, error] {
 	return func(yield func(*SandboxAnalysisResultsResponse, error) bool) {
 		if f.vone.mockup != nil {
 			response, err := f.vone.mockup.ListAnalysisResults(f)
@@ -141,12 +141,12 @@ func (f *SandboxListAnalysisResultsFunc) Range(ctx context.Context) iter.Seq2[*S
 				yield(nil, err)
 				return
 			}
-			for i := range f.Response.Items {
-				if !yield(&f.Response.Items[i], nil) {
+			for i := range f.response.Items {
+				if !yield(&f.response.Items[i], nil) {
 					return
 				}
 			}
-			if f.Response.NextLink == "" {
+			if f.response.NextLink == "" {
 				return
 			}
 		}

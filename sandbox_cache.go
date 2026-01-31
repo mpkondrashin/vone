@@ -22,8 +22,8 @@ import (
 
 // Cache - database to cache Analyzer check results
 type Cache struct {
-	DBPath string
-	DB     *sql.DB
+	dbPath string
+	db     *sql.DB
 }
 
 // NewCache - open existing or create new cache
@@ -47,7 +47,8 @@ func NewCache(db *sql.DB, dbPath string) (*Cache, error) {
 		return nil, fmt.Errorf("%s: %w", dbPath, err)
 	}
 	return &Cache{
-		dbPath, db,
+		dbPath: dbPath,
+		db:     db,
 	}, nil
 }
 
@@ -66,7 +67,7 @@ func (c *Cache) Add(ctx context.Context, data *SandboxAnalysisResultsResponse) e
 		TrueFileType 
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
 
-	_, err := c.DB.ExecContext(ctx, stmt,
+	_, err := c.db.ExecContext(ctx, stmt,
 		data.Type,
 		strings.ToUpper(data.Digest.MD5),
 		strings.ToUpper(data.Digest.SHA1),
@@ -97,7 +98,7 @@ func (c *Cache) Add(ctx context.Context, data *SandboxAnalysisResultsResponse) e
 		DetectionNames=$8,
 		ThreatTypes=$9,
 		TrueFileType=$10`
-		_, err = c.DB.Exec(stmt,
+		_, err = c.db.Exec(stmt,
 			data.Type,
 			strings.ToUpper(data.Digest.MD5),
 			strings.ToUpper(data.Digest.SHA1),
@@ -116,7 +117,7 @@ func (c *Cache) Add(ctx context.Context, data *SandboxAnalysisResultsResponse) e
 // Delete - delete entity from hashes table
 func (c *Cache) Delete(sha1 string) error {
 	stmt := "DELETE FROM hashes where sha1=$1"
-	_, err := c.DB.Exec(stmt, strings.ToUpper(sha1))
+	_, err := c.db.Exec(stmt, strings.ToUpper(sha1))
 	return c.error("Delete Exec", err)
 }
 
@@ -126,7 +127,7 @@ func (c *Cache) Cleanup(ctx context.Context, date time.Time) error {
 	//	stmt := "DELETE FROM hashes where strftime('%s', updated) < $1"
 	//	_, err := c.DB.Exec(stmt, fmt.Sprint(date.Unix()))
 	stmt := "DELETE FROM hashes where updated < $1"
-	if _, err := c.DB.ExecContext(ctx, stmt, date); err != nil {
+	if _, err := c.db.ExecContext(ctx, stmt, date); err != nil {
 		return c.error("Cleanup hashes", err)
 	}
 	return nil
@@ -147,7 +148,7 @@ func (c *Cache) Query(ctx context.Context, sha1 string) (*SandboxAnalysisResults
 		ThreatTypes,
 		TrueFileType,
 		updated FROM hashes WHERE sha1=$1`
-	rows, err := c.DB.Query(stmt, strings.ToUpper(sha1))
+	rows, err := c.db.Query(stmt, strings.ToUpper(sha1))
 	if err != nil {
 		return nil, time.Time{}, c.error("Query", err)
 	}
@@ -199,7 +200,7 @@ func (c *Cache) Count(ctx context.Context) (int, error) {
 // сountEntities - count entities in given table
 func (c *Cache) countEntities(ctx context.Context, table string) (int, error) {
 	Select := fmt.Sprintf("SELECT COUNT(*) FROM %s", table)
-	rows, err := c.DB.Query(Select)
+	rows, err := c.db.Query(Select)
 	if err != nil {
 		return -1, c.error("countEntities", err)
 	}
@@ -220,7 +221,7 @@ func (c *Cache) countEntities(ctx context.Context, table string) (int, error) {
 
 // Close database - should be called when database is not in use anymore
 func (c *Cache) Close() error {
-	return c.DB.Close()
+	return c.db.Close()
 }
 
 // IterateCache - perform provided function fo each database entity
@@ -238,7 +239,7 @@ func (c *Cache) IterateCache(ctx context.Context, f func(data *SandboxAnalysisRe
 		TrueFileType,
 		updated
 		FROM hashes`
-	rows, err := c.DB.QueryContext(ctx, Select)
+	rows, err := c.db.QueryContext(ctx, Select)
 	if err != nil {
 		return c.error("IterateCache Query", err)
 	}
@@ -263,5 +264,5 @@ func (c *Cache) error(message string, err error) error {
 	if err == nil {
 		return nil
 	}
-	return fmt.Errorf("%s: %s: %w", c.DBPath, message, err)
+	return fmt.Errorf("%s: %s: %w", c.dbPath, message, err)
 }

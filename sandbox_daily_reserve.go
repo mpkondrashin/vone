@@ -24,30 +24,30 @@ type SandboxDailyReserveResponse struct {
 	} `json:"submissionCountDetail"`
 }
 
-type SanboxDailyReserveFunc struct {
+type sanboxDailyReserveFunc struct {
 	baseFunc
-	Response SandboxDailyReserveResponse
+	response SandboxDailyReserveResponse
 }
 
-var _ vOneFunc = &SanboxDailyReserveFunc{}
+var _ vOneFunc = &sanboxDailyReserveFunc{}
 
-func (f *SanboxDailyReserveFunc) Do(ctx context.Context) (*SandboxDailyReserveResponse, error) {
+func (f *sanboxDailyReserveFunc) Do(ctx context.Context) (*SandboxDailyReserveResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
-	return &f.Response, nil
+	return &f.response, nil
 }
 
-func (v *VOne) SandboxDailyReserve() *SanboxDailyReserveFunc {
-	f := &SanboxDailyReserveFunc{}
+func (v *VOne) SandboxDailyReserve() *sanboxDailyReserveFunc {
+	f := &sanboxDailyReserveFunc{}
 	f.baseFunc.init(v)
 	return f
 }
 
-func (s *SanboxDailyReserveFunc) url() string {
+func (s *sanboxDailyReserveFunc) url() string {
 	return "/v3.0/sandbox/submissionUsage"
 }
 
-func (f *SanboxDailyReserveFunc) responseStruct() any {
-	return &f.Response
+func (f *sanboxDailyReserveFunc) responseStruct() any {
+	return &f.response
 }

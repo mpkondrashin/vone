@@ -27,33 +27,33 @@ type SandboxSuspiciousObjectsResponse struct {
 	} `json:"items"`
 }
 
-type SandboxSuspiciousObjectsFunc struct {
+type sandboxSuspiciousObjectsFunc struct {
 	baseFunc
 	id       string
-	Response SandboxSuspiciousObjectsResponse
+	response SandboxSuspiciousObjectsResponse
 }
 
-func (v *VOne) SandboxSuspiciousObjects(id string) *SandboxSuspiciousObjectsFunc {
-	f := &SandboxSuspiciousObjectsFunc{id: id}
+func (v *VOne) SandboxSuspiciousObjects(id string) *sandboxSuspiciousObjectsFunc {
+	f := &sandboxSuspiciousObjectsFunc{id: id}
 	f.baseFunc.init(v)
 	return f
 }
 
-func (f *SandboxSuspiciousObjectsFunc) Do(ctx context.Context) (*SandboxSuspiciousObjectsResponse, error) {
+func (f *sandboxSuspiciousObjectsFunc) Do(ctx context.Context) (*SandboxSuspiciousObjectsResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
-	return &f.Response, nil
+	return &f.response, nil
 }
 
-func (f *SandboxSuspiciousObjectsFunc) method() string {
+func (f *sandboxSuspiciousObjectsFunc) method() string {
 	return methodGet
 }
 
-func (f *SandboxSuspiciousObjectsFunc) url() string {
+func (f *sandboxSuspiciousObjectsFunc) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s/suspiciousObjects", f.id)
 }
 
-func (f *SandboxSuspiciousObjectsFunc) responseStruct() any {
-	return &f.Response
+func (f *sandboxSuspiciousObjectsFunc) responseStruct() any {
+	return &f.response
 }
