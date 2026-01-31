@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"sync"
 )
 
 type RegionalDomain struct {
@@ -22,33 +21,66 @@ var RegionalDomains = []RegionalDomain{
 }
 
 // DetectVisionOneDomain return correct domain for given token or empty string
-func DetectVisionOneDomain(ctx context.Context, token string, modifier func(*http.Transport)) (result string, returnError error) {
+func DetectVisionOneDomain(
+	ctx context.Context,
+	token string,
+	modifier func(*http.Transport),
+) (string, error) {
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	var wg sync.WaitGroup
+
+	type result struct {
+		domain string
+		err    error
+	}
+
+	results := make(chan result, len(RegionalDomains))
+
 	for _, rd := range RegionalDomains {
-		wg.Add(1)
-		go func(d string) {
-			defer wg.Done()
-			vOne := NewVOne(d, token)
+		domain := rd.Domain
+
+		go func() {
+			vOne := NewVOne(domain, token)
 			if modifier != nil {
 				vOne.AddTransportModifier(modifier)
 			}
+
 			_, err := vOne.CheckConnection().Do(ctx)
 			if err != nil {
-				var e *Error
-				if !errors.As(err, &e) {
-					returnError = err
+				// если это не API-ошибка — возвращаем её
+				var apiErr *Error
+				if !errors.As(err, &apiErr) {
+					results <- result{err: err}
 				}
 				return
 			}
-			cancel()
-			result = d
-		}(rd.Domain)
+
+			// успех
+			results <- result{domain: domain}
+		}()
 	}
-	wg.Wait()
-	if result != "" {
-		returnError = nil
+
+	var firstErr error
+
+	for range RegionalDomains {
+		select {
+		case r := <-results:
+			if r.domain != "" {
+				cancel() // останавливаем остальные
+				return r.domain, nil
+			}
+			if r.err != nil && firstErr == nil {
+				firstErr = r.err
+			}
+		case <-ctx.Done():
+			return "", ctx.Err()
+		}
 	}
-	return
+
+	if firstErr != nil {
+		return "", firstErr
+	}
+
+	return "", errors.New("vision one domain not detected")
 }

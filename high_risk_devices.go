@@ -69,33 +69,6 @@ func (f *HighRiskDevicesRequest) Do(ctx context.Context) (*HighRiskDevicesRespon
 	return &f.response, nil
 }
 
-// Iterate - get all endpoints matching query one by one. If callback returns
-// non nil error, iteration is aborted and this error is returned
-func (f *HighRiskDevicesRequest) Iterate(ctx context.Context,
-	callback func(item *HighRiskDevicesItem) error) error {
-	for {
-		response, err := f.Do(ctx)
-		//fmt.Println("XXXXXXXXXXXXXXXXXXXXXXXXXXX:", err, response.Count, response.TotalCount) ////, /response, err)
-		if err != nil {
-			return err
-		}
-		//return errors.New("Quit")
-		for n := range response.Items {
-			//	fmt.Println("XXX call callback")
-			if err := callback(&response.Items[n]); err != nil {
-				return err
-			}
-		}
-		if response.NextLink == "" {
-			break
-		}
-		if response.Count != f.top {
-			break
-		}
-	}
-	return nil
-}
-
 // Range - iterator for all devices matching query (go 1.23 and later)
 func (f *HighRiskDevicesRequest) Range(ctx context.Context) iter.Seq2[*HighRiskDevicesItem, error] {
 	return func(yield func(*HighRiskDevicesItem, error) bool) {

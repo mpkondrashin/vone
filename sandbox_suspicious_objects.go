@@ -14,17 +14,19 @@ import (
 	"fmt"
 )
 
+type SandboxSuspiciousObject struct {
+	RiskLevel                  RiskLevel     `json:"riskLevel"`
+	AnalysisCompletionDateTime VisionOneTime `json:"analysisCompletionDateTime"`
+	ExpiredDateTime            VisionOneTime `json:"expiredDateTime"`
+	RootSHA1                   string        `json:"rootSha1"`
+	IP                         string        `json:"ip"`
+	URL                        string        `json:"url"`
+	FileSHA1                   string        `json:"fileSha1"`
+	Domain                     string        `json:"domain"`
+}
+
 type SandboxSuspiciousObjectsResponse struct {
-	Items []struct {
-		RiskLevel                  RiskLevel     `json:"riskLevel"`
-		AnalysisCompletionDateTime VisionOneTime `json:"analysisCompletionDateTime"`
-		ExpiredDateTime            VisionOneTime `json:"expiredDateTime"`
-		RootSHA1                   string        `json:"rootSha1"`
-		IP                         string        `json:"ip"`
-		URL                        string        `json:"url"`
-		FileSHA1                   string        `json:"fileSha1"`
-		Domain                     string        `json:"domain"`
-	} `json:"items"`
+	Items []SandboxSuspiciousObject `json:"items"`
 }
 
 type sandboxSuspiciousObjectsRequest struct {
@@ -40,14 +42,13 @@ func (v *VOne) SandboxSuspiciousObjects(id string) *sandboxSuspiciousObjectsRequ
 }
 
 func (f *sandboxSuspiciousObjectsRequest) Do(ctx context.Context) (*SandboxSuspiciousObjectsResponse, error) {
+	if err := f.checkUsed(); err != nil {
+		return nil, nil, fmt.Errorf("syspicious objects: %w", err)
+	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.response, nil
-}
-
-func (f *sandboxSuspiciousObjectsRequest) method() string {
-	return methodGet
 }
 
 func (f *sandboxSuspiciousObjectsRequest) url() string {

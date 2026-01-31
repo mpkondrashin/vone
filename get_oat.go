@@ -51,7 +51,7 @@ func (e *EventID) UnmarshalJSON(data []byte) error {
 
 // Implement Marshaler interface for EventID
 func (e EventID) MarshalJSON() ([]byte, error) {
-	return []byte(e.String()), nil
+	return []byte(fmt.Sprintf(`"%v"`, e)), nil
 }
 
 type ObjectSubTrueType int
@@ -240,7 +240,7 @@ const (
 // Implement Unmarshaler interface for DataSource
 func (d *DataSource) UnmarshalJSON(data []byte) error {
 	s := strings.Trim(string(data), `"`)
-	for i := range ThirdPartyLogData + 1 {
+	for i := 0; i <= int(ThirdPartyLogData); i++ {
 		if s == DataSource(i).String() {
 			*d = DataSource(i)
 			return nil
