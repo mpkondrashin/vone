@@ -23,43 +23,43 @@ type (
 	}
 )
 
-type sandboxListAnalysisResultsFunc struct {
+type sandboxListAnalysisResultsRequest struct {
 	baseFunc
 	response SandboxListAnalysisResultResponse
 }
 
-func (v *VOne) SandboxListAnalysisResults() *sandboxListAnalysisResultsFunc {
-	f := &sandboxListAnalysisResultsFunc{}
+func (v *VOne) SandboxListAnalysisResults() *sandboxListAnalysisResultsRequest {
+	f := &sandboxListAnalysisResultsRequest{}
 	f.baseFunc.init(v)
 	return f
 }
 
-func (f *sandboxListAnalysisResultsFunc) StartDateTime(t time.Time) *sandboxListAnalysisResultsFunc {
+func (f *sandboxListAnalysisResultsRequest) StartDateTime(t time.Time) *sandboxListAnalysisResultsRequest {
 	f.setParameter("startDateTime", t.Format(timeFormatZ))
 	return f
 }
 
-func (f *sandboxListAnalysisResultsFunc) EndDateTime(t time.Time) *sandboxListAnalysisResultsFunc {
+func (f *sandboxListAnalysisResultsRequest) EndDateTime(t time.Time) *sandboxListAnalysisResultsRequest {
 	f.setParameter("endDateTime", t.Format(timeFormatZ))
 	return f
 }
 
-func (f *sandboxListAnalysisResultsFunc) OrderBy(orderBy string) *sandboxListAnalysisResultsFunc {
+func (f *sandboxListAnalysisResultsRequest) OrderBy(orderBy string) *sandboxListAnalysisResultsRequest {
 	f.setParameter("orderBy", orderBy)
 	return f
 }
 
-func (f *sandboxListAnalysisResultsFunc) Filter(s string) *sandboxListAnalysisResultsFunc {
+func (f *sandboxListAnalysisResultsRequest) Filter(s string) *sandboxListAnalysisResultsRequest {
 	f.setParameter("filter", s)
 	return f
 }
 
-func (f *sandboxListAnalysisResultsFunc) Top(t Top) *sandboxListAnalysisResultsFunc {
+func (f *sandboxListAnalysisResultsRequest) Top(t Top) *sandboxListAnalysisResultsRequest {
 	f.setParameter("top", t.String())
 	return f
 }
 
-func (f *sandboxListAnalysisResultsFunc) Do(ctx context.Context) (*SandboxListAnalysisResultResponse, error) {
+func (f *sandboxListAnalysisResultsRequest) Do(ctx context.Context) (*SandboxListAnalysisResultResponse, error) {
 	if f.vone.mockup != nil {
 		return f.vone.mockup.ListAnalysisResults(f)
 	}
@@ -69,30 +69,30 @@ func (f *sandboxListAnalysisResultsFunc) Do(ctx context.Context) (*SandboxListAn
 	return &f.response, nil
 }
 
-func (f *sandboxListAnalysisResultsFunc) Method() string {
+func (f *sandboxListAnalysisResultsRequest) Method() string {
 	return methodGet
 }
 
-func (*sandboxListAnalysisResultsFunc) url() string {
+func (*sandboxListAnalysisResultsRequest) url() string {
 	return "/v3.0/sandbox/analysisResults"
 }
 
-func (f *sandboxListAnalysisResultsFunc) uri() string {
+func (f *sandboxListAnalysisResultsRequest) uri() string {
 	return f.response.NextLink
 }
 
-func (f *sandboxListAnalysisResultsFunc) responseStruct() any {
+func (f *sandboxListAnalysisResultsRequest) responseStruct() any {
 	return &f.response
 }
 
-func (f *sandboxListAnalysisResultsFunc) Next(ctx context.Context) (*SandboxListAnalysisResultResponse, error) {
+func (f *sandboxListAnalysisResultsRequest) Next(ctx context.Context) (*SandboxListAnalysisResultResponse, error) {
 	if f.response.NextLink == "" {
 		return nil, io.EOF
 	}
 	return f.Do(ctx)
 }
 
-func (f *sandboxListAnalysisResultsFunc) IterateListSubmissions(ctx context.Context, callback func(*SandboxAnalysisResultsResponse) error) error {
+func (f *sandboxListAnalysisResultsRequest) IterateListSubmissions(ctx context.Context, callback func(*SandboxAnalysisResultsResponse) error) error {
 	if f.vone.mockup != nil {
 		response, err := f.vone.mockup.ListAnalysisResults(f)
 		if err != nil {
@@ -121,7 +121,7 @@ func (f *sandboxListAnalysisResultsFunc) IterateListSubmissions(ctx context.Cont
 }
 
 // Range - iterator for all submissions (go 1.23 and later)
-func (f *sandboxListAnalysisResultsFunc) Range(ctx context.Context) iter.Seq2[*SandboxAnalysisResultsResponse, error] {
+func (f *sandboxListAnalysisResultsRequest) Range(ctx context.Context) iter.Seq2[*SandboxAnalysisResultsResponse, error] {
 	return func(yield func(*SandboxAnalysisResultsResponse, error) bool) {
 		if f.vone.mockup != nil {
 			response, err := f.vone.mockup.ListAnalysisResults(f)

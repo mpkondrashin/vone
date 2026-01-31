@@ -49,55 +49,55 @@ type (
 	SandboxSubmitURLsToSandboxResponse []SubmitURLsToSandboxStruct
 )
 
-type sandboxSubmitURLsFunc struct {
+type sandboxSubmitURLsRequest struct {
 	baseFunc
 	request         SubmitURLsToSandboxRequest
 	response        SandboxSubmitURLsToSandboxResponse
 	responseHeaders SandboxSubmitFileResponseHeaders
 }
 
-func (v *VOne) SandboxSubmitURLs() *sandboxSubmitURLsFunc {
-	f := &sandboxSubmitURLsFunc{}
+func (v *VOne) SandboxSubmitURLs() *sandboxSubmitURLsRequest {
+	f := &sandboxSubmitURLsRequest{}
 	f.baseFunc.init(v)
 	return f
 }
 
-func (s *sandboxSubmitURLsFunc) AddURL(url string) *sandboxSubmitURLsFunc {
+func (s *sandboxSubmitURLsRequest) AddURL(url string) *sandboxSubmitURLsRequest {
 	s.request = append(s.request, SubmitURLsToSandboxURL{URL: url})
 	return s
 }
 
-func (f *sandboxSubmitURLsFunc) AddURLs(urls []string) *sandboxSubmitURLsFunc {
+func (f *sandboxSubmitURLsRequest) AddURLs(urls []string) *sandboxSubmitURLsRequest {
 	for _, url := range urls {
 		f.AddURL(url)
 	}
 	return f
 }
 
-func (f *sandboxSubmitURLsFunc) Do(ctx context.Context) (SandboxSubmitURLsToSandboxResponse, *SandboxSubmitFileResponseHeaders, error) {
+func (f *sandboxSubmitURLsRequest) Do(ctx context.Context) (SandboxSubmitURLsToSandboxResponse, *SandboxSubmitFileResponseHeaders, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, nil, err
 	}
 	return f.response, &f.responseHeaders, nil
 }
 
-func (f *sandboxSubmitURLsFunc) method() string {
+func (f *sandboxSubmitURLsRequest) method() string {
 	return methodPost
 }
 
-func (s *sandboxSubmitURLsFunc) url() string {
+func (s *sandboxSubmitURLsRequest) url() string {
 	return "/v3.0/sandbox/urls/analyze"
 }
 
-func (f *sandboxSubmitURLsFunc) requestBody() io.Reader {
+func (f *sandboxSubmitURLsRequest) requestBody() io.Reader {
 	data, _ := json.Marshal(f.request)
 	return bytes.NewBuffer(data)
 }
 
-func (f *sandboxSubmitURLsFunc) responseStruct() any {
+func (f *sandboxSubmitURLsRequest) responseStruct() any {
 	return &f.response
 }
 
-func (f *sandboxSubmitURLsFunc) responseHeader() any {
+func (f *sandboxSubmitURLsRequest) responseHeader() any {
 	return &f.responseHeaders
 }

@@ -15,35 +15,35 @@ import (
 	"os"
 )
 
-// connectivityFunc - check Vision One connectivity
-type connectivityFunc struct {
+// connectivityRequest - check Vision One connectivity
+type connectivityRequest struct {
 	baseFunc
 }
 
-var _ vOneFunc = &connectivityFunc{}
+var _ vOneFunc = &connectivityRequest{}
 
-func (v *VOne) Connectivity() *connectivityFunc {
-	f := &connectivityFunc{}
+func (v *VOne) Connectivity() *connectivityRequest {
+	f := &connectivityRequest{}
 	f.baseFunc.init(v)
 	return f
 }
 
-func (f *connectivityFunc) Do(ctx context.Context) error {
+func (f *connectivityRequest) Do(ctx context.Context) error {
 	if err := f.vone.call(ctx, f); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (f *connectivityFunc) url() string {
+func (f *connectivityRequest) url() string {
 	return "/v3.0/healthcheck/connectivity"
 }
 
-func (f *connectivityFunc) responseStruct() any {
+func (f *connectivityRequest) responseStruct() any {
 	return &ErrorData{}
 }
 
-func (f *connectivityFunc) responseBody(b io.ReadCloser) {
+func (f *connectivityRequest) responseBody(b io.ReadCloser) {
 	io.Copy(os.Stdout, b)
 	b.Close()
 }

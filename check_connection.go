@@ -15,30 +15,30 @@ type CheckConnectionResponse struct {
 	Status string `json:"status"`
 }
 
-type sanboxCheckConnectionFunc struct {
+type sanboxCheckConnectionRequest struct {
 	baseFunc
 	response CheckConnectionResponse
 }
 
-var _ vOneFunc = &sanboxCheckConnectionFunc{}
+var _ vOneFunc = &sanboxCheckConnectionRequest{}
 
-func (f *sanboxCheckConnectionFunc) Do(ctx context.Context) (*CheckConnectionResponse, error) {
+func (f *sanboxCheckConnectionRequest) Do(ctx context.Context) (*CheckConnectionResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.response, nil
 }
 
-func (v *VOne) CheckConnection() *sanboxCheckConnectionFunc {
-	f := &sanboxCheckConnectionFunc{}
+func (v *VOne) CheckConnection() *sanboxCheckConnectionRequest {
+	f := &sanboxCheckConnectionRequest{}
 	f.baseFunc.init(v)
 	return f
 }
 
-func (s *sanboxCheckConnectionFunc) url() string {
+func (s *sanboxCheckConnectionRequest) url() string {
 	return "/v3.0/healthcheck/connectivity"
 }
 
-func (f *sanboxCheckConnectionFunc) responseStruct() any {
+func (f *sanboxCheckConnectionRequest) responseStruct() any {
 	return &f.response
 }

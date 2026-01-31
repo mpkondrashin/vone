@@ -11,13 +11,17 @@ package vone
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
 	"path/filepath"
 )
 
-// SandboxSubmitFileResponse - Submit file or url to sanbox response JSON format
+var ErrFileNotSet = errors.New("file not set")
+
+// SandboxSubmitFileResponse - Submit file to sandbox response JSON format.
 type SandboxSubmitFileResponse struct {
 	ID     string `json:"id"`
 	Digest struct {
@@ -28,7 +32,7 @@ type SandboxSubmitFileResponse struct {
 	Arguments string `json:"arguments"`
 }
 
-// SandboxSubmitFileResponse - struct used to return value of HTTP headers from file or url submit to sanbox
+// SandboxSubmitFileResponseHeaders contains response headers returned by sandbox file submission.
 type SandboxSubmitFileResponseHeaders struct {
 	OperationLocation        string `header:"Operation-Location"`
 	SubmissionReserveCount   int    `header:"TMV1-Submission-Reserve-Count"`
@@ -37,30 +41,29 @@ type SandboxSubmitFileResponseHeaders struct {
 	SubmissionExemptionCount int    `header:"TMV1-Submission-Exemption-Count"`
 }
 
-// sandboxSubmitFileFunc - function to submit file to sandbox
-type sandboxSubmitFileFunc struct {
+// sandboxSubmitFileRequest - function to submit file to sandbox
+type sandboxSubmitFileRequest struct {
 	baseFunc
-	//filePath            string
 	request             io.Reader
 	formDataContentType string
 	response            SandboxSubmitFileResponse
 	responseHeaders     SandboxSubmitFileResponseHeaders
 }
 
-var _ vOneFunc = &sandboxSubmitFileFunc{}
+var _ vOneFunc = &sandboxSubmitFileRequest{}
 
 // SandboxSubmitFile - return new submit to sandbox file
-func (v *VOne) SandboxSubmitFile() *sandboxSubmitFileFunc {
-	f := &sandboxSubmitFileFunc{}
+func (v *VOne) SandboxSubmitFile() *sandboxSubmitFileRequest {
+	f := &sandboxSubmitFileRequest{}
 	f.baseFunc.init(v)
 	return f
 }
 
-func (f *sandboxSubmitFileFunc) SetFilePath(filePath string) error {
+func (f *sandboxSubmitFileRequest) SetFilePath(filePath string) error {
 	return f.SetFilePathAndName(filePath, filepath.Base(filePath))
 }
 
-func (f *sandboxSubmitFileFunc) SetFilePathAndName(filePath, fileName string) error {
+func (f *sandboxSubmitFileRequest) SetFilePathAndName(filePath, fileName string) error {
 	reader, err := os.Open(filePath)
 	if err != nil {
 		return err
@@ -69,14 +72,16 @@ func (f *sandboxSubmitFileFunc) SetFilePathAndName(filePath, fileName string) er
 	return f.SetReader(reader, fileName)
 }
 
-func (f *sandboxSubmitFileFunc) SetReader(reader io.Reader, fileName string) error {
+func (f *sandboxSubmitFileRequest) SetReader(reader io.Reader, fileName string) error {
 	pr, pw := io.Pipe()
 	writer := multipart.NewWriter(pw)
 
 	go func() {
 		defer pw.Close()
 		defer writer.Close()
-
+		if c, ok := reader.(io.Closer); ok {
+			defer c.Close()
+		}
 		part, err := writer.CreateFormFile("file", fileName)
 		if err != nil {
 			pw.CloseWithError(err)
@@ -93,22 +98,25 @@ func (f *sandboxSubmitFileFunc) SetReader(reader io.Reader, fileName string) err
 	return nil
 }
 
-func (s *sandboxSubmitFileFunc) SetDocumentPassword(documentPassword string) *sandboxSubmitFileFunc {
+func (s *sandboxSubmitFileRequest) SetDocumentPassword(documentPassword string) *sandboxSubmitFileRequest {
 	s.setParameter("documentPassword", documentPassword)
 	return s
 }
 
-func (s *sandboxSubmitFileFunc) SetArchivePassword(archivePassword string) *sandboxSubmitFileFunc {
+func (s *sandboxSubmitFileRequest) SetArchivePassword(archivePassword string) *sandboxSubmitFileRequest {
 	s.setParameter("archivePassword", archivePassword)
 	return s
 }
 
-func (s *sandboxSubmitFileFunc) SetArguments(arguments string) *sandboxSubmitFileFunc {
+func (s *sandboxSubmitFileRequest) SetArguments(arguments string) *sandboxSubmitFileRequest {
 	s.setParameter("arguments", arguments)
 	return s
 }
 
-func (f *sandboxSubmitFileFunc) Do(ctx context.Context) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
+func (f *sandboxSubmitFileRequest) Do(ctx context.Context) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error) {
+	if f.request == nil {
+		return nil, nil, fmt.Errorf("submit file: %w", ErrFileNotSet)
+	}
 	if f.vone.mockup != nil {
 		return f.vone.mockup.SubmitFile(f)
 	}
@@ -118,26 +126,26 @@ func (f *sandboxSubmitFileFunc) Do(ctx context.Context) (*SandboxSubmitFileRespo
 	return &f.response, &f.responseHeaders, nil
 }
 
-func (f *sandboxSubmitFileFunc) method() string {
+func (f *sandboxSubmitFileRequest) method() string {
 	return methodPost
 }
 
-func (s *sandboxSubmitFileFunc) url() string {
+func (s *sandboxSubmitFileRequest) url() string {
 	return "/v3.0/sandbox/files/analyze"
 }
 
-func (f *sandboxSubmitFileFunc) requestBody() io.Reader {
+func (f *sandboxSubmitFileRequest) requestBody() io.Reader {
 	return f.request
 }
 
-func (f *sandboxSubmitFileFunc) contentType() string {
+func (f *sandboxSubmitFileRequest) contentType() string {
 	return f.formDataContentType
 }
 
-func (f *sandboxSubmitFileFunc) responseStruct() any {
+func (f *sandboxSubmitFileRequest) responseStruct() any {
 	return &f.response
 }
 
-func (f *sandboxSubmitFileFunc) responseHeader() any {
+func (f *sandboxSubmitFileRequest) responseHeader() any {
 	return &f.responseHeaders
 }

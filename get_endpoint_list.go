@@ -85,14 +85,14 @@ func (p Patterns) MarshalCSV() (string, error) {
 }
 
 // SearchEndPointDataFunc - search for endpoints
-type getEndPointListFunc struct {
+type getEndPointListRequest struct {
 	baseFunc
 	response EndpointListResponse
 	top      int
 }
 
 // Filter - filter endpoints
-func (f *getEndPointListFunc) Filter(filter string) *getEndPointListFunc {
+func (f *getEndPointListRequest) Filter(filter string) *getEndPointListRequest {
 	f.setHeader("TMV1-Filter", filter)
 	//	if f.query != query {
 	//		f.query = query
@@ -102,20 +102,20 @@ func (f *getEndPointListFunc) Filter(filter string) *getEndPointListFunc {
 }
 
 // OrderBy - sort endpoints
-func (f *getEndPointListFunc) OrderBy(orderBy string) *getEndPointListFunc {
+func (f *getEndPointListRequest) OrderBy(orderBy string) *getEndPointListRequest {
 	f.setParameter("orderBy", orderBy)
 	return f
 }
 
 // Top - set limit for returned amount of items
-func (f *getEndPointListFunc) Top(t Top) *getEndPointListFunc {
+func (f *getEndPointListRequest) Top(t Top) *getEndPointListRequest {
 	f.setParameter("top", t.String())
 	f.top = t.Int()
 	return f
 }
 
 // Do - run request
-func (f *getEndPointListFunc) Do(ctx context.Context) (*EndpointListResponse, error) {
+func (f *getEndPointListRequest) Do(ctx context.Context) (*EndpointListResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (f *getEndPointListFunc) Do(ctx context.Context) (*EndpointListResponse, er
 
 // Iterate - get all endpoints matching query one by one. If callback returns
 // non nil error, iteration is aborted and this error is returned
-func (f *getEndPointListFunc) Iterate(ctx context.Context,
+func (f *getEndPointListRequest) Iterate(ctx context.Context,
 	callback func(item *EndpointListItem) error) error {
 	for {
 		response, err := f.Do(ctx)
@@ -150,7 +150,7 @@ func (f *getEndPointListFunc) Iterate(ctx context.Context,
 }
 
 // Range - iterator for all endpoints matching query (go 1.23 and later)
-func (f *getEndPointListFunc) Range(ctx context.Context) iter.Seq2[*EndpointListItem, error] {
+func (f *getEndPointListRequest) Range(ctx context.Context) iter.Seq2[*EndpointListItem, error] {
 	return func(yield func(*EndpointListItem, error) bool) {
 		for {
 			response, err := f.Do(ctx)
@@ -174,8 +174,8 @@ func (f *getEndPointListFunc) Range(ctx context.Context) iter.Seq2[*EndpointList
 }
 
 // SearchEndPointData - get new search for endpoint data function
-func (v *VOne) EndPointList() *getEndPointListFunc {
-	f := &getEndPointListFunc{
+func (v *VOne) EndPointList() *getEndPointListRequest {
+	f := &getEndPointListRequest{
 		top: 100,
 	}
 	f.baseFunc.init(v)
@@ -183,17 +183,17 @@ func (v *VOne) EndPointList() *getEndPointListFunc {
 
 }
 
-func (s *getEndPointListFunc) uri() string {
+func (s *getEndPointListRequest) uri() string {
 	if s.response.NextLink != "" {
 		return s.response.NextLink
 	}
 	return ""
 }
 
-func (s *getEndPointListFunc) url() string {
+func (s *getEndPointListRequest) url() string {
 	return "/v3.0/endpointSecurity/endpoints"
 }
 
-func (f *getEndPointListFunc) responseStruct() any {
+func (f *getEndPointListRequest) responseStruct() any {
 	return &f.response
 }

@@ -27,33 +27,33 @@ type SandboxSuspiciousObjectsResponse struct {
 	} `json:"items"`
 }
 
-type sandboxSuspiciousObjectsFunc struct {
+type sandboxSuspiciousObjectsRequest struct {
 	baseFunc
 	id       string
 	response SandboxSuspiciousObjectsResponse
 }
 
-func (v *VOne) SandboxSuspiciousObjects(id string) *sandboxSuspiciousObjectsFunc {
-	f := &sandboxSuspiciousObjectsFunc{id: id}
+func (v *VOne) SandboxSuspiciousObjects(id string) *sandboxSuspiciousObjectsRequest {
+	f := &sandboxSuspiciousObjectsRequest{id: id}
 	f.baseFunc.init(v)
 	return f
 }
 
-func (f *sandboxSuspiciousObjectsFunc) Do(ctx context.Context) (*SandboxSuspiciousObjectsResponse, error) {
+func (f *sandboxSuspiciousObjectsRequest) Do(ctx context.Context) (*SandboxSuspiciousObjectsResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.response, nil
 }
 
-func (f *sandboxSuspiciousObjectsFunc) method() string {
+func (f *sandboxSuspiciousObjectsRequest) method() string {
 	return methodGet
 }
 
-func (f *sandboxSuspiciousObjectsFunc) url() string {
+func (f *sandboxSuspiciousObjectsRequest) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s/suspiciousObjects", f.id)
 }
 
-func (f *sandboxSuspiciousObjectsFunc) responseStruct() any {
+func (f *sandboxSuspiciousObjectsRequest) responseStruct() any {
 	return &f.response
 }

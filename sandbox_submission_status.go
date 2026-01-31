@@ -44,21 +44,21 @@ func (s *SandboxSubmissionStatusResponse) GetError() error {
 	return fmt.Errorf("%w: %v: %s", ErrSubmission, s.Error.Code, s.Error.Message)
 }
 
-type sandboxSubmissionStatusFunc struct {
+type sandboxSubmissionStatusRequest struct {
 	baseFunc
 	id       string
 	Response SandboxSubmissionStatusResponse
 }
 
-func (v *VOne) SandboxSubmissionStatus(id string) *sandboxSubmissionStatusFunc {
-	f := &sandboxSubmissionStatusFunc{
+func (v *VOne) SandboxSubmissionStatus(id string) *sandboxSubmissionStatusRequest {
+	f := &sandboxSubmissionStatusRequest{
 		id: id,
 	}
 	f.baseFunc.init(v)
 	return f
 }
 
-func (f *sandboxSubmissionStatusFunc) Do(ctx context.Context) (*SandboxSubmissionStatusResponse, error) {
+func (f *sandboxSubmissionStatusRequest) Do(ctx context.Context) (*SandboxSubmissionStatusResponse, error) {
 	if f.vone.mockup != nil {
 		return f.vone.mockup.SubmissionStatus(f)
 	}
@@ -68,10 +68,10 @@ func (f *sandboxSubmissionStatusFunc) Do(ctx context.Context) (*SandboxSubmissio
 	return &f.Response, nil
 }
 
-func (f *sandboxSubmissionStatusFunc) url() string {
+func (f *sandboxSubmissionStatusRequest) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/tasks/%s", f.id)
 }
 
-func (f *sandboxSubmissionStatusFunc) responseStruct() any {
+func (f *sandboxSubmissionStatusRequest) responseStruct() any {
 	return &f.Response
 }

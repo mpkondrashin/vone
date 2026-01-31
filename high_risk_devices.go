@@ -32,14 +32,14 @@ type (
 )
 
 // SearchEndPointDataFunc - search for endpoints
-type HighRiskDevicesFunc struct {
+type HighRiskDevicesRequest struct {
 	baseFunc
 	response HighRiskDevicesResponse
 	top      int
 }
 
 // Filter - filter endpoints
-func (f *HighRiskDevicesFunc) Filter(filter string) *HighRiskDevicesFunc {
+func (f *HighRiskDevicesRequest) Filter(filter string) *HighRiskDevicesRequest {
 	f.setHeader("TMV1-Filter", filter)
 	//	if f.query != query {
 	//		f.query = query
@@ -49,20 +49,20 @@ func (f *HighRiskDevicesFunc) Filter(filter string) *HighRiskDevicesFunc {
 }
 
 // OrderBy - sort endpoints
-func (f *HighRiskDevicesFunc) OrderBy(orderBy string) *HighRiskDevicesFunc {
+func (f *HighRiskDevicesRequest) OrderBy(orderBy string) *HighRiskDevicesRequest {
 	f.setParameter("orderBy", orderBy)
 	return f
 }
 
 // Top - set limit for returned amount of items
-func (f *HighRiskDevicesFunc) Top(t TopXM) *HighRiskDevicesFunc {
+func (f *HighRiskDevicesRequest) Top(t TopXM) *HighRiskDevicesRequest {
 	f.setParameter("top", t.String())
 	f.top = t.Int()
 	return f
 }
 
 // Do - run request
-func (f *HighRiskDevicesFunc) Do(ctx context.Context) (*HighRiskDevicesResponse, error) {
+func (f *HighRiskDevicesRequest) Do(ctx context.Context) (*HighRiskDevicesResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (f *HighRiskDevicesFunc) Do(ctx context.Context) (*HighRiskDevicesResponse,
 
 // Iterate - get all endpoints matching query one by one. If callback returns
 // non nil error, iteration is aborted and this error is returned
-func (f *HighRiskDevicesFunc) Iterate(ctx context.Context,
+func (f *HighRiskDevicesRequest) Iterate(ctx context.Context,
 	callback func(item *HighRiskDevicesItem) error) error {
 	for {
 		response, err := f.Do(ctx)
@@ -97,7 +97,7 @@ func (f *HighRiskDevicesFunc) Iterate(ctx context.Context,
 }
 
 // Range - iterator for all devices matching query (go 1.23 and later)
-func (f *HighRiskDevicesFunc) Range(ctx context.Context) iter.Seq2[*HighRiskDevicesItem, error] {
+func (f *HighRiskDevicesRequest) Range(ctx context.Context) iter.Seq2[*HighRiskDevicesItem, error] {
 	return func(yield func(*HighRiskDevicesItem, error) bool) {
 		for {
 			response, err := f.Do(ctx)
@@ -121,8 +121,8 @@ func (f *HighRiskDevicesFunc) Range(ctx context.Context) iter.Seq2[*HighRiskDevi
 }
 
 // SearchEndPointData - get new search for endpoint data function
-func (v *VOne) HighRiskDevices() *HighRiskDevicesFunc {
-	f := &HighRiskDevicesFunc{
+func (v *VOne) HighRiskDevices() *HighRiskDevicesRequest {
+	f := &HighRiskDevicesRequest{
 		top: 100,
 	}
 	f.baseFunc.init(v)
@@ -130,17 +130,17 @@ func (v *VOne) HighRiskDevices() *HighRiskDevicesFunc {
 
 }
 
-func (s *HighRiskDevicesFunc) uri() string {
+func (s *HighRiskDevicesRequest) uri() string {
 	if s.response.NextLink != "" {
 		return s.response.NextLink
 	}
 	return ""
 }
 
-func (s *HighRiskDevicesFunc) url() string {
+func (s *HighRiskDevicesRequest) url() string {
 	return "/v3.0/asrm/highRiskDevices"
 }
 
-func (f *HighRiskDevicesFunc) responseStruct() any {
+func (f *HighRiskDevicesRequest) responseStruct() any {
 	return &f.response
 }

@@ -16,22 +16,22 @@ import (
 	"os"
 )
 
-type sandboxInvestigationPackageFunc struct {
-	sandboxDownloadResultsFunc
+type sandboxInvestigationPackageRequest struct {
+	sandboxDownloadResultsRequest
 }
 
-func (v *VOne) SandboxInvestigationPackage(id string) *sandboxInvestigationPackageFunc {
-	return &sandboxInvestigationPackageFunc{*v.SandboxDownloadResults(id)}
+func (v *VOne) SandboxInvestigationPackage(id string) *sandboxInvestigationPackageRequest {
+	return &sandboxInvestigationPackageRequest{*v.SandboxDownloadResults(id)}
 }
 
-func (f *sandboxInvestigationPackageFunc) Do(ctx context.Context) (io.ReadCloser, error) {
+func (f *sandboxInvestigationPackageRequest) Do(ctx context.Context) (io.ReadCloser, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return f.response, nil
 }
 
-func (f *sandboxInvestigationPackageFunc) Store(ctx context.Context, filePath string) error {
+func (f *sandboxInvestigationPackageRequest) Store(ctx context.Context, filePath string) error {
 	if _, err := f.Do(ctx); err != nil {
 		return nil
 	}
@@ -45,6 +45,6 @@ func (f *sandboxInvestigationPackageFunc) Store(ctx context.Context, filePath st
 	return err
 }
 
-func (s *sandboxInvestigationPackageFunc) url() string {
+func (s *sandboxInvestigationPackageRequest) url() string {
 	return fmt.Sprintf("/v3.0/sandbox/analysisResults/%s/investigationPackage", s.id)
 }
