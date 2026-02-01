@@ -12,6 +12,8 @@ package vone
 import (
 	"context"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type Digest struct {
@@ -19,6 +21,7 @@ type Digest struct {
 	SHA1   string `json:"sha1"`
 	SHA256 string `json:"sha256"`
 }
+
 // SandboxAnalysisResultsResponseItem - structure of VisionOne sandbox analysis results JSON
 type SandboxAnalysisResultsResponseItem struct {
 	ID                         string        `json:"id"`
@@ -49,6 +52,9 @@ func (v *VOne) SandboxAnalysisResults(id string) *sandboxAnalysisResultsRequest 
 
 // Do - get sanbox analysis results
 func (f *sandboxAnalysisResultsRequest) Do(ctx context.Context) (*SandboxAnalysisResultsResponseItem, error) {
+	if err := uuid.Validate(f.id); err != nil {
+		return nil, fmt.Errorf("SandboxAnalysisResults: %w", err)
+	}
 	if f.vone.mockup != nil {
 		return f.vone.mockup.AnalysisResults(f)
 	}

@@ -14,6 +14,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/google/uuid"
 )
 
 type sandboxDownloadResultsRequest struct {
@@ -33,8 +35,11 @@ func (v *VOne) SandboxDownloadResults(id string) *sandboxDownloadResultsRequest 
 // Do performs the request and returns a ReadCloser.
 // Only call Do() or Store() once; the returned stream must be consumed immediately.
 func (f *sandboxDownloadResultsRequest) Do(ctx context.Context) (io.ReadCloser, error) {
+	if err := uuid.Validate(f.id); err != nil {
+		return nil, fmt.Errorf("download result/investigation package: %w", err)
+	}
 	if err := f.checkUsed(); err != nil {
-		return nil, fmt.Errorf("download results: %w", err)
+		return nil, fmt.Errorf("download result/investigation package: %w", err)
 	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err

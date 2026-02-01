@@ -13,6 +13,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -59,6 +61,9 @@ func (v *VOne) SandboxSubmissionStatus(id string) *sandboxSubmissionStatusReques
 }
 
 func (f *sandboxSubmissionStatusRequest) Do(ctx context.Context) (*SandboxSubmissionStatusResponse, error) {
+	if err := uuid.Validate(f.id); err != nil {
+		return nil, fmt.Errorf("submission status: %w", err)
+	}
 	if err := f.checkUsed(); err != nil {
 		return nil, fmt.Errorf("submissions status: %w", err)
 	}

@@ -37,9 +37,6 @@ type sandboxDailyReserveRequest struct {
 var _ vOneRequest = &sandboxDailyReserveRequest{}
 
 func (f *sandboxDailyReserveRequest) Do(ctx context.Context) (*SandboxDailyReserveResponse, error) {
-	if err := f.checkUsed(); err != nil {
-		return nil, fmt.Errorf("daily reserve: %w", err)
-	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, fmt.Errorf("daily reserve: %w", err)
 	}
