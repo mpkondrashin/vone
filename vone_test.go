@@ -27,7 +27,7 @@ func TestUnmarshalSandboxAnalysisResultsResponse(t *testing.T) {
   "trueFileType": "exe"
 }`
 
-	var response SandboxAnalysisResultsResponse
+	var response SandboxAnalysisResultsResponseItem
 	if err := json.Unmarshal([]byte(jsonData), &response); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

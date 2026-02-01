@@ -53,7 +53,7 @@ func NewCache(db *sql.DB, dbPath string) (*Cache, error) {
 }
 
 // Add - add Analyzer check result to cache database
-func (c *Cache) Add(ctx context.Context, data *SandboxAnalysisResultsResponse) error {
+func (c *Cache) Add(ctx context.Context, data *SandboxAnalysisResultsResponseItem) error {
 	stmt := `INSERT OR REPLACE INTO hashes (
 		type,
 		md5,
@@ -136,7 +136,7 @@ func (c *Cache) Cleanup(ctx context.Context, date time.Time) error {
 var ErrNotFound = errors.New("not found")
 
 // Query - get cached Analyzer check result for SHA1 of file
-func (c *Cache) Query(ctx context.Context, sha1 string) (*SandboxAnalysisResultsResponse, time.Time, error) {
+func (c *Cache) Query(ctx context.Context, sha1 string) (*SandboxAnalysisResultsResponseItem, time.Time, error) {
 	stmt := `SELECT type,
 		md5,
 		sha1,
@@ -162,8 +162,8 @@ func (c *Cache) Query(ctx context.Context, sha1 string) (*SandboxAnalysisResults
 	return c.ScanSandboxAnalysisResultsResponse(rows)
 }
 
-func (c *Cache) ScanSandboxAnalysisResultsResponse(rows *sql.Rows) (*SandboxAnalysisResultsResponse, time.Time, error) {
-	var data SandboxAnalysisResultsResponse
+func (c *Cache) ScanSandboxAnalysisResultsResponse(rows *sql.Rows) (*SandboxAnalysisResultsResponseItem, time.Time, error) {
+	var data SandboxAnalysisResultsResponseItem
 	var detectionNames, threatTypes string
 	var analysisCompletionDateTime string
 	var updated string
@@ -225,7 +225,7 @@ func (c *Cache) Close() error {
 }
 
 // IterateCache - perform provided function fo each database entity
-func (c *Cache) IterateCache(ctx context.Context, f func(data *SandboxAnalysisResultsResponse, updated time.Time) error) error {
+func (c *Cache) IterateCache(ctx context.Context, f func(data *SandboxAnalysisResultsResponseItem, updated time.Time) error) error {
 	Select := `SELECT
 	    type,
 		md5,

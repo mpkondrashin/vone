@@ -1,17 +1,15 @@
 /*
-	Trend Micro Vision One API SDK
-	(c) 2023 by Mikhail Kondrashin (mkondrashin@gmail.com)
+Trend Micro Vision One API SDK
+(c) 2023 by Mikhail Kondrashin (mkondrashin@gmail.com)
 
-	Sandbox API capabilities
+# Sandbox API capabilities
 
-	search_get_endpoint_data.go - get endpoint data
+search_get_endpoint_data.go - get endpoint data
 */
-
 package vone
 
 import (
 	"context"
-	"iter"
 )
 
 // SearchEndPointDataResponseItem - get endpoint data response for each endpoint
@@ -55,33 +53,16 @@ type searchEndPointDataRequest struct {
 
 // Do - run request
 func (f *searchEndPointDataRequest) Do(ctx context.Context) (*SearchEndPointDataResponse, error) {
+	if err := f.checkUsed(); err != nil {
+		return nil, err
+	}
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
 	return &f.response, nil
 }
 
-// Iterate - get all endpoints matching query one by one. If callback returns
-// non nil error, iteration is aborted and this error is returned
-func (f *searchEndPointDataRequest) Iterate(ctx context.Context,
-	callback func(item *SearchEndPointDataResponseItem) error) error {
-	for {
-		response, err := f.Do(ctx)
-		if err != nil {
-			return err
-		}
-		for n := range response.Items {
-			if err := callback(&response.Items[n]); err != nil {
-				return err
-			}
-		}
-		if response.NextLink == "" {
-			break
-		}
-	}
-	return nil
-}
-
+/*
 // Range - iterator for all endpoints matching query (go 1.23 and later)
 func (f *searchEndPointDataRequest) Range(ctx context.Context) iter.Seq2[*SearchEndPointDataResponseItem, error] {
 	return func(yield func(*SearchEndPointDataResponseItem, error) bool) {
@@ -101,7 +82,7 @@ func (f *searchEndPointDataRequest) Range(ctx context.Context) iter.Seq2[*Search
 			}
 		}
 	}
-}
+}*/
 
 // SearchEndPointData - get new search for endpoint data function
 func (v *VOne) SearchEndPointData() *searchEndPointDataRequest {
@@ -114,20 +95,14 @@ func (v *VOne) SearchEndPointData() *searchEndPointDataRequest {
 // Query - set search query
 func (f *searchEndPointDataRequest) Query(filter Filter) *searchEndPointDataRequest {
 	f.setHeader("TMV1-Query", filter.Build())
-	//	if f.query != query {
-	//		f.query = query
 	f.response.NextLink = ""
-	//	}
 	return f
 }
 
 // Query - set search query
 func (f *searchEndPointDataRequest) QueryString(query string) *searchEndPointDataRequest {
 	f.setHeader("TMV1-Query", query)
-	//	if f.query != query {
-	//		f.query = query
 	f.response.NextLink = ""
-	//	}
 	return f
 }
 
@@ -137,6 +112,14 @@ func (f *searchEndPointDataRequest) Top(t Top) *searchEndPointDataRequest {
 	return f
 }
 
+func (f *searchEndPointDataRequest) nextLink() string {
+	return f.response.NextLink
+}
+
+func (f *searchEndPointDataRequest) resetPagination() {
+	f.response.NextLink = ""
+}
+
 func (s *searchEndPointDataRequest) url() string {
 	if s.response.NextLink != "" {
 		return s.response.NextLink
@@ -144,11 +127,18 @@ func (s *searchEndPointDataRequest) url() string {
 	return "/v3.0/eiqs/endpoints"
 }
 
-//func (s *SearchEndPointDataFunc) populate(req *http.Request) {
-//	s.baseFunc.populate(req)
-//	req.Header.Set("TMV1-Query", s.query)
-//}
-
 func (f *searchEndPointDataRequest) responseStruct() any {
 	return &f.response
+}
+
+func (f *searchEndPointDataRequest) Paginator() *Paginator[
+	SearchEndPointDataResponse,
+	SearchEndPointDataResponseItem,
+] {
+	return NewPaginator(
+		f,
+		func(r *SearchEndPointDataResponse) []SearchEndPointDataResponseItem {
+			return r.Items
+		},
+	)
 }

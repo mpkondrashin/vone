@@ -57,9 +57,9 @@ func (c *commandGetEndpointData) Execute() error {
 	writer := csv.NewWriter(os.Stdout)
 	dataCh := make(chan interface{})
 	go func() {
-		for row, err := range search.Range(context.TODO()) {
+		for row, err := range search.Paginator().Range(context.TODO()) {
 			if err != nil {
-				panic(err)
+				log.Panic(err)
 			}
 			dataCh <- row
 		}

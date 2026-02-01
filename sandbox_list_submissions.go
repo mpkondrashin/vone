@@ -11,9 +11,7 @@ package vone
 
 import (
 	"context"
-	"fmt"
 	"io"
-	"iter"
 	"strings"
 	"time"
 )
@@ -110,6 +108,14 @@ func (f *sandboxSubmissionsRequest) responseStruct() any {
 	return &f.response
 }
 
+func (f *sandboxSubmissionsRequest) nextLink() string {
+	return f.response.NextLink
+}
+
+func (f *sandboxSubmissionsRequest) resetPagination() {
+	f.response.NextLink = ""
+}
+
 func (f *sandboxSubmissionsRequest) Next(ctx context.Context) (*SandboxSubmissionsResponse, error) {
 	if f.response.NextLink == "" {
 		return nil, io.EOF
@@ -117,39 +123,53 @@ func (f *sandboxSubmissionsRequest) Next(ctx context.Context) (*SandboxSubmissio
 	return f.Do(ctx)
 }
 
+/*
 // Range - iterator for all submissions (go 1.23 and later)
-func (f *sandboxSubmissionsRequest) Range(ctx context.Context) iter.Seq2[*SandboxSubmissionStatusResponse, error] {
-	return func(yield func(*SandboxSubmissionStatusResponse, error) bool) {
-		if err := f.checkUsed(); err != nil {
-			yield(nil, fmt.Errorf("submissions: %w", err))
-			return
-		}
-		if f.vone.mockup != nil {
-			response, err := f.vone.mockup.ListSubmissions(f)
-			if err != nil {
-				yield(nil, err)
+
+	func (f *sandboxSubmissionsRequest) Range(ctx context.Context) iter.Seq2[*SandboxSubmissionStatusResponse, error] {
+		return func(yield func(*SandboxSubmissionStatusResponse, error) bool) {
+			if err := f.checkUsed(); err != nil {
+				yield(nil, fmt.Errorf("submissions: %w", err))
 				return
 			}
-			for i := range response.Items {
-				if !yield(&response.Items[i], nil) {
+			if f.vone.mockup != nil {
+				response, err := f.vone.mockup.ListSubmissions(f)
+				if err != nil {
+					yield(nil, err)
 					return
 				}
-			}
-			return
-		}
-		for {
-			if err := f.vone.call(ctx, f); err != nil {
-				yield(nil, err)
+				for i := range response.Items {
+					if !yield(&response.Items[i], nil) {
+						return
+					}
+				}
 				return
 			}
-			for i := range f.response.Items {
-				if !yield(&f.response.Items[i], nil) {
+			for {
+				if err := f.vone.call(ctx, f); err != nil {
+					yield(nil, err)
 					return
 				}
-			}
-			if f.response.NextLink == "" {
-				return
+				for i := range f.response.Items {
+					if !yield(&f.response.Items[i], nil) {
+						return
+					}
+				}
+				if f.response.NextLink == "" {
+					return
+				}
 			}
 		}
 	}
+*/
+func (f *sandboxSubmissionsRequest) Paginator() *Paginator[
+	SandboxSubmissionsResponse,
+	SandboxSubmissionStatusResponse,
+] {
+	return NewPaginator(
+		f,
+		func(r *SandboxSubmissionsResponse) []SandboxSubmissionStatusResponse {
+			return r.Items
+		},
+	)
 }

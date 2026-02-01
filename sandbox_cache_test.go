@@ -28,7 +28,7 @@ func TestAddTwice(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data1 := &SandboxAnalysisResultsResponse{
+	data1 := &SandboxAnalysisResultsResponseItem{
 		ID:   "abc",
 		Type: "file",
 		Digest: Digest{
@@ -53,7 +53,7 @@ func TestAddTwice(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data2 := &SandboxAnalysisResultsResponse{
+	data2 := &SandboxAnalysisResultsResponseItem{
 		ID:   "abc",
 		Type: "file",
 		Digest: Digest{
@@ -94,7 +94,7 @@ func TestAddTwo(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data1 := &SandboxAnalysisResultsResponse{
+	data1 := &SandboxAnalysisResultsResponseItem{
 		ID:   "abc",
 		Type: "file",
 		Digest: Digest{
@@ -119,7 +119,7 @@ func TestAddTwo(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data2 := &SandboxAnalysisResultsResponse{
+	data2 := &SandboxAnalysisResultsResponseItem{
 		ID:   "abc",
 		Type: "file",
 		Digest: Digest{
@@ -160,7 +160,7 @@ func TestAddAndQuery(t *testing.T) {
 		t.Fatal(err)
 	}
 	sha1 := "efgh"
-	data1 := &SandboxAnalysisResultsResponse{
+	data1 := &SandboxAnalysisResultsResponseItem{
 		ID:   "abc",
 		Type: "file",
 		Digest: Digest{
@@ -208,7 +208,7 @@ func TestAddAndIterate(t *testing.T) {
 		t.Fatal(err)
 	}
 	sha1 := "efgh"
-	data1 := &SandboxAnalysisResultsResponse{
+	data1 := &SandboxAnalysisResultsResponseItem{
 		ID:   "abc",
 		Type: "file",
 		Digest: Digest{
@@ -234,7 +234,7 @@ func TestAddAndIterate(t *testing.T) {
 		t.Fatal(err)
 	}
 	count := 0
-	err = cache.IterateCache(context.Background(), func(data *SandboxAnalysisResultsResponse, updated time.Time) error {
+	err = cache.IterateCache(context.Background(), func(data *SandboxAnalysisResultsResponseItem, updated time.Time) error {
 		count += 1
 		if !strings.EqualFold(data.Digest.SHA1, sha1) {
 			t.Errorf("Expected count %s, but got %s", sha1, data.Digest.SHA1)

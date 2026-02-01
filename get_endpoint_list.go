@@ -11,7 +11,6 @@ package vone
 
 import (
 	"context"
-	"iter"
 	"strings"
 )
 
@@ -122,6 +121,20 @@ func (f *getEndPointListRequest) Do(ctx context.Context) (*EndpointListResponse,
 	return &f.response, nil
 }
 
+// Paginator - get endpoints matching query one by one
+func (f *getEndPointListRequest) Paginator() *Paginator[
+	EndpointListResponse,
+	EndpointListItem,
+] {
+	return NewPaginator(
+		f,
+		func(r *EndpointListResponse) []EndpointListItem {
+			return r.Items
+		},
+	)
+}
+
+/*
 // Iterate - get all endpoints matching query one by one. If callback returns
 // non nil error, iteration is aborted and this error is returned
 func (f *getEndPointListRequest) Iterate(ctx context.Context,
@@ -149,6 +162,7 @@ func (f *getEndPointListRequest) Iterate(ctx context.Context,
 	return nil
 }
 
+
 // Range - iterator for all endpoints matching query (go 1.23 and later)
 func (f *getEndPointListRequest) Range(ctx context.Context) iter.Seq2[*EndpointListItem, error] {
 	return func(yield func(*EndpointListItem, error) bool) {
@@ -171,7 +185,7 @@ func (f *getEndPointListRequest) Range(ctx context.Context) iter.Seq2[*EndpointL
 			}
 		}
 	}
-}
+}*/
 
 // SearchEndPointData - get new search for endpoint data function
 func (v *VOne) EndPointList() *getEndPointListRequest {
@@ -183,12 +197,22 @@ func (v *VOne) EndPointList() *getEndPointListRequest {
 
 }
 
+func (f *getEndPointListRequest) nextLink() string {
+	return f.response.NextLink
+}
+
+func (f *getEndPointListRequest) resetPagination() {
+	f.response.NextLink = ""
+}
+
+/*
 func (s *getEndPointListRequest) uri() string {
 	if s.response.NextLink != "" {
 		return s.response.NextLink
 	}
 	return ""
 }
+*/
 
 func (s *getEndPointListRequest) url() string {
 	return "/v3.0/endpointSecurity/endpoints"

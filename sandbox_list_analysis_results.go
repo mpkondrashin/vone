@@ -11,16 +11,14 @@ package vone
 
 import (
 	"context"
-	"fmt"
 	"io"
-	"iter"
 	"time"
 )
 
 type (
 	SandboxListAnalysisResultResponse struct {
-		Items    []SandboxAnalysisResultsResponse `json:"items"`
-		NextLink string                           `json:"nextLink"`
+		Items    []SandboxAnalysisResultsResponseItem `json:"items"`
+		NextLink string                               `json:"nextLink"`
 	}
 )
 
@@ -70,6 +68,14 @@ func (f *sandboxListAnalysisResultsRequest) Do(ctx context.Context) (*SandboxLis
 	return &f.response, nil
 }
 
+func (f *sandboxListAnalysisResultsRequest) nextLink() string {
+	return f.response.NextLink
+}
+
+func (f *sandboxListAnalysisResultsRequest) resetPagination() {
+	f.response.NextLink = ""
+}
+
 func (*sandboxListAnalysisResultsRequest) url() string {
 	return "/v3.0/sandbox/analysisResults"
 }
@@ -89,6 +95,23 @@ func (f *sandboxListAnalysisResultsRequest) Next(ctx context.Context) (*SandboxL
 	return f.Do(ctx)
 }
 
+func (f *sandboxListAnalysisResultsRequest) Paginator() *Paginator[
+	SandboxListAnalysisResultResponse,
+	SandboxAnalysisResultsResponseItem,
+] {
+	return NewPaginator(
+		f,
+		func(r *SandboxListAnalysisResultResponse) []SandboxAnalysisResultsResponseItem {
+			return r.Items
+		},
+	)
+}
+
+/*in call to NewPaginator, type
+func(r *SandboxListAnalysisResultResponse) []SandboxAnalysisResultsResponseItem
+func(r *SandboxListAnalysisResultResponse) []SandboxAnalysisResultsResponseItem
+func(*SearchEndPointDataResponse) []Item for func(*T) []Item*
+/*
 // Range - iterator for all submissions (go 1.23 and later)
 func (f *sandboxListAnalysisResultsRequest) Range(ctx context.Context) iter.Seq2[*SandboxAnalysisResultsResponse, error] {
 	return func(yield func(*SandboxAnalysisResultsResponse, error) bool) {
@@ -125,3 +148,4 @@ func (f *sandboxListAnalysisResultsRequest) Range(ctx context.Context) iter.Seq2
 		}
 	}
 }
+*/

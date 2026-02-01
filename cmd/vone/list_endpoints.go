@@ -46,7 +46,7 @@ func (c *commandListEndpoints) Execute() error {
 	writer := csv.NewWriter(os.Stdout)
 	dataCh := make(chan interface{})
 	go func() {
-		for row, err := range list.Range(context.TODO()) {
+		for row, err := range list.Paginator().Range(context.TODO()) {
 			if err != nil {
 				panic(err)
 			}

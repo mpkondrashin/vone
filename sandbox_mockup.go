@@ -23,7 +23,7 @@ import (
 type SandboxMockup interface {
 	SubmitFile(f *sandboxSubmitFileRequest) (*SandboxSubmitFileResponse, *SandboxSubmitFileResponseHeaders, error)
 	SubmissionStatus(f *sandboxSubmissionStatusRequest) (*SandboxSubmissionStatusResponse, error)
-	AnalysisResults(f *sandboxAnalysisResultsRequest) (*SandboxAnalysisResultsResponse, error)
+	AnalysisResults(f *sandboxAnalysisResultsRequest) (*SandboxAnalysisResultsResponseItem, error)
 	ListSubmissions(f *sandboxSubmissionsRequest) (*SandboxSubmissionsResponse, error)
 	ListAnalysisResults(f *sandboxListAnalysisResultsRequest) (*SandboxListAnalysisResultResponse, error)
 }
@@ -37,7 +37,7 @@ const (
 type (
 	submission struct {
 		state            SubmissionState
-		analysisResult   SandboxAnalysisResultsResponse
+		analysisResult   SandboxAnalysisResultsResponseItem
 		submissionStatus SandboxSubmissionStatusResponse
 	}
 
@@ -185,7 +185,7 @@ func (sm *SandboxMockupRAM) SubmissionStatus(f *sandboxSubmissionStatusRequest) 
 	return &result, nil
 }
 
-func (sm *SandboxMockupRAM) AnalysisResults(f *sandboxAnalysisResultsRequest) (*SandboxAnalysisResultsResponse, error) {
+func (sm *SandboxMockupRAM) AnalysisResults(f *sandboxAnalysisResultsRequest) (*SandboxAnalysisResultsResponseItem, error) {
 	sm.logger.Printf("AnalysisResults (%s)", f.id)
 	submission, ok := sm.submissions[f.id]
 	sm.logger.Printf("AnalysisResults (%s): Submission found: %v", f.id, ok)

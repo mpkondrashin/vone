@@ -20,8 +20,8 @@ type Digest struct {
 	SHA256 string `json:"sha256"`
 }
 
-// SandboxAnalysisResultsResponse - structure of VisionOne sandbox analysis results JSON
-type SandboxAnalysisResultsResponse struct {
+// SandboxAnalysisResultsResponseItem - structure of VisionOne sandbox analysis results JSON
+type SandboxAnalysisResultsResponseItem struct {
 	ID                         string        `json:"id"`
 	Type                       string        `json:"type"`
 	Digest                     Digest        `json:"digest"`
@@ -36,7 +36,7 @@ type SandboxAnalysisResultsResponse struct {
 type sandboxAnalysisResultsRequest struct {
 	baseRequest
 	id       string
-	response SandboxAnalysisResultsResponse
+	response SandboxAnalysisResultsResponseItem
 }
 
 var _ vOneRequest = &sandboxAnalysisResultsRequest{}
@@ -49,7 +49,7 @@ func (v *VOne) SandboxAnalysisResults(id string) *sandboxAnalysisResultsRequest 
 }
 
 // Do - get sanbox analysis results
-func (f *sandboxAnalysisResultsRequest) Do(ctx context.Context) (*SandboxAnalysisResultsResponse, error) {
+func (f *sandboxAnalysisResultsRequest) Do(ctx context.Context) (*SandboxAnalysisResultsResponseItem, error) {
 	if f.vone.mockup != nil {
 		return f.vone.mockup.AnalysisResults(f)
 	}
