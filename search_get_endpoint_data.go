@@ -62,27 +62,6 @@ func (f *searchEndPointDataRequest) Do(ctx context.Context) (*SearchEndPointData
 	return &f.response, nil
 }
 
-/*
-// Range - iterator for all endpoints matching query (go 1.23 and later)
-func (f *searchEndPointDataRequest) Range(ctx context.Context) iter.Seq2[*SearchEndPointDataResponseItem, error] {
-	return func(yield func(*SearchEndPointDataResponseItem, error) bool) {
-		for {
-			response, err := f.Do(ctx)
-			if err != nil {
-				yield(nil, err)
-				return
-			}
-			for n := range response.Items {
-				if !yield(&response.Items[n], nil) {
-					return
-				}
-			}
-			if response.NextLink == "" {
-				break
-			}
-		}
-	}
-}*/
 
 // SearchEndPointData - get new search for endpoint data function
 func (v *VOne) SearchEndPointData() *searchEndPointDataRequest {

@@ -19,7 +19,6 @@ type Digest struct {
 	SHA1   string `json:"sha1"`
 	SHA256 string `json:"sha256"`
 }
-
 // SandboxAnalysisResultsResponseItem - structure of VisionOne sandbox analysis results JSON
 type SandboxAnalysisResultsResponseItem struct {
 	ID                         string        `json:"id"`
