@@ -57,7 +57,7 @@ func NewSandboxMockup() *SandboxMockupRAM {
 func (s *SandboxMockupRAM) EnableFileLogging(path string) error {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
-		return err
+		return fmt.Errorf("mockup logging: %v", err)
 	}
 	s.logger = log.New(
 		f,
@@ -91,7 +91,7 @@ func (sm *SandboxMockupRAM) SubmitFile(f *sandboxSubmitFileRequest) (*SandboxSub
 	sm.logger.Println("SubmitFile")
 	data, err := io.ReadAll(f.request)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("submit file: %v", err)
 	}
 	re := regexp.MustCompile(`\s+`)
 	strippedData := re.ReplaceAllString(string(data), "")
@@ -99,7 +99,7 @@ func (sm *SandboxMockupRAM) SubmitFile(f *sandboxSubmitFileRequest) (*SandboxSub
 
 	jsonData, err := sm.extractFirstPart(data, f.formDataContentType)
 	if err != nil {
-		return nil, nil, fmt.Errorf("Error extracting JSON: %v", err)
+		return nil, nil, fmt.Errorf("submit file: %v", err)
 	}
 	strippedJsonData := re.ReplaceAllString(string(jsonData), "")
 	sm.logger.Printf("Got JSON data \"%s\"", strippedJsonData)
@@ -150,7 +150,7 @@ func (sm *SandboxMockupRAM) SubmitFile(f *sandboxSubmitFileRequest) (*SandboxSub
 	err = json.Unmarshal(jsonData, &sub.analysisResult)
 	if err != nil {
 		sm.logger.Printf("SubmitFile (%s): unmarshal analysisResult failed: %v", id, err)
-		return nil, nil, fmt.Errorf("unmarshal: %w", err)
+		return nil, nil, fmt.Errorf("submit file: %v", err)
 	}
 	sm.logger.Printf("SubmitFile (%s): unmarshaled analysisResult", id)
 	sub.analysisResult.ID = id

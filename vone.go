@@ -154,9 +154,7 @@ func NewVOne(domain string, token string) *VOne {
 	return &VOne{
 		Domain: domain,
 		Token:  token,
-		client: &http.Client{
-			Timeout: 30 * time.Second,
-		},
+		client: &http.Client{},
 	}
 }
 
@@ -243,7 +241,6 @@ func (v *VOne) callURL(ctx context.Context, f vOneRequest, uri string) error {
 		req.Header.Set("Content-Type", f.contentType())
 	}
 	f.populate(req)
-
 	/*
 		fmt.Printf("Method: %v\n", req.Method)
 		fmt.Printf("URL: %v\n", req.URL)
@@ -260,13 +257,13 @@ func (v *VOne) callURL(ctx context.Context, f vOneRequest, uri string) error {
 	*/
 	resp, err := v.client.Do(req)
 	if err != nil {
-		return fmt.Errorf("HTTP request: %w", err)
+		return fmt.Errorf("vone: %w", err)
 	}
 	defer resp.Body.Close()
 	if GetHTTPCodeRange(resp.StatusCode) != HTTPCodeSuccessRange {
 		vOneErr, err := ErrorFromReader(resp.Body)
 		if err != nil {
-			return fmt.Errorf("parse error: %w", err)
+			return fmt.Errorf("vone: %w", err)
 		}
 		return &HTTPError{
 			Status: resp.StatusCode,

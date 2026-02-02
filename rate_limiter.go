@@ -39,7 +39,6 @@ var (
 )
 
 func (l *AdaptiveRateLimiter) ShouldAbort() bool {
-	//log.Println("XXX *AdaptiveRateLimiter) ShouldAbort() sleep = ", l.sleep)
 	if l.stop == nil {
 		time.Sleep(l.sleep)
 		return false
@@ -53,23 +52,17 @@ func (l *AdaptiveRateLimiter) ShouldAbort() bool {
 }
 
 func (l *AdaptiveRateLimiter) CheckError(err error) error {
-	//log.Println("AdaptiveRateLimiter) CheckError: ", err)
 	if err == nil || !l.rateLimitSurpassed(err) {
-		//	log.Println("nil or not )rateLimitSurpassed")
 		l.sleep /= 2
 		if l.sleep < minSleepTime {
 			l.sleep = minSleepTime
 		}
-		//	log.Println("now sleep:", l.sleep, "return nil")
 		return err
 	}
-	//log.Println("not nil")
 	l.sleep *= 2
 	if l.sleep > maxSleepTime {
 		l.sleep = maxSleepTime
-		//	log.Println("return ", err)
 		return err
 	}
-	//log.Println("return ", ErrOnceMore)
 	return ErrOnceMore
 }
