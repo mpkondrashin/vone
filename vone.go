@@ -25,10 +25,11 @@ import (
 const (
 	methodGet  = "GET"
 	methodPost = "POST"
+	methodPatch = "PATCH"
+	methodDelete = "DELETE"
+
 
 	applicationJSON = "application/json"
-
-	//timeFormat = "2006-01-02T15:04:05Z"
 )
 
 type (

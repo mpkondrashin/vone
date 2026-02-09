@@ -2,6 +2,7 @@ package vone
 
 import (
 	"errors"
+	"sync"
 	"time"
 )
 
@@ -19,6 +20,7 @@ type RateLimitSurpassed = func(error) bool
 
 type AdaptiveRateLimiter struct {
 	stop               chan struct{}
+	mu                 sync.Mutex
 	sleep              time.Duration
 	rateLimitSurpassed RateLimitSurpassed
 }
@@ -39,19 +41,26 @@ var (
 )
 
 func (l *AdaptiveRateLimiter) ShouldAbort() bool {
+	l.mu.Lock()
+	sleep := l.sleep
+	l.mu.Unlock()
+
 	if l.stop == nil {
-		time.Sleep(l.sleep)
+		time.Sleep(sleep)
 		return false
 	}
 	select {
 	case <-l.stop:
 		return true
-	case <-time.After(l.sleep):
+	case <-time.After(sleep):
 		return false
 	}
 }
 
 func (l *AdaptiveRateLimiter) CheckError(err error) error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	if err == nil || !l.rateLimitSurpassed(err) {
 		l.sleep /= 2
 		if l.sleep < minSleepTime {

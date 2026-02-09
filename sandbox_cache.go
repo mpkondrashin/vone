@@ -148,7 +148,7 @@ func (c *Cache) Query(ctx context.Context, sha1 string) (*SandboxAnalysisResults
 		ThreatTypes,
 		TrueFileType,
 		updated FROM hashes WHERE sha1=$1`
-	rows, err := c.db.Query(stmt, strings.ToUpper(sha1))
+	rows, err := c.db.QueryContext(ctx, stmt, strings.ToUpper(sha1))
 	if err != nil {
 		return nil, time.Time{}, c.error("Query", err)
 	}
@@ -194,22 +194,16 @@ func (c *Cache) ScanSandboxAnalysisResultsResponse(rows *sql.Rows) (*SandboxAnal
 
 // Count - return number of entities in cache database
 func (c *Cache) Count(ctx context.Context) (int, error) {
-	return c.countEntities(ctx, "hashes")
-}
-
-// сountEntities - count entities in given table
-func (c *Cache) countEntities(ctx context.Context, table string) (int, error) {
-	Select := fmt.Sprintf("SELECT COUNT(*) FROM %s", table)
-	rows, err := c.db.Query(Select)
+	rows, err := c.db.QueryContext(ctx, "SELECT COUNT(*) FROM hashes")
 	if err != nil {
-		return -1, c.error("countEntities", err)
+		return -1, c.error("Count", err)
 	}
 	if rows.Err() != nil {
-		return 0, c.error("countEntities", rows.Err())
+		return 0, c.error("Count", rows.Err())
 	}
 	defer rows.Close()
 	if !rows.Next() {
-		return 0, c.error("countEntities", fmt.Errorf("rows.Next() returned false"))
+		return 0, c.error("Count", fmt.Errorf("rows.Next() returned false"))
 	}
 	var value int
 	err = rows.Scan(&value)

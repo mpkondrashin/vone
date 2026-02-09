@@ -40,7 +40,7 @@ type (
 var ErrSubmission = errors.New("submission error")
 
 func (s *SandboxSubmissionStatusResponse) GetError() error {
-	if s.Error.Code == ErrorCodeNoError {
+	if s.Error.Code == ErrorCodeOK {
 		return nil
 	}
 	return fmt.Errorf("%w: %v: %s", ErrSubmission, s.Error.Code, s.Error.Message)

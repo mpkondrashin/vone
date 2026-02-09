@@ -13,10 +13,6 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func prepare(t *testing.T) {
-
-}
-
 func TestAddTwice(t *testing.T) {
 	folder := "testing/cache"
 	err := os.RemoveAll(folder)

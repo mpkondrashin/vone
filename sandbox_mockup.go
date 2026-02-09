@@ -28,6 +28,12 @@ type SandboxMockup interface {
 	ListAnalysisResults(f *sandboxListAnalysisResultsRequest) (*SandboxListAnalysisResultResponse, error)
 }
 
+var (
+	ErrNotImplemented = errors.New("not implemented")
+	ErrNoBoundary = errors.New("no boundary")
+	ErrContentNotFound = errors.New("file content not found")
+)
+
 type SubmissionState int
 
 const (
