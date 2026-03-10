@@ -20,15 +20,15 @@ import (
 type (
 	// WorkbenchModifyStatusRequest - request body for modifying alert status
 	WorkbenchModifyStatusRequest struct {
-		Status              AlertStatus `json:"status,omitempty"`
-		InvestigationResult InvestigationResult      `json:"investigationResult,omitempty"`
+		Status              AlertStatus         `json:"status,omitempty"`
+		InvestigationResult InvestigationResult `json:"investigationResult,omitempty"`
 	}
 )
 
 type workbenchModifyStatusRequest struct {
 	baseRequest
-	id       string
-	request  WorkbenchModifyStatusRequest
+	id      string
+	request WorkbenchModifyStatusRequest
 }
 
 var _ vOneRequest = &workbenchModifyStatusRequest{}
@@ -41,13 +41,9 @@ func (v *VOne) WorkbenchModifyStatus(id string) *workbenchModifyStatusRequest {
 }
 
 // Status - set the alert status (e.g., "Open", "Closed", "In Progress")
-func (f *workbenchModifyStatusRequest) Status(status AlertStatus) *workbenchModifyStatusRequest {
-	f.request.Status = status
-	return f
-}
-
 // InvestigationResult - set the investigation result (e.g., "True Positive", "False Positive", "No Findings")
-func (f *workbenchModifyStatusRequest) InvestigationResult(result InvestigationResult) *workbenchModifyStatusRequest {
+func (f *workbenchModifyStatusRequest) Status(status AlertStatus, result InvestigationResult) *workbenchModifyStatusRequest {
+	f.request.Status = status
 	f.request.InvestigationResult = result
 	return f
 }

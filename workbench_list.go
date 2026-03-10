@@ -25,26 +25,26 @@ type (
 
 	// Entity - impact scope entity
 	Entity struct {
-		EntityType                    string      `json:"entityType"`
-		EntityValue                   interface{} `json:"entityValue"` // can be string or EntityValue object
-		EntityID                      string      `json:"entityId"`
-		ManagementScopeGroupID        string      `json:"managementScopeGroupId,omitempty"`
-		ManagementScopeInstanceID     string      `json:"managementScopeInstanceId,omitempty"`
-		ManagementScopePartitionKey   string      `json:"managementScopePartitionKey,omitempty"`
-		RelatedEntities               []string    `json:"relatedEntities"`
-		RelatedIndicatorIDs           []int       `json:"relatedIndicatorIds"`
-		Provenance                    []string    `json:"provenance"`
+		EntityType                  string      `json:"entityType"`
+		EntityValue                 interface{} `json:"entityValue"` // can be string or EntityValue object
+		EntityID                    string      `json:"entityId"`
+		ManagementScopeGroupID      string      `json:"managementScopeGroupId,omitempty"`
+		ManagementScopeInstanceID   string      `json:"managementScopeInstanceId,omitempty"`
+		ManagementScopePartitionKey string      `json:"managementScopePartitionKey,omitempty"`
+		RelatedEntities             []string    `json:"relatedEntities"`
+		RelatedIndicatorIDs         []int       `json:"relatedIndicatorIds"`
+		Provenance                  []string    `json:"provenance"`
 	}
 
 	// ImpactScope - impact scope of the alert
 	ImpactScope struct {
-		DesktopCount        int      `json:"desktopCount"`
-		ServerCount         int      `json:"serverCount"`
-		AccountCount        int      `json:"accountCount"`
-		EmailAddressCount   int      `json:"emailAddressCount"`
-		ContainerCount      int      `json:"containerCount"`
-		CloudIdentityCount  int      `json:"cloudIdentityCount"`
-		Entities            []Entity `json:"entities"`
+		DesktopCount       int      `json:"desktopCount"`
+		ServerCount        int      `json:"serverCount"`
+		AccountCount       int      `json:"accountCount"`
+		EmailAddressCount  int      `json:"emailAddressCount"`
+		ContainerCount     int      `json:"containerCount"`
+		CloudIdentityCount int      `json:"cloudIdentityCount"`
+		Entities           []Entity `json:"entities"`
 	}
 
 	// MatchedEvent - matched event in a filter
@@ -83,28 +83,28 @@ type (
 
 	// WorkbenchAlert - structure of a single workbench alert
 	WorkbenchAlert struct {
-		SchemaVersion              string        `json:"schemaVersion"`
-		ID                         string        `json:"id"`
-		InvestigationStatus        string        `json:"investigationStatus"`
-		Status                     string        `json:"status"`
-		InvestigationResult        string        `json:"investigationResult"`
-		WorkbenchLink              string        `json:"workbenchLink"`
-		AlertProvider              string        `json:"alertProvider"`
-		ModelID                    string        `json:"modelId"`
-		Model                      string        `json:"model"`
-		ModelType                  string        `json:"modelType"`
-		Score                      int           `json:"score"`
-		Severity                   string        `json:"severity"`
-		FirstInvestigatedDateTime  VisionOneTime `json:"firstInvestigatedDateTime,omitempty"`
-		CreatedDateTime            VisionOneTime `json:"createdDateTime"`
-		UpdatedDateTime            VisionOneTime `json:"updatedDateTime"`
-		IncidentID                 string        `json:"incidentId,omitempty"`
-		CaseID                     string        `json:"caseId,omitempty"`
-		OwnerIDs                   []string      `json:"ownerIds,omitempty"`
-		ImpactScope                ImpactScope   `json:"impactScope"`
-		Description                string        `json:"description"`
-		MatchedRules               []MatchedRule `json:"matchedRules"`
-		Indicators                 []Indicator   `json:"indicators"`
+		SchemaVersion             string        `json:"schemaVersion"`
+		ID                        string        `json:"id"`
+		InvestigationStatus       string        `json:"investigationStatus"`
+		Status                    string        `json:"status"`
+		InvestigationResult       string        `json:"investigationResult"`
+		WorkbenchLink             string        `json:"workbenchLink"`
+		AlertProvider             string        `json:"alertProvider"`
+		ModelID                   string        `json:"modelId"`
+		Model                     string        `json:"model"`
+		ModelType                 string        `json:"modelType"`
+		Score                     int           `json:"score"`
+		Severity                  string        `json:"severity"`
+		FirstInvestigatedDateTime VisionOneTime `json:"firstInvestigatedDateTime,omitempty"`
+		CreatedDateTime           VisionOneTime `json:"createdDateTime"`
+		UpdatedDateTime           VisionOneTime `json:"updatedDateTime"`
+		IncidentID                string        `json:"incidentId,omitempty"`
+		CaseID                    string        `json:"caseId,omitempty"`
+		OwnerIDs                  []string      `json:"ownerIds,omitempty"`
+		ImpactScope               ImpactScope   `json:"impactScope"`
+		Description               string        `json:"description"`
+		MatchedRules              []MatchedRule `json:"matchedRules"`
+		Indicators                []Indicator   `json:"indicators"`
 	}
 
 	// WorkbenchAlertsResponse - response structure for workbench alerts list
@@ -168,6 +168,10 @@ func (f *workbenchListRequest) Do(ctx context.Context) (*WorkbenchAlertsResponse
 		return nil, err
 	}
 	return &f.response, nil
+}
+
+func (f *workbenchListRequest) isDone(resp *WorkbenchAlertsResponse) bool {
+	return resp.NextLink == ""
 }
 
 func (*workbenchListRequest) url() string {

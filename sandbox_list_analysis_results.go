@@ -68,6 +68,10 @@ func (f *sandboxListAnalysisResultsRequest) Do(ctx context.Context) (*SandboxLis
 	return &f.response, nil
 }
 
+func (f *sandboxListAnalysisResultsRequest) isDone(resp *SandboxListAnalysisResultResponse) bool {
+	return resp.NextLink == ""
+}
+
 func (f *sandboxListAnalysisResultsRequest) nextLink() string {
 	return f.response.NextLink
 }

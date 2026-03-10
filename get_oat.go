@@ -12,7 +12,7 @@ package vone
 import (
 	"context"
 	"fmt"
-	"iter"
+	"io"
 	"strconv"
 	"strings"
 )
@@ -658,49 +658,49 @@ func (s StringsSlice) MarshalCSV() (string, error) {
 	return strings.Join(s, "|"), nil
 }
 
-type GetOATEventsFunc struct {
+type GetOATEventsRequest struct {
 	baseRequest
-	Response ObservedAttackTechniquesEventsResponse
+	response ObservedAttackTechniquesEventsResponse
 	top      int
 }
 
-var _ vOneRequest = &GetOATEventsFunc{}
+var _ vOneRequest = &GetOATEventsRequest{}
 
-func (v *VOne) GetOATEvents() *GetOATEventsFunc {
-	f := &GetOATEventsFunc{}
+func (v *VOne) GetOATEvents() *GetOATEventsRequest {
+	f := &GetOATEventsRequest{}
 	f.baseRequest.init(v)
 	return f
 }
 
-func (f *GetOATEventsFunc) DetectedStart(vOneTime VisionOneTime) *GetOATEventsFunc {
+func (f *GetOATEventsRequest) DetectedStart(vOneTime VisionOneTime) *GetOATEventsRequest {
 	f.setParameter("detectedStartDateTime", vOneTime.String())
 	return f
 }
 
-func (f *GetOATEventsFunc) DetectedEnd(vOneTime VisionOneTime) *GetOATEventsFunc {
+func (f *GetOATEventsRequest) DetectedEnd(vOneTime VisionOneTime) *GetOATEventsRequest {
 	f.setParameter("detectedEndDateTime", vOneTime.String())
 	return f
 }
 
-func (f *GetOATEventsFunc) IngestedStart(vOneTime VisionOneTime) *GetOATEventsFunc {
+func (f *GetOATEventsRequest) IngestedStart(vOneTime VisionOneTime) *GetOATEventsRequest {
 	f.setParameter("ingestedStartDateTime", vOneTime.String())
 	return f
 }
 
-func (f *GetOATEventsFunc) IngestedEnd(vOneTime VisionOneTime) *GetOATEventsFunc {
+func (f *GetOATEventsRequest) IngestedEnd(vOneTime VisionOneTime) *GetOATEventsRequest {
 	f.setParameter("ingestedEndDateTime", vOneTime.String())
 	return f
 }
 
 // Filter - filter events
-func (f *GetOATEventsFunc) Filter(filter string) *GetOATEventsFunc {
+func (f *GetOATEventsRequest) Filter(filter string) *GetOATEventsRequest {
 	f.setHeader("TMV1-Filter", filter)
-	f.Response.NextLink = ""
+	f.response.NextLink = ""
 	return f
 }
 
 // Top - set limit for returned amount of items
-func (f *GetOATEventsFunc) Top(t Top) *GetOATEventsFunc {
+func (f *GetOATEventsRequest) Top(t Top) *GetOATEventsRequest {
 	f.setParameter("top", t.String())
 	f.top = t.Int()
 	return f
@@ -708,7 +708,7 @@ func (f *GetOATEventsFunc) Top(t Top) *GetOATEventsFunc {
 
 // Iterate - get all events matching query one by one. If callback returns
 // non nil error, iteration is aborted and this error is returned
-func (f *GetOATEventsFunc) Iterate(ctx context.Context,
+func (f *GetOATEventsRequest) Iterate(ctx context.Context,
 	callback func(item *ObservedAttackTechniquesEventsItem) error) error {
 	for {
 		response, err := f.Do(ctx)
@@ -730,8 +730,9 @@ func (f *GetOATEventsFunc) Iterate(ctx context.Context,
 	return nil
 }
 
+/*
 // Range - iterator for all endpoints matching query (go 1.23 and later)
-func (f *GetOATEventsFunc) Range(ctx context.Context) iter.Seq2[*ObservedAttackTechniquesEventsItem, error] {
+func (f *GetOATEventsRequest) Range(ctx context.Context) iter.Seq2[*ObservedAttackTechniquesEventsItem, error] {
 	return func(yield func(*ObservedAttackTechniquesEventsItem, error) bool) {
 		for {
 			response, err := f.Do(ctx)
@@ -752,24 +753,60 @@ func (f *GetOATEventsFunc) Range(ctx context.Context) iter.Seq2[*ObservedAttackT
 			}
 		}
 	}
-}
+}*/
 
 // Do - execute the API call
-func (f *GetOATEventsFunc) Do(ctx context.Context) (*ObservedAttackTechniquesEventsResponse, error) {
+func (f *GetOATEventsRequest) Do(ctx context.Context) (*ObservedAttackTechniquesEventsResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
 		return nil, err
 	}
-	return &f.Response, nil
+	return &f.response, nil
 }
 
-func (f *GetOATEventsFunc) method() string {
+func (f *GetOATEventsRequest) isDone(resp *ObservedAttackTechniquesEventsResponse) bool {
+	return resp.NextLink == ""
+}
+
+func (f *GetOATEventsRequest) method() string {
 	return methodGet
 }
 
-func (s *GetOATEventsFunc) url() string {
+func (s *GetOATEventsRequest) url() string {
 	return "/v3.0/oat/detections"
 }
 
-func (f *GetOATEventsFunc) responseStruct() any {
-	return &f.Response
+func (f *GetOATEventsRequest) responseStruct() any {
+	return &f.response
+}
+
+func (f *GetOATEventsRequest) uri() string {
+	return f.response.NextLink
+}
+
+func (f *GetOATEventsRequest) nextLink() string {
+	return f.response.NextLink
+}
+
+func (f *GetOATEventsRequest) resetPagination() {
+	f.response.NextLink = ""
+}
+
+func (f *GetOATEventsRequest) Next(ctx context.Context) (*ObservedAttackTechniquesEventsResponse, error) {
+	if f.response.NextLink == "" {
+		return nil, io.EOF
+	}
+	return f.Do(ctx)
+}
+
+// Paginator - create a paginator for iterating through all results
+func (f *GetOATEventsRequest) Paginator() *Paginator[
+	ObservedAttackTechniquesEventsResponse,
+	ObservedAttackTechniquesEventsItem,
+] {
+	return NewPaginator(
+		f,
+		func(r *ObservedAttackTechniquesEventsResponse) []ObservedAttackTechniquesEventsItem {
+			return r.Items
+		},
+	)
 }

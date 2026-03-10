@@ -62,7 +62,6 @@ func (f *searchEndPointDataRequest) Do(ctx context.Context) (*SearchEndPointData
 	return &f.response, nil
 }
 
-
 // SearchEndPointData - get new search for endpoint data function
 func (v *VOne) SearchEndPointData() *searchEndPointDataRequest {
 	f := &searchEndPointDataRequest{}
@@ -89,6 +88,10 @@ func (f *searchEndPointDataRequest) QueryString(query string) *searchEndPointDat
 func (f *searchEndPointDataRequest) Top(t Top) *searchEndPointDataRequest {
 	f.setParameter("top", t.String())
 	return f
+}
+
+func (f *searchEndPointDataRequest) isDone(resp *SearchEndPointDataResponse) bool {
+	return resp.NextLink == ""
 }
 
 func (f *searchEndPointDataRequest) nextLink() string {

@@ -121,6 +121,10 @@ func (f *getEndPointListRequest) Do(ctx context.Context) (*EndpointListResponse,
 	return &f.response, nil
 }
 
+func (f *getEndPointListRequest) isDone(resp *EndpointListResponse) bool {
+	return resp.NextLink == ""
+}
+
 // Paginator - get endpoints matching query one by one
 func (f *getEndPointListRequest) Paginator() *Paginator[
 	EndpointListResponse,

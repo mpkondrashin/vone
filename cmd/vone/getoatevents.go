@@ -111,7 +111,7 @@ func (c *commandGetOATEvents) Execute() error {
 	writer := csv.NewWriter(os.Stdout)
 	dataCh := make(chan interface{})
 	go func() {
-		for row, err := range events.Range(context.TODO()) {
+		for row, err := range events.Paginator().Range(context.TODO()) {
 			if err != nil {
 				log.Fatalln(err)
 			}

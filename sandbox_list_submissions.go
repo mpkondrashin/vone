@@ -96,6 +96,10 @@ func (f *sandboxSubmissionsRequest) Do(ctx context.Context) (*SandboxSubmissions
 	return &f.response, nil
 }
 
+func (f *sandboxSubmissionsRequest) isDone(resp *SandboxSubmissionsResponse) bool {
+	return resp.NextLink == ""
+}
+
 func (*sandboxSubmissionsRequest) url() string {
 	return "/v3.0/sandbox/tasks"
 }

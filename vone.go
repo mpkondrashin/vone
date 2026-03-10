@@ -15,6 +15,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -23,11 +24,10 @@ import (
 )
 
 const (
-	methodGet  = "GET"
-	methodPost = "POST"
-	methodPatch = "PATCH"
+	methodGet    = "GET"
+	methodPost   = "POST"
+	methodPatch  = "PATCH"
 	methodDelete = "DELETE"
-
 
 	applicationJSON = "application/json"
 )
@@ -85,6 +85,34 @@ func (e *HTTPError) Error() string {
 
 func (e *HTTPError) Unwrap() error {
 	return e.Err
+}
+
+type RateLimitError struct {
+	Status    int
+	Limit     int
+	Window    int
+	Remaining int
+	Reset     int
+	Err       error
+}
+
+func (e *RateLimitError) Error() string {
+	return fmt.Sprintf(
+		"http %d: rate limit exceeded (limit=%d remaining=%d reset=%ds): %v",
+		e.Status, e.Limit, e.Remaining, e.Reset, e.Err,
+	)
+}
+
+func (e *RateLimitError) Unwrap() error {
+	return e.Err
+}
+
+func IsRateLimit(err error) (*RateLimitError, bool) {
+	var rl *RateLimitError
+	if !errors.As(err, &rl) {
+		return nil, false
+	}
+	return rl, true
 }
 
 type VisionOneTime time.Time
@@ -188,14 +216,6 @@ var VOneRateLimitSurpassedError RateLimitSurpassed = func(err error) bool {
 	return vOneErr.Code == HTTPResponseTooManyRequests
 }
 
-func (v *VOne) callWithoutLimiter(ctx context.Context, f vOneRequest) error {
-	uri := f.uri()
-	if uri == "" {
-		uri = "https://" + v.Domain + f.url()
-	}
-	return v.callURL(ctx, f, uri)
-}
-
 func (v *VOne) callWithLimiter(ctx context.Context, f vOneRequest) error {
 	for {
 		if v.rateLimiter.ShouldAbort() {
@@ -232,7 +252,16 @@ func (v *VOne) call(ctx context.Context, f vOneRequest) error {
 	return v.callWithoutLimiter(ctx, f)
 }
 
-func (v *VOne) callURL(ctx context.Context, f vOneRequest, uri string) error {
+func parseInt(s string) int {
+	i, _ := strconv.Atoi(s)
+	return i
+}
+
+func (v *VOne) callWithoutLimiter(ctx context.Context, f vOneRequest) error {
+	uri := f.uri()
+	if uri == "" {
+		uri = "https://" + v.Domain + f.url()
+	}
 	req, err := http.NewRequestWithContext(ctx, f.method(), uri, f.requestBody())
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
@@ -241,7 +270,10 @@ func (v *VOne) callURL(ctx context.Context, f vOneRequest, uri string) error {
 	if f.requestBody() != nil {
 		req.Header.Set("Content-Type", f.contentType())
 	}
-	f.populate(req)
+	f.populateHeaders(req)
+	if f.uri() == "" {
+		f.populateParameters(req.URL)
+	}
 	/*
 		fmt.Printf("Method: %v\n", req.Method)
 		fmt.Printf("URL: %v\n", req.URL)
@@ -256,15 +288,27 @@ func (v *VOne) callURL(ctx context.Context, f vOneRequest, uri string) error {
 		fmt.Printf("RemoteAddr: %v\n", req.RemoteAddr)
 		fmt.Printf("ContentLength: %v\n", req.ContentLength)
 	*/
+	//log.Println(req)
 	resp, err := v.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("vone: %w", err)
 	}
 	defer resp.Body.Close()
 	if GetHTTPCodeRange(resp.StatusCode) != HTTPCodeSuccessRange {
+		log.Println(resp.Header)
 		vOneErr, err := ErrorFromReader(resp.Body)
 		if err != nil {
 			return fmt.Errorf("vone: %w", err)
+		}
+		if resp.StatusCode == 429 {
+			return &RateLimitError{
+				Status:    resp.StatusCode,
+				Limit:     parseInt(resp.Header.Get("RateLimit-Limit")),
+				Window:    parseInt(resp.Header.Get("RateLimit-Window")),
+				Remaining: parseInt(resp.Header.Get("RateLimit-Remaining")),
+				Reset:     parseInt(resp.Header.Get("RateLimit-Reset")),
+				Err:       vOneErr,
+			}
 		}
 		return &HTTPError{
 			Status: resp.StatusCode,
@@ -289,7 +333,17 @@ func (v *VOne) DecodeBody(f vOneRequest, body io.ReadCloser) error {
 	if err != nil {
 		return fmt.Errorf("read body : %w", err)
 	}
+	//fmt.Println(string(bodyBytes))
 	r := f.responseStruct()
+
+	rv := reflect.ValueOf(r)
+	if rv.Kind() != reflect.Pointer || rv.IsNil() {
+		return fmt.Errorf("responseStruct must return non-nil pointer")
+	}
+
+	// Обнуляем целевой объект перед Unmarshal
+	rv.Elem().Set(reflect.Zero(rv.Elem().Type()))
+
 	err = json.Unmarshal(bodyBytes, r)
 	if err != nil {
 		return fmt.Errorf("response parse error: %w [%s]", err, string(bodyBytes))

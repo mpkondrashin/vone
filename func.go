@@ -13,21 +13,23 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
 var ErrAlreadyCalled = errors.New("Do() or Store() already called")
 
 type vOneRequest interface {
-	method() string             // GET, POST, ...
-	url() string                // last part of URI
-	uri() string                // full URI (with https://xdr...)
-	requestBody() io.Reader     // Body
-	populate(*http.Request)     // Pupulate request path and headers
-	contentType() string        // application/json by default
-	responseStruct() any        // Pointer to struct/slice to parse JSON
-	responseHeader() any        // Return struct to populate with response headers
-	responseBody(io.ReadCloser) // process body - is called only if responseStruct returns any
+	method() string                // GET, POST, ...
+	url() string                   // last part of URI
+	uri() string                   // full URI (with https://xdr...)
+	requestBody() io.Reader        // Body
+	populateHeaders(*http.Request) // Populate request headers
+	populateParameters(*url.URL)   // Populate request parameters
+	contentType() string           // application/json by default
+	responseStruct() any           // Pointer to struct/slice to parse JSON
+	responseHeader() any           // Return struct to populate with response headers
+	responseBody(io.ReadCloser)    // process body - is called only if responseStruct returns any
 }
 
 var _ vOneRequest = &baseRequest{}
@@ -80,15 +82,18 @@ func (f *baseRequest) setParameter(name, value string) {
 	f.parameters[name] = value
 }
 
-func (f *baseRequest) populate(req *http.Request) {
-	q := req.URL.Query()
-	for key, value := range f.parameters {
-		q.Add(key, value)
-	}
-	req.URL.RawQuery = strings.ReplaceAll(q.Encode(), "%3A", ":")
+func (f *baseRequest) populateHeaders(req *http.Request) {
 	for key, value := range f.headers {
 		req.Header.Add(key, value)
 	}
+}
+
+func (f *baseRequest) populateParameters(u *url.URL) {
+	q := u.Query()
+	for key, value := range f.parameters {
+		q.Add(key, value)
+	}
+	u.RawQuery = strings.ReplaceAll(q.Encode(), "%3A", ":")
 }
 
 func (f *baseRequest) responseHeader() any {
