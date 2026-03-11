@@ -116,45 +116,6 @@ func (f *sandboxSubmissionsRequest) Next(ctx context.Context) (*SandboxSubmissio
 	return f.Do(ctx)
 }
 
-/*
-// Range - iterator for all submissions (go 1.23 and later)
-
-	func (f *sandboxSubmissionsRequest) Range(ctx context.Context) iter.Seq2[*SandboxSubmissionStatusResponse, error] {
-		return func(yield func(*SandboxSubmissionStatusResponse, error) bool) {
-			if err := f.checkUsed(); err != nil {
-				yield(nil, fmt.Errorf("submissions: %w", err))
-				return
-			}
-			if f.vone.mockup != nil {
-				response, err := f.vone.mockup.ListSubmissions(f)
-				if err != nil {
-					yield(nil, err)
-					return
-				}
-				for i := range response.Items {
-					if !yield(&response.Items[i], nil) {
-						return
-					}
-				}
-				return
-			}
-			for {
-				if err := f.vone.call(ctx, f); err != nil {
-					yield(nil, err)
-					return
-				}
-				for i := range f.response.Items {
-					if !yield(&f.response.Items[i], nil) {
-						return
-					}
-				}
-				if f.response.NextLink == "" {
-					return
-				}
-			}
-		}
-	}
-*/
 func (f *sandboxSubmissionsRequest) Paginator() *Paginator[
 	SandboxSubmissionsResponse,
 	SandboxSubmissionStatusResponse,

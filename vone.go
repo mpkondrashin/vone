@@ -15,7 +15,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -295,7 +294,6 @@ func (v *VOne) callWithoutLimiter(ctx context.Context, f vOneRequest) error {
 	}
 	defer resp.Body.Close()
 	if GetHTTPCodeRange(resp.StatusCode) != HTTPCodeSuccessRange {
-		log.Println(resp.Header)
 		vOneErr, err := ErrorFromReader(resp.Body)
 		if err != nil {
 			return fmt.Errorf("vone: %w", err)
