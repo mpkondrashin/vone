@@ -706,55 +706,6 @@ func (f *GetOATEventsRequest) Top(t Top) *GetOATEventsRequest {
 	return f
 }
 
-// Iterate - get all events matching query one by one. If callback returns
-// non nil error, iteration is aborted and this error is returned
-func (f *GetOATEventsRequest) Iterate(ctx context.Context,
-	callback func(item *ObservedAttackTechniquesEventsItem) error) error {
-	for {
-		response, err := f.Do(ctx)
-		if err != nil {
-			return err
-		}
-		for n := range response.Items {
-			if err := callback(&response.Items[n]); err != nil {
-				return err
-			}
-		}
-		if response.NextLink == "" {
-			break
-		}
-		if response.Count != f.top {
-			break
-		}
-	}
-	return nil
-}
-
-/*
-// Range - iterator for all endpoints matching query (go 1.23 and later)
-func (f *GetOATEventsRequest) Range(ctx context.Context) iter.Seq2[*ObservedAttackTechniquesEventsItem, error] {
-	return func(yield func(*ObservedAttackTechniquesEventsItem, error) bool) {
-		for {
-			response, err := f.Do(ctx)
-			if err != nil {
-				yield(nil, err)
-				return
-			}
-			for n := range response.Items {
-				if !yield(&response.Items[n], nil) {
-					return
-				}
-			}
-			if response.NextLink == "" {
-				break
-			}
-			if response.Count != f.top {
-				break
-			}
-		}
-	}
-}*/
-
 // Do - execute the API call
 func (f *GetOATEventsRequest) Do(ctx context.Context) (*ObservedAttackTechniquesEventsResponse, error) {
 	if err := f.vone.call(ctx, f); err != nil {
