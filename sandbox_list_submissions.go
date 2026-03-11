@@ -44,17 +44,6 @@ func (f *sandboxSubmissionsRequest) EndDateTime(t time.Time) *sandboxSubmissions
 	return f
 }
 
-type DateTimeTarget int
-
-const (
-	CreatedDateTime DateTimeTarget = iota
-	LastActionDateTime
-)
-
-func (t DateTimeTarget) String() string {
-	return [...]string{"createdDateTime", "lastActionDateTime"}[t]
-}
-
 func (f *sandboxSubmissionsRequest) DateTimeTarget(t DateTimeTarget) *sandboxSubmissionsRequest {
 	f.setParameter("dateTimeTarget", t.String())
 	return f

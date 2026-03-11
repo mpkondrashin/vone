@@ -17,3 +17,4 @@ package vone
 //go:generate enum -package=vone -type=AlertStatus -names=Open,InProgress,Closed
 //go:generate enum -package=vone -type=InvestigationResult -names "No Findings,Noteworthy,True Positive,False Positive,Benign True Positive,Other Findings"
 //go:generate enum -package=vone -type=Mode -names default,countOnly,performance
+//go:generate enum -package=vone -type=DateTimeTarget -noprefix -names CreatedDateTime,LastActionDateTime
